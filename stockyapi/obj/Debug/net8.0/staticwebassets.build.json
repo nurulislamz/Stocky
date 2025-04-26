@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "ZDhBEuzU34A0r75BJBsHfmZv/Dlmwcy+XSiPls8LlT8=",
+  "Source": "stockyapi",
+  "BasePath": "_content/stockyapi",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
