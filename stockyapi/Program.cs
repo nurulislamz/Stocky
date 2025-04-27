@@ -37,8 +37,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalReactApp",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+        }
+    );
+});
 
 var app = builder.Build();
+app.UseCors("AllowLocalReactApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

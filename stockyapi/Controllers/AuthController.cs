@@ -35,7 +35,7 @@ public class AuthController : ControllerBase
       if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
         return Unauthorized("Invalid credentials");
 
-      // TODO: Add JWT token generation here
+      // JWT token generation here
       var token = _tokenService.CreateToken(user);
 
       return Ok(new { message = "Login successful", token = token });
@@ -66,8 +66,11 @@ public class AuthController : ControllerBase
 
       _context.Users.Add(user);
       await _context.SaveChangesAsync();
+      
+      // JWT token generation here
+      var token = _tokenService.CreateToken(user);
 
-      return Ok(new { message = "Registration successful" });
+      return Ok(new { message = "Registration successful", token = token });
     }
     catch (Exception ex)
     {

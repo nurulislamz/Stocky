@@ -3,6 +3,7 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
+import Link from "@mui/material/Link"
 import { useState } from "react";
 import { AuthService } from "../../services/auth";
 
@@ -101,6 +102,9 @@ const LoginForm = () => {
       >
         {isLoading ? "Logging in..." : "Login"}
       </Button>
+      <Link href="#">
+        Continue as Guest
+      </Link>
       {error && <Alert severity="error">{error}</Alert>}
     </Box>
   );

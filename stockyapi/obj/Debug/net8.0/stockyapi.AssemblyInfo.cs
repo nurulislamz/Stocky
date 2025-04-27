@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("stockyapi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fad4efd3868d8f144e317f2f8915c534e4d42151")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+39702f440149a5ef3e051feac064ac72692eca0d")]
 [assembly: System.Reflection.AssemblyProductAttribute("stockyapi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("stockyapi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
