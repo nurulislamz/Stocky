@@ -1,4 +1,4 @@
-import * as React from 'react';
+import {useState} from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -11,61 +11,28 @@ import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 import ForgotPassword from '../../components/ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeSelect from "../../shared-theme/ColorModeSelect";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomIcons';
+import Card from '../../components/Card';
+import StackContainer from '../../components/StackContainer';
+import { AuthService } from "../../services/auth";
 
-const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
-  padding: theme.spacing(4),
-  gap: theme.spacing(2),
-  margin: 'auto',
-  [theme.breakpoints.up('sm')]: {
-    maxWidth: '450px',
-  },
-  boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  ...theme.applyStyles('dark', {
-    boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
-  }),
-}));
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-const SignInContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
-  padding: theme.spacing(2),
-  [theme.breakpoints.up('sm')]: {
-    padding: theme.spacing(4),
-  },
-  '&::before': {
-    content: '""',
-    display: 'block',
-    position: 'absolute',
-    zIndex: -1,
-    inset: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))',
-    backgroundRepeat: 'no-repeat',
-    ...theme.applyStyles('dark', {
-      backgroundImage:
-        'radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))',
-    }),
-  },
-}));
+export default function LoginPage(props: { disableCustomTheme?: boolean }) {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-export default function Login(props: { disableCustomTheme?: boolean }) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [emailErrorMessage, setEmailErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -75,16 +42,54 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    setIsLoading(true);
     if (emailError || passwordError) {
       event.preventDefault();
+      setIsLoading(false);
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+
+    // call api here
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      // api call fails
+      if (!response.ok) {
+        const errorData = await response.json();
+        setServerError(errorData.message || "Login failed");
+        console.error("Login failed:", errorData);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Login sucessful:", data.message);
+      console.log("Login sucessful:", data.token);
+      console.log(data.token);
+
+      // setup auth
+      AuthService.setToken(data.token);
+
+      if (!AuthService.isAuthenticated()) {
+        setServerError("Invalid or expired token recieved");
+        return;
+      }
+
+      console.log("Login successful:", data.message);
+    }
+    catch (err) {
+      console.error("Login error:", err);
+      setServerError("An error occured. Please try again.");
+    }
+    finally {
+      setIsLoading(false);
+    }
   };
 
   const validateInputs = () => {
@@ -117,7 +122,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
+      <StackContainer direction="column" justifyContent="space-between">
         <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card variant="outlined">
           <SitemarkIcon />
@@ -226,7 +231,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
             </Typography>
           </Box>
         </Card>
-      </SignInContainer>
+      </StackContainer>
     </AppTheme>
   );
 };
