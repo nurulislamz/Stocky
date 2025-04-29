@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -10,15 +10,33 @@ import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
 import AppTheme from '../../shared-theme/AppTheme';
 import ColorModeSelect from '../../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomIcons';
 import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
+import { useState } from "react";
+import { AuthService } from "../../services/auth";
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+interface SignUpSuccessResponse {
+  message: string;
+  token: string;
+}
+
+interface SignUpErrorResponse {
+  message: string;
+}
 
 export default function SignUp(props: { disableCustomTheme?: boolean }) {
+  const [firstName, setFirstName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [emailError, setEmailError] = React.useState(false);
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -27,13 +45,9 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
 
   const validateInputs = () => {
-    const email = document.getElementById('email') as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
-    const name = document.getElementById('name') as HTMLInputElement;
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
@@ -42,7 +56,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password || password.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
@@ -51,7 +65,16 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       setPasswordErrorMessage('');
     }
 
-    if (!name.value || name.value.length < 1) {
+    if (!firstName || firstName.length < 1) {
+      setNameError(true);
+      setNameErrorMessage('Name is required.');
+      isValid = false;
+    } else {
+      setNameError(false);
+      setNameErrorMessage('');
+    }
+
+    if (!surname || surname.length < 1) {
       setNameError(true);
       setNameErrorMessage('Name is required.');
       isValid = false;
@@ -63,18 +86,52 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsLoading(true);
+
     if (nameError || emailError || passwordError) {
       event.preventDefault();
+      setIsLoading(false);
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      name: data.get('name'),
-      lastName: data.get('lastName'),
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+
+    // call api here
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ firstName, surname, email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = (await response.json()) as SignUpErrorResponse;
+        setError(errorData.message || "Sign up failed");
+        console.error("Sign up failed:", errorData);
+        return;
+      }
+
+      const data = (await response.json()) as SignUpSuccessResponse;;
+      console.log("Sign up sucessful:", data.message);
+      console.log("Sign up sucessful:", data.token);
+
+      // setup auth
+      AuthService.setToken(data.token);
+
+      if (!AuthService.isAuthenticated()) {
+        setError("Invalid or expired token recieved");
+        return;
+      }
+
+      console.log("Signup successful:", data.message);
+    } catch (err) {
+      console.error("Signup error:", err);
+      setError("An error occured. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -97,17 +154,33 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
             <FormControl>
-              <FormLabel htmlFor="name">Full name</FormLabel>
+              <FormLabel htmlFor="firstname">Full name</FormLabel>
               <TextField
-                autoComplete="name"
-                name="name"
+                autoComplete="firstname"
+                name="firstname"
                 required
                 fullWidth
-                id="name"
-                placeholder="Jon Snow"
+                id="firstname"
+                placeholder="Jon"
+                error={nameError}
+                helperText={nameErrorMessage}
+                  color={nameError ? 'error' : 'primary'}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel htmlFor="surname">Full name</FormLabel>
+              <TextField
+                autoComplete="surname"
+                name="surname"
+                required
+                fullWidth
+                id="surname"
+                placeholder="Snow"
                 error={nameError}
                 helperText={nameErrorMessage}
                 color={nameError ? 'error' : 'primary'}
+                onChange={(e) => setSurname(e.target.value)}
               />
             </FormControl>
             <FormControl>
@@ -123,6 +196,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 error={emailError}
                 helperText={emailErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </FormControl>
             <FormControl>
@@ -139,9 +213,10 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
                 error={passwordError}
                 helperText={passwordErrorMessage}
                 color={passwordError ? 'error' : 'primary'}
-              />
-            </FormControl>
-            <FormControlLabel
+                onChange={(e) => setPassword(e.target.value)}
+                />
+              </FormControl>
+              <FormControlLabel
               control={<Checkbox value="allowExtraEmails" color="primary" />}
               label="I want to receive updates via email."
             />
