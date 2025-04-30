@@ -29,11 +29,11 @@ public class AuthController : ControllerBase
       // Find user
       var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
       if (user == null)
-        return Unauthorized("Invalid credentials");
+        return Unauthorized(new { error = "Invalid credentials" });
 
       // Verify password
       if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
-        return Unauthorized("Invalid credentials");
+        return Unauthorized(new { error = "Invalid credentials" });
 
       // JWT token generation here
       var token = _tokenService.CreateToken(user);
@@ -54,7 +54,7 @@ public class AuthController : ControllerBase
     {
       // Check if user exists
       if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-        return BadRequest("Registration failed");  // Vague message for security
+        return BadRequest(new { error ="Registration failed"});  // Vague message for security
 
       var user = new UserModel
       {

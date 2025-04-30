@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import Alert from "@mui/material/Alert";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -10,17 +11,23 @@ import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Stack from '@mui/material/Stack';
-import { styled } from '@mui/material/styles';
 import ForgotPassword from '../../components/ForgotPassword';
 import AppTheme from '../../shared-theme/AppTheme';
-import ColorModeSelect from "../../shared-theme/ColorModeSelect";
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomIcons';
 import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
 import { AuthService } from "../../services/auth";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+interface LoginSuccessResponse {
+  message: string;
+  token: string;
+}
+
+interface LoginErrorResponse {
+  error: string;
+}
 
 export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   const [email, setEmail] = useState<string>("");
@@ -43,7 +50,9 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading(true);
+
     if (emailError || passwordError) {
       event.preventDefault();
       setIsLoading(false);
@@ -62,16 +71,15 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
 
       // api call fails
       if (!response.ok) {
-        const errorData = await response.json();
-        setServerError(errorData.message || "Login failed");
+        const errorData = await response.json() as LoginErrorResponse;
+        setServerError(errorData.error || "Login failed");
         console.error("Login failed:", errorData);
         return;
       }
 
-      const data = await response.json();
+      const data = await response.json() as LoginSuccessResponse;
       console.log("Login sucessful:", data.message);
       console.log("Login sucessful:", data.token);
-      console.log(data.token);
 
       // setup auth
       AuthService.setToken(data.token);
@@ -93,12 +101,9 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   };
 
   const validateInputs = () => {
-    const email = document.getElementById('email') as HTMLInputElement;
-    const password = document.getElementById('password') as HTMLInputElement;
-
     let isValid = true;
 
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
       isValid = false;
@@ -107,7 +112,7 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password || password.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
@@ -123,13 +128,12 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <StackContainer direction="column" justifyContent="space-between">
-        <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card variant="outlined">
           <SitemarkIcon />
           <Typography
             component="h1"
             variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
           >
             Sign in
           </Typography>
@@ -138,9 +142,9 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
             onSubmit={handleSubmit}
             noValidate
             sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
               gap: 2,
             }}
           >
@@ -158,7 +162,11 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={emailError ? 'error' : 'primary'}
+                color={emailError ? "error" : "primary"}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setServerError(null);
+                }}
               />
             </FormControl>
             <FormControl>
@@ -175,7 +183,11 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
+                color={passwordError ? "error" : "primary"}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setServerError(null); // Clear error on change
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -196,17 +208,17 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
               type="button"
               onClick={handleClickOpen}
               variant="body2"
-              sx={{ alignSelf: 'center' }}
+              sx={{ alignSelf: "center" }}
             >
               Forgot your password?
             </Link>
           </Box>
           <Divider>or</Divider>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={() => alert("Sign in with Google")}
               startIcon={<GoogleIcon />}
             >
               Sign in with Google
@@ -214,21 +226,22 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
             <Button
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
+              onClick={() => alert("Sign in with Facebook")}
               startIcon={<FacebookIcon />}
             >
               Sign in with Facebook
             </Button>
-            <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
+            <Typography sx={{ textAlign: "center" }}>
+              Don&apos;t have an account?{" "}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="./signup"
                 variant="body2"
-                sx={{ alignSelf: 'center' }}
+                sx={{ alignSelf: "center" }}
               >
                 Sign up
               </Link>
             </Typography>
+            {serverError && <Alert severity="error">{serverError}</Alert>}
           </Box>
         </Card>
       </StackContainer>
