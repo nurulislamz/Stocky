@@ -1,5 +1,5 @@
 import * as React from 'react';
-import type {} from '@mui/x-date-pickers/themeAugmentation';
+// import type {} from '@mui/x-date-pickers/themeAugmentation';
 import type {} from '@mui/x-charts/themeAugmentation';
 import type {} from '@mui/x-data-grid-pro/themeAugmentation';
 import type {} from '@mui/x-tree-view/themeAugmentation';
@@ -8,8 +8,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import AppNavbar from '../../components/AppNavbar';
-import Header from '../../components/Header';
-import MainGrid from "../../components/MainGrid";
+// import Header from '../../components/Header';
+// import MainGrid from "../../components/MainGrid";
 import SideMenu from "../../components/SideMenu";
 import AppTheme from "../../shared-theme/AppTheme";
 
