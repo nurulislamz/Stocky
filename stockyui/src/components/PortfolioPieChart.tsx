@@ -121,40 +121,43 @@ const colors = [
   'hsl(220, 20%, 25%)',
 ];
 
-export default function ChartUserByCountry() {
+export default function PortfolioPieChart() {
   return (
     <Card
       variant="outlined"
-      sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1 }}
+      sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1, height: '100%', width: '100%'}}
     >
       <CardContent>
-        <Typography component="h2" variant="subtitle2">
-          Users by country
+        <Typography component="h2" variant="subtitle2" sx={{ mb: 4 }}>
+          Portfolio %
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mt: 4,
+          mb: 4
+        }}>
           <PieChart
-            /*colors={colors}
-            //margin={{
-              left: 80,
-              right: 80,
-              top: 80,
-              bottom: 80,
-            }}*/
+            sx={{
+              height: {
+                xs: '180px',
+                sm: '220px',
+                md: '250px'
+              },
+              width: '100%'
+            }}
             series={[
               {
                 data,
-                innerRadius: 75,
-                outerRadius: 100,
+                innerRadius: 50,
+                outerRadius: 70,
                 paddingAngle: 0,
                 highlightScope: { fade: 'global', highlight: 'item' },
               },
             ]}
-            /*height={260}
-            width={260}*/
             slotProps={{
-              legend: { position: undefined },
-            }}
-          >
+              legend: { direction: "horizontal", position: { horizontal: 'center', vertical: 'bottom' } },
+            }}>
             <PieCenterLabel primaryText="98.5K" secondaryText="Total" />
           </PieChart>
         </Box>
