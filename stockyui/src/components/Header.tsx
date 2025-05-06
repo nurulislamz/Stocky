@@ -7,7 +7,7 @@ import ColorModeIconDropdown from '../shared-theme/ColorModeIconDropdown';
 
 import Search from './Search';
 
-export default function Header() {
+export default function Header(props: {headerName : string} ) {
   return (
     <Stack
       direction="row"
@@ -21,7 +21,7 @@ export default function Header() {
       }}
       spacing={2}
     >
-      <NavbarBreadcrumbs />
+      <NavbarBreadcrumbs pageName={props.headerName}/>
       <Stack direction="row" sx={{ gap: 1 }}>
         <Search />
         <MenuButton showBadge aria-label="Open notifications">

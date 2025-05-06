@@ -70,7 +70,7 @@ export function renderAvatar(
 }
 
 export const columns: GridColDef[] = [
-  { field: 'pageTitle', headerName: 'Page Title', flex: 1.5, minWidth: 200 },
+  { field: 'pageTitle', headerName: 'Stock Name', flex: 1.5, minWidth: 200 },
   {
     field: 'status',
     headerName: 'Status',

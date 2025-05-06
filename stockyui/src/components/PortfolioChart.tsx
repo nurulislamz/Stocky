@@ -47,7 +47,7 @@ export default function PortfolioChart() {
     <Card variant="outlined" sx={{ width: '100%', height: '100%' }}>
       <CardContent>
         <Typography component="h2" variant="subtitle2" gutterBottom>
-          Sessions
+          Portfolio Chart
         </Typography>
         <Stack sx={{ justifyContent: 'space-between' }}>
           <Stack
@@ -64,14 +64,14 @@ export default function PortfolioChart() {
             <Chip size="small" color="success" label="+35%" />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            Sessions per day for the last 30 days
+            Portfolio per day for the last 30 days
           </Typography>
         </Stack>
         <LineChart
           series={[
             {
-              id: 'direct',
-              label: 'Direct',
+              id: 'portfolio',
+              label: 'Portfolio',
               showMark: false,
               curve: 'linear',
               stack: 'total',
@@ -84,8 +84,8 @@ export default function PortfolioChart() {
               ],
             },
             {
-              id: 'referral',
-              label: 'Referral',
+              id: 'sp500',
+              label: 'S&P 500',
               showMark: false,
               curve: 'linear',
               stack: 'total',
@@ -97,20 +97,6 @@ export default function PortfolioChart() {
                 6500, 5600, 6800, 7100, 7400, 7700, 8000,
               ],
             },
-            {
-              id: 'organic',
-              label: 'Organic',
-              showMark: false,
-              curve: 'linear',
-              stack: 'total',
-              stackOrder: 'ascending',
-              data: [
-                1000, 1500, 1200, 1700, 1300, 2000, 2400, 2200, 2600, 2800, 2500,
-                3000, 3400, 3700, 3200, 3900, 4100, 3500, 4300, 4500, 4000, 4700,
-                5000, 5200, 4800, 5400, 5600, 5900, 6100, 6300,
-              ],
-              area: true,
-            },
           ]}
           grid={{ horizontal: true }}
           sx={{
@@ -119,14 +105,11 @@ export default function PortfolioChart() {
               md: '300px',
               lg: '400px',
             },
-            '& .MuiAreaElement-series-organic': {
-              fill: "url('#organic')",
+            '& .MuiAreaElement-series-sp500': {
+              fill: "url('#sp500')",
             },
-            '& .MuiAreaElement-series-referral': {
-              fill: "url('#referral')",
-            },
-            '& .MuiAreaElement-series-direct': {
-              fill: "url('#direct')",
+            '& .MuiAreaElement-series-portfolio': {
+              fill: "url('#portfolio')",
             },
           }}
           slotProps={{
@@ -134,9 +117,8 @@ export default function PortfolioChart() {
             },
           }}
         >
-          <AreaGradient color={theme.palette.primary.dark} id="organic" />
-          <AreaGradient color={theme.palette.primary.main} id="referral" />
-          <AreaGradient color={theme.palette.primary.light} id="direct" />
+          <AreaGradient color={theme.palette.primary.main} id="sp500" />
+          <AreaGradient color={theme.palette.primary.light} id="portfolio" />
         </LineChart>
       </CardContent>
     </Card>
