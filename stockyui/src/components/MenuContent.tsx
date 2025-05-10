@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useLocation, useMatch } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -19,32 +20,72 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded';
 import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import ShowChartRoundedIcon from '@mui/icons-material/ShowChartRounded';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { Link } from 'react-router-dom';
 
 
 const mainListItems = [
-  { text: 'Home', icon: <DashboardRoundedIcon />, to: '/home'},
-  { text: 'Portfolio', icon: <AccountBalanceWalletIcon />, to: '/portfolio' },
-  { text: 'Watchlist', icon: <StarBorderRoundedIcon />, to: '/watchlist' },
-  { text: 'Market Data', icon: <ShowChartRoundedIcon />, to: '/marketdata' },
-  { text: 'Stock Screener', icon: <ScreenSearchDesktopIcon />, to: '/stockscreener' },
-  { text: 'Leverage ETF Calculator', icon: <CalculateIcon />, to: '/etfcalculator' },
-  { text: 'News Feed', icon: <NewspaperIcon />, to: '/newsfeed' },
+  { text: "Home", icon: <DashboardRoundedIcon />, to: "/home"  },
+  { text: "Search", icon: <SearchRoundedIcon />, to: "/search"  },
+  {
+    text: "Portfolio",
+    icon: <AccountBalanceWalletIcon />,
+    to: "/portfolio"
+  },
+  {
+    text: "Watchlist",
+    icon: <StarBorderRoundedIcon />,
+    to: "/watchlist"
+  },
+  {
+    text: "Market Data",
+    icon: <ShowChartRoundedIcon />,
+    to: "/marketdata"
+  },
+  {
+    text: "Stock Screener",
+    icon: <ScreenSearchDesktopIcon />,
+    to: "/stockscreener"
+  },
+  {
+    text: "Leverage ETF Calculator",
+    icon: <CalculateIcon />,
+    to: "/etfcalculator"
+  },
+  {
+    text: "News Feed",
+    icon: <NewspaperIcon />,
+    to: "/newsfeed"
+  },
 ];
 
 const secondaryListItems = [
-  { text: 'Settings', icon: <SettingsRoundedIcon />, to: '/settings' },
-  { text: 'About', icon: <InfoRoundedIcon />, to: '/about' },
-  { text: 'Feedback', icon: <HelpRoundedIcon />, to: '/feedback' },
+  {
+    text: "Settings",
+    icon: <SettingsRoundedIcon />,
+    to: "/settings"
+  },
+  { text: "About", icon: <InfoRoundedIcon />, to: "/about", itemNumber: 10 },
+  {
+    text: "Feedback",
+    icon: <HelpRoundedIcon />,
+    to: "/feedback"
+  },
 ];
 
 export default function MenuContent() {
+  const currentLocation = useLocation();
+
   return (
-    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
+    <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <List dense>
         {mainListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton selected={index === 0} component={Link} to={item.to}>
+          <ListItem key={index} disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+              selected={currentLocation.pathname === item.to}
+              component={Link}
+              to={item.to}
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
@@ -53,7 +94,7 @@ export default function MenuContent() {
       </List>
       <List dense>
         {secondaryListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: 'block' }}>
+          <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton component={Link} to={item.to}>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />

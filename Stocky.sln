@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stockyapi", "stockyapi\stockyapi.csproj", "{6D68670F-79EB-5442-418C-4B5BE893F58F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "stockymodels", "stockymodels\stockymodels.csproj", "{0B9B1C29-E45C-4D5A-9DE3-B80908234BE3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{6D68670F-79EB-5442-418C-4B5BE893F58F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D68670F-79EB-5442-418C-4B5BE893F58F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D68670F-79EB-5442-418C-4B5BE893F58F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B9B1C29-E45C-4D5A-9DE3-B80908234BE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B9B1C29-E45C-4D5A-9DE3-B80908234BE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B9B1C29-E45C-4D5A-9DE3-B80908234BE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B9B1C29-E45C-4D5A-9DE3-B80908234BE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
