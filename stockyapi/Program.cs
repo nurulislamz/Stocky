@@ -2,11 +2,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using stockyapi.Controllers;
-using stockyapi.Data;
 using stockyapi.Services;
 using stockyapi.Options;
-using Microsoft.Extensions.Logging;
+using stockymodels.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

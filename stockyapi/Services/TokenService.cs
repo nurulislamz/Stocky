@@ -4,8 +4,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
-using stockyapi.Models;
-using stockyapi.Data;
+using stockymodels.models;
 using stockyapi.Options;
 
 namespace stockyapi.Services;

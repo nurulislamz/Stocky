@@ -5,7 +5,6 @@ import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Copyright from "../../internals/components/Copyright";
-import CustomizedDataGrid from "../../components/CustomizedDataGrid";
 
 export default function MarketDataPage(props: { disableCustomTheme?: boolean }) {
   return (
@@ -13,10 +12,10 @@ export default function MarketDataPage(props: { disableCustomTheme?: boolean }) 
       <Header headerName="Home" />
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
         <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-          WatchList
+          Indicators
         </Typography>
         <Grid spacing={2} columns={12}>
-          <CustomizedDataGrid />
+          Move Index, Inverse Yield Curve, Etc
         </Grid>
         <Copyright sx={{ my: 4 }} />
       </Box>

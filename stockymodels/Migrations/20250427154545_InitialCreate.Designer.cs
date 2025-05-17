@@ -4,9 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using stockyapi.Data;
-
-#nullable disable
+using stockymodels.Data;
 
 namespace stockyapi.Migrations
 {
@@ -17,14 +15,13 @@ namespace stockyapi.Migrations
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
-#pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("stockyapi.Models.UserModel", b =>
+            modelBuilder.Entity("stockymodels.models.UserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,7 +52,6 @@ namespace stockyapi.Migrations
 
                     b.ToTable("Users");
                 });
-#pragma warning restore 612, 618
         }
     }
 }

@@ -1,10 +1,11 @@
-﻿using stockyapi.Models;
-using stockyapi.Data;
+﻿using stockymodels.Models;
+using stockymodels.Data;
 using stockyapi.Requests;
 using stockyapi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using stockymodels.models;
 
 namespace stockyapi.Controllers;
 

@@ -6,6 +6,9 @@
 /stockyapi/bin
 /stockyapi/obj
 /stockyapi/.idea
+/stockymodels/bin
+/stockymodels/obj
+/stockymodels/.idea
 /.pnp
 .pnp.js
 
