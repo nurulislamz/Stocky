@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -5,60 +6,93 @@ using Microsoft.IdentityModel.Tokens;
 using stockyapi.Services;
 using stockyapi.Options;
 using stockymodels.Data;
+using Swashbuckle.AspNetCore;
+using Swashbuckle.AspNetCore.Filters;
+using MediatR;
+using System.Text.Json.Serialization;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<JwtSettings>(
-    builder.Configuration.GetSection("Jwt")
-);
-
-var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
-var cs = builder.Configuration.GetConnectionString("DefaultConnection");
-logger.LogInformation("ConnectionString={cs}", cs);
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
+class Program
 {
-    opts.TokenValidationParameters = new TokenValidationParameters
+    public static void Main(string[] args)
     {
-        ValidateIssuer = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
-        )
-    };
-});
-builder.Services.AddTransient<ITokenService, TokenService>();
-builder.Services.AddControllers();
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowLocalReactApp",
-        builder =>
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container
+        var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
+        var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+        logger.LogInformation("ConnectionString={cs}", cs);
+
+        // Configure services
+        ConfigureServices(builder.Services, builder.Configuration);
+
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline
+        ConfigureHostBuilder(app, app.Environment);
+
+        app.Run();
+    }
+
+    private static void ConfigureHostBuilder(IApplicationBuilder app, IHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-            builder.WithOrigins("http://localhost:3000")
-            .AllowAnyMethod()
-            .AllowAnyHeader();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
-    );
-});
 
-var app = builder.Build();
-app.UseCors("AllowLocalReactApp");
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+        app.UseRouting();
+        app.UseCors("AllowLocalReactApp");
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseHttpsRedirection();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+    }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+        });
+
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
+
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
+
+        services.AddTransient<ITokenService, TokenService>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
+        {
+            opts.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidateAudience = true,
+                ValidAudience = configuration["Jwt:Audience"],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+            };
+        });
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowLocalReactApp",
+                builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+        });
+    }
 }
-
-app.UseHttpsRedirection();
-app.Run();

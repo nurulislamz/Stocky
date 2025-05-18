@@ -15,11 +15,13 @@ public class AuthController : ControllerBase
 {
   private readonly ApplicationDbContext _context;
   private readonly ITokenService _tokenService;
+  private readonly ILogger<string> logger;
 
-  public AuthController(ApplicationDbContext context, ITokenService tokenService)
+  public AuthController(ApplicationDbContext context, ITokenService tokenService, ILogger<string> _logger)
   {
     _context = context;
     _tokenService = tokenService;
+    _logger = logger;
   }
 
   [HttpPost("login")]
@@ -45,6 +47,7 @@ public class AuthController : ControllerBase
     {
       // Log the error here
       return StatusCode(500, "An error occurred during login");
+      
     }
   }
 
