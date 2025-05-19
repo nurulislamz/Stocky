@@ -1,4 +1,4 @@
-﻿using stockyapi.Requests;
+using stockyapi.Requests;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
 
@@ -6,12 +6,12 @@ namespace stockyapi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class PortfolioController : ControllerBase
 {
   private readonly IMediator _mediator;
   private readonly ILogger<AuthController> _logger;
 
-  public AuthController(
+  public PortfolioController(
     ILogger<AuthController> logger,
     IMediator mediator)
   {
@@ -19,8 +19,8 @@ public class AuthController : ControllerBase
     _mediator = mediator;
   }
 
-  [HttpPost("login")]
-  public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+  [HttpGet("portfolio")]
+  public async Task<IActionResult> GetPortfolio([FromBody] GetPortfolioRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);
 
@@ -30,8 +30,19 @@ public class AuthController : ControllerBase
     return Ok(new { message = "Login successful", token = response.Token });
   }
 
-  [HttpPost("register")]
-  public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+  [HttpPost("buy")]
+  public async Task<IActionResult> Buy([FromBody] BuyStockRequest request, CancellationToken cancellationToken)
+  {
+      var response = await _mediator.Send(request, cancellationToken);
+
+      if (!response.Success)
+        return BadRequest(new { error = response.Error });
+
+      return Ok(new { message = "Registration successful", token = response.Token });
+  }
+
+  [HttpPost("sell")]
+  public async Task<IActionResult> Sell([FromBody] BuyStockRequest request, CancellationToken cancellationToken)
   {
       var response = await _mediator.Send(request, cancellationToken);
 
