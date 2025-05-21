@@ -1,6 +1,11 @@
 ﻿namespace stockyapi.Responses;
 
-public class LoginResponse : BaseResponse
+public class LoginResponse : BaseResponse<LoginData>
 {
-    // Add any login-specific properties here if needed
+
+}
+
+public class LoginData
+{
+    public string? Token { get; set; }
 }

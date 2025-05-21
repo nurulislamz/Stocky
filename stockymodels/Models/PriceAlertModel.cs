@@ -1,8 +1,8 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
-using stockymodels.Models;
+
+namespace stockymodels.Models;
 
 public class PriceAlertModel : BaseModel
 {

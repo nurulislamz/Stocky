@@ -2,12 +2,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
-using stockymodels.Models;
 
 public class PortfolioModel : BaseModel
 {
     [Required]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     [Required]
     [Precision(18, 2)]

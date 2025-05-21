@@ -11,27 +11,53 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68ab6a32-18ab-433b-81e9-444cfbc92e03" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/stockyapi/DTOs/Requests/BuyPortfolioRequest.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stockyapi/Services/IPortfolioService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Stocky.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Stocky.sln.DotSettings.user" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Controllers/AuthController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Requests/LoginRequest.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Requests/RegisterRequest.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/BuyStockRequest.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/SellStockRequest.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/LoginResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/LoginResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/RegisterResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/RegisterResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/BaseResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/BaseResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/PortfolioResponse.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/stockyapi.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/stockyapi.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/StockHoldingModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/StockHoldingModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/TransactionModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/TransactionModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/UserModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/UserModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/UserPreferencesModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/UserPreferencesModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Models/WatchlistModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/WatchlistModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.packagespec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/rider.project.model.nuget.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,8 +71,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/ILViewer/fed8b229abb94bdc8773917f0b72ca1511000/ae/d87016e8/02000014pdb5Low.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/113641a9e9a8478ab04505b1621f8fb4188b0/49/0f4e4f70/ClaimTypes.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c99d7fafbc5b4efb96bc3ce1803e10924e908/38/b42103d6/IHttpContextAccessor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/4c32958d8e8197ff3a8cad5383fa9a0f783157cc8c3f07a74cef668311de/ControllerEndpointRouteBuilderExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/7415982338a3ccbd2a7a4eb483af627bda727e356b86bb32c5d4f6998f9c/IRequestHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/8aca45508683a6169bab9e8bd96b7cda607d638cacfaa31173c8c278c45/ISender.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/96a4cc66aa48dda8a9d8be8febec4a769fc143f7a86dd53ecdebfb9c3177d/ControllerBase.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/abe193ec7107fe257fbe56564e41d8e7f2f3527b62fbdb99f9337fcffa0fdd7/EndpointMethodInfoApiExplorerServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/stockyapi/Options/JwtSettings.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/stockyapi/Program.cs" root0="FORCE_HIGHLIGHTING" />
@@ -54,7 +85,7 @@
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="SWEA" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -99,10 +130,58 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="stockymodels" type="DotNetProject" factoryName=".NET Project">
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/stockymodels/stockymodels.csproj" />
+      <option name="PROJECT_EXE_PATH_TRACKING" value="1" />
+      <option name="PROJECT_ARGUMENTS_TRACKING" value="1" />
+      <option name="PROJECT_WORKING_DIRECTORY_TRACKING" value="1" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="PROJECT_TFM" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
     <configuration name="stockyapi: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/stockyapi/stockyapi.csproj" />
       <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
       <option name="LAUNCH_PROFILE_NAME" value="IIS Express" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="stockyapi: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/stockyapi/stockyapi.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="IIS Express" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
+    <configuration name="stockyapi: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/stockyapi/stockyapi.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="http" />
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
       <option name="USE_MONO" value="0" />
       <option name="RUNTIME_ARGUMENTS" value="" />
@@ -144,6 +223,21 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="stockyapi: https" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
+      <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/stockyapi/stockyapi.csproj" />
+      <option name="LAUNCH_PROFILE_TFM" value="net8.0" />
+      <option name="LAUNCH_PROFILE_NAME" value="https" />
+      <option name="USE_EXTERNAL_CONSOLE" value="0" />
+      <option name="USE_MONO" value="0" />
+      <option name="RUNTIME_ARGUMENTS" value="" />
+      <option name="GENERATE_APPLICATIONHOST_CONFIG" value="1" />
+      <option name="SHOW_IIS_EXPRESS_OUTPUT" value="0" />
+      <option name="SEND_DEBUG_REQUEST" value="1" />
+      <option name="ADDITIONAL_IIS_EXPRESS_ARGUMENTS" value="" />
+      <method v="2">
+        <option name="Build" />
+      </method>
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -156,7 +250,9 @@
       <workItem from="1746878757438" duration="9582000" />
       <workItem from="1747478826861" duration="21289000" />
       <workItem from="1747571580751" duration="4651000" />
-      <workItem from="1747589044235" duration="5669000" />
+      <workItem from="1747589044235" duration="6528000" />
+      <workItem from="1747739479684" duration="17291000" />
+      <workItem from="1747785234156" duration="5468000" />
     </task>
     <servers />
   </component>
@@ -183,17 +279,43 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs</url>
-          <line>24</line>
-          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockymodels\Models\PortfolioModel.cs" containingFunctionPresentation="Property 'User'">
+          <url>file://$PROJECT_DIR$/stockymodels/Program.cs</url>
+          <line>11</line>
+          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockymodels\Program.cs" containingFunctionPresentation="">
             <startOffsets>
-              <option value="584" />
+              <option value="452" />
             </startOffsets>
             <endOffsets>
-              <option value="588" />
+              <option value="453" />
             </endOffsets>
           </properties>
-          <option name="timeStamp" value="2" />
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/stockymodels/Program.cs</url>
+          <line>13</line>
+          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockymodels\Program.cs" containingFunctionPresentation="">
+            <startOffsets>
+              <option value="457" />
+            </startOffsets>
+            <endOffsets>
+              <option value="484" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs</url>
+          <line>19</line>
+          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockyapi\Repository\Portfolio\GetPortfolioRequestHandler.cs" containingFunctionPresentation="Method 'Handle'">
+            <startOffsets>
+              <option value="587" />
+            </startOffsets>
+            <endOffsets>
+              <option value="637" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="9" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

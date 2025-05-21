@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using stockymodels.models;
-using stockymodels.Models;
 
 public class UserPreferencesModel : BaseModel
 {

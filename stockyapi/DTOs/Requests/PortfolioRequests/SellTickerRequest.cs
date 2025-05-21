@@ -4,7 +4,7 @@ using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class BuyStockRequest : IRequest<BaseResponse>
+public class SellTickerRequest : IRequest<SellTickerResponse>
 {
     [Required]
     public required string Symbol { get; set; }

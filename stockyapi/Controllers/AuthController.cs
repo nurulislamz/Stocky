@@ -1,6 +1,7 @@
 ﻿using stockyapi.Requests;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using stockyapi.Responses;
 
 namespace stockyapi.Controllers;
 
@@ -20,24 +21,26 @@ public class AuthController : ControllerBase
   }
 
   [HttpPost("login")]
-  public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
+  public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);
 
     if (!response.Success)
-       return Unauthorized(new { error = response.Error });
+      return StatusCode(response.StatusCode, response);
 
-    return Ok(new { message = "Login successful", token = response.Token });
+    return Ok(response);
   }
 
   [HttpPost("register")]
-  public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
+  [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
+  [ProducesResponseType(StatusCodes.Status400BadRequest)]
+  public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
   {
-      var response = await _mediator.Send(request, cancellationToken);
+    var response = await _mediator.Send(request, cancellationToken);
 
-      if (!response.Success)
-        return BadRequest(new { error = response.Error });
+    if (!response.Success)
+      return StatusCode(response.StatusCode, response);
 
-      return Ok(new { message = "Registration successful", token = response.Token });
+    return Ok(response);
   }
 }

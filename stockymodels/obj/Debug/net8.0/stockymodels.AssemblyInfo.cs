@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("stockymodels")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1851044dbedbbdc33d9908cb2704c6ff1cf51be1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+705d57bc129a1c99152ca69a0cb73fe8739586af")]
 [assembly: System.Reflection.AssemblyProductAttribute("stockymodels")]
 [assembly: System.Reflection.AssemblyTitleAttribute("stockymodels")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

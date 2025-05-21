@@ -1,7 +1,10 @@
 namespace stockyapi.Responses;
 
-public abstract class BaseResponse
+public abstract class BaseResponse<T>
 {
-    public required bool Success { get; set; }
+    public bool Success { get; set; }
+    public int StatusCode { get; set; }
+    public string? Message { get; set; }
+    public T? Data { get; set; }
     public string? Error { get; set; }
 }

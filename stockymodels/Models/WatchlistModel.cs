@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
-using stockymodels.Models;
 
 public class WatchlistModel : BaseModel
 {
@@ -19,7 +18,7 @@ public class WatchlistModel : BaseModel
     [DataType(DataType.Currency)]
     [Precision(18,2)]
     public decimal? TargetPrice { get; set; }
-    
+
     [DataType(DataType.Currency)]
     [Precision(18,2)]
     public decimal? StopLoss { get; set; }

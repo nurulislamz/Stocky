@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
+using stockymodels.Models;
 
 namespace stockymodels.Data;
 

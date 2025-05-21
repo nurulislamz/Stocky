@@ -2251,8 +2251,8 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
+          "Microsoft.EntityFrameworkCore": "8.0.2",
           "Microsoft.EntityFrameworkCore.Relational": "8.0.2",
-          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.2",
           "Microsoft.Extensions.Hosting": "8.0.0"
         },
         "compile": {

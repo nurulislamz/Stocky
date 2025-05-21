@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace stockymodels.Models;
+namespace stockymodels.models;
 
 public abstract class BaseModel
 {
+    [Key]
     public int Id { get; set; }
+    [Required]
     public DateTime CreatedAt { get; set; }
+    [Required]
     public DateTime? UpdatedAt { get; set; }
 
     protected BaseModel()

@@ -38,7 +38,7 @@ public class UserModel : BaseModel
   // One-to-One Properties
   public virtual PortfolioModel Portfolio { get; set; }
   public virtual UserPreferencesModel Preferences { get; set; }
-  
+
   // One-to-Many Properties
   public virtual ICollection<WatchlistModel> Watchlist { get; set; }
   public virtual ICollection<PriceAlertModel> PriceAlerts { get; set; }

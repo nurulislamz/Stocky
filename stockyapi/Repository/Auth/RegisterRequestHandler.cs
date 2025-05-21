@@ -10,39 +10,15 @@ namespace stockyapi.Repository.Auth;
 
 public class RegisterRequestHandler : IRequestHandler<RegisterRequest, RegisterResponse>
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ITokenService _tokenService;
+    private readonly IAuthService _authService;
 
-    public RegisterRequestHandler(ApplicationDbContext context, ITokenService tokenService)
+    public RegisterRequestHandler(IAuthService authService)
     {
-        _context = context;
-        _tokenService = tokenService;
+        _authService = authService;
     }
 
     public async Task<RegisterResponse> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
-        // Check if user exists
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
-            return new RegisterResponse { Success = false, Error = "Email already registered" };
-
-        var user = new UserModel
-        {
-            FirstName = request.FirstName,
-            Surname = request.Surname,
-            Email = request.Email,
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        // Generate JWT token
-        var token = _tokenService.CreateToken(user);
-
-        return new RegisterResponse
-        {
-            Success = true,
-            Token = token,
-        };
+        return await _authService.CreateNewUser(request.FirstName,request.Surname,request.Email, request.Password);
     }
 }

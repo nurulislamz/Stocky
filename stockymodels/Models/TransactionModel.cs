@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.Models;
+using stockymodels.models;
 
 public class TransactionModel : BaseModel
 {
