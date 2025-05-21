@@ -1,9 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using stockymodels.models;
 
 public class UserPreferencesModel : BaseModel
 {
-    public int UserId { get; set; }
+    [Required]
+    [ForeignKey("User")]
+    public Guid UserId { get; set; }
 
     [Required]
     public string Theme { get; set; } = "light";

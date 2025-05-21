@@ -5,8 +5,6 @@ namespace stockymodels.models;
 
 public class UserModel : BaseModel
 {
-  [Key]
-  public int Id { get; set; }
 
   [Required]
   [MinLength(8)]

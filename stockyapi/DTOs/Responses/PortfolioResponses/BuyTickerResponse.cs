@@ -10,4 +10,6 @@ public class BuyTickerData
     public decimal TotalCost { get; set; }
     public decimal RemainingCashBalance { get; set; }
     public DateTime TransactionTime { get; set; }
+    public string TransactionId { get; set; }
+    public TransactionStatus Status { get; set; }
 }

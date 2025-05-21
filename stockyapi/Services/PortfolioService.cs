@@ -20,37 +20,35 @@ public class PortfolioService : IPortfolioService
         _context = context;
     }
 
-    public async Task<GetPortfolioResponse> GetUserPortfolio()
+    public async Task<PortfolioModel?> FetchUserPortfolio()
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return null;
 
-        if (userId == null)
-        {
-            return new GetPortfolioResponse
-            {
-                Success = false,
-                StatusCode = 404,
-                Message = "User not found"
-            };
-        }
-        var portfolio = _context.Portfolios
-            .Where(x => x.UserId == userId)
+        return await _context.Portfolios
+            .Where(x => x.UserId.ToString() == userId)
             .Include(portfolioModel => portfolioModel.StockHoldings)
-            .FirstOrDefaultAsync().Result;
+            .FirstOrDefaultAsync();
+    }
 
+    public bool FetchCheckYouHaveEnoughMoney(decimal price, decimal quantity, decimal currentCash)
+    {
+        decimal totalCost = price * quantity;
+        return totalCost > currentCash ;
+    }
+
+    public GetPortfolioResponse CreatePortfolioResponse(PortfolioModel? portfolio)
+    {
         if (portfolio == null)
         {
             return new GetPortfolioResponse
             {
                 Success = false,
                 StatusCode = 404,
-                Message = "User porfolio not found"
+                Message = "User portfolio not found"
             };
         }
 
-        decimal totalValue = portfolio.TotalValue;
-        decimal cashBalance = portfolio.CashBalance;
-        decimal investedAmount = portfolio.InvestedAmount;
         var portfolioItems = portfolio.StockHoldings.Select(holding => new PortfolioItem
         {
             Symbol = holding.Symbol,
@@ -71,34 +69,138 @@ public class PortfolioService : IPortfolioService
             StatusCode = 200,
             Data = new PortfolioData
             {
-                TotalValue = totalValue,
-                CashBalance = cashBalance,
-                InvestedAmount = investedAmount,
+                TotalValue = portfolio.TotalValue,
+                CashBalance = portfolio.CashBalance,
+                InvestedAmount = portfolio.InvestedAmount,
                 Items = portfolioItems,
             }
         };
     }
 
-    public async Task<(bool success, string? token, string? error)> RegisterUser(string firstName, string surname, string email, string password)
+    public async Task<BuyTickerResponse> BuyTickerPortfolio(BuyTickerRequest request)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == email))
-            return (false, null, "Email already registered");
-
-        var user = new UserModel
+        var portfolioData = await FetchUserPortfolio();
+        if (portfolioData == null)
         {
-            FirstName = firstName,
-            Surname = surname,
-            Email = email,
-            Password = BCrypt.Net.BCrypt.HashPassword(password),
-            Role = UserRole.User, // Default role
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
+            return new BuyTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+        
+        // 2. Validate purchase
+        var totalCost = request.Price * request.Quantity;
+        if (totalCost > portfolioData.CashBalance)
+        {
+            return new BuyTickerResponse
+            {
+                Success = false,
+                StatusCode = 400,
+                Message = "Insufficient funds"
+            };
+        }
+
+        // 3. Create transaction
+        var transaction = new TransactionModel
+        {
+            PortfolioId = portfolioData.Id,
+            Symbol = request.Symbol,
+            Type = TransactionType.Buy,
+            Shares = (int)request.Quantity,
+            Price = request.Price,
+            TotalAmount = totalCost,
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market
         };
 
-        _context.Users.Add(user);
+        // 4. Update portfolio
+        portfolioData.CashBalance -= totalCost;
+        portfolioData.InvestedAmount += totalCost;
+
+        // 5. Update or create stock holding
+        var existingHolding = portfolioData.StockHoldings
+            .FirstOrDefault(h => h.Symbol == request.Symbol);
+
+        if (existingHolding != null)
+        {
+            // Update existing holding
+            var newTotalShares = existingHolding.Shares + (int)request.Quantity;
+            var newTotalCost = (existingHolding.AverageCost * existingHolding.Shares) + totalCost;
+            existingHolding.Shares = newTotalShares;
+            existingHolding.AverageCost = newTotalCost / newTotalShares;
+            existingHolding.CurrentPrice = request.Price;
+        }
+        else
+        {
+            // Create new holding
+            var newHolding = new StockHoldingModel
+            {
+                PortfolioId = portfolioData.Id,
+                Symbol = request.Symbol,
+                Shares = request.Quantity,
+                AverageCost = request.Price,
+                CurrentPrice = request.Price
+            };
+            portfolioData.StockHoldings.Add(newHolding);
+        }
+
+        // 6. Save changes
+        _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync();
 
-        var token = _tokenService.CreateToken(user);
-        return (true, token, null);
+        // 7. Return response
+        return new BuyTickerResponse
+        {
+            Success = true,
+            StatusCode = 200,
+            Data = new BuyTickerData
+            {
+                Symbol = request.Symbol,
+                Quantity = request.Quantity,
+                Price = request.Price,
+                TotalCost = totalCost,
+                RemainingCashBalance = portfolioData.CashBalance,
+                TransactionTime = DateTime.UtcNow,
+                TransactionId = transaction.Id.ToString(),
+                Status = transaction.Status
+            }
+        };
+    }
+
+    public Task<SellTickerResponse> SellTickerPortfolio(SellTickerRequest request)
+    {
+        throw new NotImplementedException();
+    }
+
+    public TransactionModel CreateBuyTransaction(PortfolioModel portfolioData, BuyTickerRequest request)
+    {
+        return new TransactionModel
+        {
+            PortfolioId = portfolioData.Id,
+            Symbol = request.Symbol,
+            Type = TransactionType.Buy,
+            Shares = request.Quantity,
+            Price = request.Price,
+            TotalAmount = request.Quantity*request.Price,
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market
+        };
+    }
+    
+    public TransactionModel CreateSellTransaction(PortfolioModel portfolioData, SellTickerRequest request)
+    {
+        return new TransactionModel
+        {
+            PortfolioId = portfolioData.Id,
+            Symbol = request.Symbol,
+            Type = TransactionType.Sell,
+            Shares = request.Quantity,
+            Price = request.Price,
+            TotalAmount = request.Quantity*request.Price,
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market
+        };
     }
 }

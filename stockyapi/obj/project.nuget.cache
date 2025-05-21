@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "5I/zo/J9DfUd0RPYu+1OpFj+Pjp0+i8/S+6FqlaI/a3vnDSa5lMrqkYSQ5zrCiXm60s1cXXSKOJUOLPmoxZ6Vw==",
+  "dgSpecHash": "U+POR2RN8ec=",
   "success": true,
   "projectFilePath": "C:\\Users\\nurul\\source\\repos\\Stocky\\stockyapi\\stockyapi.csproj",
   "expectedPackageFiles": [
@@ -74,6 +74,8 @@
     "C:\\Users\\nurul\\.nuget\\packages\\microsoft.sqlserver.server\\1.0.0\\microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "C:\\Users\\nurul\\.nuget\\packages\\microsoft.win32.systemevents\\6.0.0\\microsoft.win32.systemevents.6.0.0.nupkg.sha512",
     "C:\\Users\\nurul\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
+    "C:\\Users\\nurul\\.nuget\\packages\\npgsql\\8.0.2\\npgsql.8.0.2.nupkg.sha512",
+    "C:\\Users\\nurul\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.2\\npgsql.entityframeworkcore.postgresql.8.0.2.nupkg.sha512",
     "C:\\Users\\nurul\\.nuget\\packages\\scrutor\\3.3.0\\scrutor.3.3.0.nupkg.sha512",
     "C:\\Users\\nurul\\.nuget\\packages\\swashbuckle.aspnetcore\\6.4.0\\swashbuckle.aspnetcore.6.4.0.nupkg.sha512",
     "C:\\Users\\nurul\\.nuget\\packages\\swashbuckle.aspnetcore.filters\\7.0.8\\swashbuckle.aspnetcore.filters.7.0.8.nupkg.sha512",

@@ -15,7 +15,7 @@ public class PortfolioData
 public class PortfolioItem
 {
     public required string Symbol { get; set; }
-    public int Quantity { get; set; }
+    public decimal Quantity { get; set; }
     public decimal AverageBuyPrice { get; set; }
     public decimal CurrentPrice { get; set; }
     public decimal TotalValue { get; set; }

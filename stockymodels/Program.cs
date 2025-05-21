@@ -8,7 +8,7 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
     {
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.Use(hostContext.Configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(hostContext.Configuration.GetConnectionString("DefaultConnection")));
     });
 
 var host = builder.Build();

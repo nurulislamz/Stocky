@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
 public class WatchlistModel : BaseModel
 {
-    public int UserId { get; set; }
+    [Required]
+    [ForeignKey("User")]
+    public Guid UserId { get; set; }
 
     [Required]
     [StringLength(20)]

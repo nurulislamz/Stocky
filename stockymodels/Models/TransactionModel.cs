@@ -1,11 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
 public class TransactionModel : BaseModel
 {
     [Required]
-    public int PortfolioId { get; set; }
+    [ForeignKey("Portfolio")]
+    public Guid PortfolioId { get; set; }
 
     [Required]
     [MaxLength(20)]
@@ -15,7 +17,7 @@ public class TransactionModel : BaseModel
     public TransactionType Type { get; set; }
 
     [Required]
-    public int Shares { get; set; }
+    public decimal Shares { get; set; }
 
     [Required]
     [Precision(18, 2)]

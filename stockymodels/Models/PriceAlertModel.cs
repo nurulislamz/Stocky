@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
@@ -6,7 +7,9 @@ namespace stockymodels.Models;
 
 public class PriceAlertModel : BaseModel
 {
-    public int UserId { get; set; }
+    [Required]
+    [ForeignKey("User")]
+    public Guid UserId { get; set; }
 
     [Required]
     [StringLength(20)]
@@ -27,5 +30,5 @@ public class PriceAlertModel : BaseModel
     public DateTime? TriggeredAt { get; set; }
 
     // Navigation property
-    public virtual UserModel? User { get; set; }
+    public virtual UserModel User { get; set; }
 }

@@ -11,32 +11,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68ab6a32-18ab-433b-81e9-444cfbc92e03" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/stockyapi/Services/IPortfolioService.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/SellPortfolioRequestHandler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Stocky.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Stocky.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Controllers/AuthController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/BuyStockRequest.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/SellStockRequest.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/LoginResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/LoginResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/RegisterResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/AuthResponses/RegisterResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/BaseResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/BaseResponse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/PortfolioResponse.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/BuyTickerResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/BuyTickerResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/SellTickerResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/SellTickerResponse.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Services/IPortfolioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/IPortfolioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Services/PortfolioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/PortfolioService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.assets.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.targets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.Designer.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250427154545_InitialCreate.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250517123034_Portfolio_and_WatchList_Tables.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/ApplicationDbContextModelSnapshot.cs" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" afterDir="false" />
@@ -57,6 +53,7 @@
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.targets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,6 +78,8 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/abe193ec7107fe257fbe56564e41d8e7f2f3527b62fbdb99f9337fcffa0fdd7/EndpointMethodInfoApiExplorerServiceCollectionExtensions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/stockyapi/Options/JwtSettings.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/stockyapi/Program.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/nurul/source/repos/Stocky/stockyapi/Services/PortfolioService.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/nurul/source/repos/Stocky/stockyapi/Services/PortfolioService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/stockyapi/Services/TokenService.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
@@ -253,6 +252,7 @@
       <workItem from="1747589044235" duration="6528000" />
       <workItem from="1747739479684" duration="17291000" />
       <workItem from="1747785234156" duration="5468000" />
+      <workItem from="1747853491784" duration="6472000" />
     </task>
     <servers />
   </component>
@@ -274,50 +274,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/stockymodels/Program.cs</url>
-          <line>11</line>
-          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockymodels\Program.cs" containingFunctionPresentation="">
-            <startOffsets>
-              <option value="452" />
-            </startOffsets>
-            <endOffsets>
-              <option value="453" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/stockymodels/Program.cs</url>
-          <line>13</line>
-          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockymodels\Program.cs" containingFunctionPresentation="">
-            <startOffsets>
-              <option value="457" />
-            </startOffsets>
-            <endOffsets>
-              <option value="484" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DotNet Breakpoints">
-          <url>file://$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs</url>
-          <line>19</line>
-          <properties documentPath="C:\Users\nurul\source\repos\Stocky\stockyapi\Repository\Portfolio\GetPortfolioRequestHandler.cs" containingFunctionPresentation="Method 'Handle'">
-            <startOffsets>
-              <option value="587" />
-            </startOffsets>
-            <endOffsets>
-              <option value="637" />
-            </endOffsets>
-          </properties>
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
