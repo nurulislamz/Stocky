@@ -3,8 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
+namespace stockymodels.models;
+
 public class WatchlistModel : BaseModel
 {
+    [Required]
+    [Column("WatchlistId")]
+    public override Guid Id { get; set; }
+
     [Required]
     [ForeignKey("User")]
     public Guid UserId { get; set; }

@@ -7,16 +7,22 @@ using stockymodels.models;
 
 namespace stockyapi.Services;
 
+public interface IPortfolioService
+{
+    public Task<PortfolioModel?> FetchUserPortfolio();
+    public UserPortfolioResponse GetUserPortfolio(PortfolioModel? portfolio);
+    public Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request);
+    public Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request);
+}
+
 public class PortfolioService : IPortfolioService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _context;
 
-    public PortfolioService(IHttpContextAccessor httpContextAccessor, ITokenService tokenService, ApplicationDbContext context)
+    public PortfolioService(IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
     {
         _httpContextAccessor = httpContextAccessor;
-        _tokenService = tokenService;
         _context = context;
     }
 
@@ -37,11 +43,11 @@ public class PortfolioService : IPortfolioService
         return totalCost > currentCash ;
     }
 
-    public GetPortfolioResponse CreatePortfolioResponse(PortfolioModel? portfolio)
+    public UserPortfolioResponse GetUserPortfolio(PortfolioModel? portfolio)
     {
         if (portfolio == null)
         {
-            return new GetPortfolioResponse
+            return new UserPortfolioResponse
             {
                 Success = false,
                 StatusCode = 404,
@@ -60,10 +66,10 @@ public class PortfolioService : IPortfolioService
             ProfitLossPercentage = holding.AverageCost != 0
                 ? ((holding.CurrentPrice - holding.AverageCost) / holding.AverageCost) * 100
                 : 0,
-            LastUpdatedTime = holding.UpdatedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? holding.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            LastUpdatedTime = holding.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss") ?? holding.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
         }).ToList();
 
-        return new GetPortfolioResponse
+        return new UserPortfolioResponse
         {
             Success = true,
             StatusCode = 200,
@@ -77,7 +83,7 @@ public class PortfolioService : IPortfolioService
         };
     }
 
-    public async Task<BuyTickerResponse> BuyTickerPortfolio(BuyTickerRequest request)
+    public async Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request)
     {
         var portfolioData = await FetchUserPortfolio();
         if (portfolioData == null)
@@ -108,14 +114,14 @@ public class PortfolioService : IPortfolioService
             PortfolioId = portfolioData.Id,
             Symbol = request.Symbol,
             Type = TransactionType.Buy,
-            Shares = (int)request.Quantity,
+            Shares = request.Quantity,
             Price = request.Price,
             TotalAmount = totalCost,
             Status = TransactionStatus.Completed,
             OrderType = OrderType.Market
         };
 
-        // 4. Update portfolio
+        // 4. Update portfolio  balance
         portfolioData.CashBalance -= totalCost;
         portfolioData.InvestedAmount += totalCost;
 
@@ -126,7 +132,7 @@ public class PortfolioService : IPortfolioService
         if (existingHolding != null)
         {
             // Update existing holding
-            var newTotalShares = existingHolding.Shares + (int)request.Quantity;
+            var newTotalShares = existingHolding.Shares + request.Quantity;
             var newTotalCost = (existingHolding.AverageCost * existingHolding.Shares) + totalCost;
             existingHolding.Shares = newTotalShares;
             existingHolding.AverageCost = newTotalCost / newTotalShares;
@@ -169,38 +175,89 @@ public class PortfolioService : IPortfolioService
         };
     }
 
-    public Task<SellTickerResponse> SellTickerPortfolio(SellTickerRequest request)
+    public async Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request)
     {
-        throw new NotImplementedException();
-    }
-
-    public TransactionModel CreateBuyTransaction(PortfolioModel portfolioData, BuyTickerRequest request)
-    {
-        return new TransactionModel
+        var portfolioData = await FetchUserPortfolio();
+        if (portfolioData == null)
         {
-            PortfolioId = portfolioData.Id,
-            Symbol = request.Symbol,
-            Type = TransactionType.Buy,
-            Shares = request.Quantity,
-            Price = request.Price,
-            TotalAmount = request.Quantity*request.Price,
-            Status = TransactionStatus.Completed,
-            OrderType = OrderType.Market
-        };
-    }
-    
-    public TransactionModel CreateSellTransaction(PortfolioModel portfolioData, SellTickerRequest request)
-    {
-        return new TransactionModel
+            return new SellTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+        
+        // 2. Validate purchase
+        var total = request.Price * request.Quantity;
+
+        // 3. Create transaction
+        var transaction = new TransactionModel
         {
             PortfolioId = portfolioData.Id,
             Symbol = request.Symbol,
             Type = TransactionType.Sell,
             Shares = request.Quantity,
             Price = request.Price,
-            TotalAmount = request.Quantity*request.Price,
+            TotalAmount = total,
             Status = TransactionStatus.Completed,
             OrderType = OrderType.Market
+        };
+
+        // 4. Update portfolio
+        portfolioData.CashBalance += total;
+        portfolioData.InvestedAmount -= total;
+
+        // 5. Update or create stock holding
+        var existingHolding = portfolioData.StockHoldings
+            .FirstOrDefault(h => h.Symbol == request.Symbol);
+
+        if (existingHolding == null)
+        {
+            return new SellTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Stock is not own"
+            };
+        }
+        else if (existingHolding.Shares > request.Quantity)
+        {
+            return new SellTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "You're trying to sell more shares than you own"
+            };
+        }
+
+        // Update existing holding
+        var newTotalShares = existingHolding.Shares - request.Quantity;
+        var newTotalCost =  total - (existingHolding.AverageCost * existingHolding.Shares);
+        existingHolding.Shares = newTotalShares;
+        existingHolding.AverageCost = newTotalShares == 0 ? 0 : newTotalCost / newTotalShares;
+        existingHolding.CurrentPrice = request.Price;
+        
+        // 6. Save changes
+        _context.Transactions.Add(transaction);
+        await _context.SaveChangesAsync();
+
+        // 7. Return response
+        return new SellTickerResponse
+        {
+            Success = true,
+            StatusCode = 200,
+            Data = new SellTickerData()
+            {
+                Symbol = request.Symbol,
+                Quantity = request.Quantity,
+                Price = request.Price,
+                TotalCost = total,
+                RemainingCashBalance = portfolioData.CashBalance,
+                TransactionTime = DateTime.UtcNow,
+                TransactionId = transaction.Id.ToString(),
+                Status = transaction.Status
+            }
         };
     }
 }

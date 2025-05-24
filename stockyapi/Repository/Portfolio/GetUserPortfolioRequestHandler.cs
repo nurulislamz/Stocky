@@ -2,11 +2,10 @@ using MediatR;
 using stockyapi.Requests;
 using stockyapi.Responses;
 using stockyapi.Services;
-using stockymodels.Data;
 
 namespace stockyapi.Repository.Portfolio;
 
-public class GetUserPortfolioRequestHandler : IRequestHandler<GetPortfolioRequest, GetPortfolioResponse>
+public class GetUserPortfolioRequestHandler : IRequestHandler<UserPortfolioRequest, UserPortfolioResponse>
 {
     private readonly PortfolioService _portfolioService;
 
@@ -15,9 +14,9 @@ public class GetUserPortfolioRequestHandler : IRequestHandler<GetPortfolioReques
         _portfolioService = portfolioservice;
     }
 
-    public async Task<GetPortfolioResponse> Handle(GetPortfolioRequest request, CancellationToken cancellationToken)
+    public async Task<UserPortfolioResponse> Handle(UserPortfolioRequest request, CancellationToken cancellationToken)
     {
         var portfolio =  await _portfolioService.FetchUserPortfolio();
-        return _portfolioService.CreatePortfolioResponse(portfolio);
+        return _portfolioService.GetUserPortfolio(portfolio);
     }
 }

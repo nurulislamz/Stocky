@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
-using stockymodels.Models;
+using stockymodels.Data.Configurations;
 
 namespace stockymodels.Data;
 
@@ -22,46 +22,46 @@ public class ApplicationDbContext : DbContext
   {
     base.OnModelCreating(modelBuilder);
 
-    // User-Portfolio relationship (One-to-One)
-    modelBuilder.Entity<UserModel>()
-        .HasOne(u => u.Portfolio)
-        .WithOne(p => p.User)
-        .HasForeignKey<PortfolioModel>(p => p.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+    // Apply all configurations
+    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
-    // User-Preferences relationship (One-to-One)
-    modelBuilder.Entity<UserModel>()
-        .HasOne(u => u.Preferences)
-        .WithOne(p => p.User)
-        .HasForeignKey<UserPreferencesModel>(p => p.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+    // Configure timestamps for all BaseModel entities
+    foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+    {
+      if (typeof(BaseModel).IsAssignableFrom(entityType.ClrType))
+      {
+        modelBuilder.Entity(entityType.ClrType)
+          .Property("CreatedAt")
+          .HasDefaultValueSql("GETUTCDATE()");
 
-    // User-Watchlist relationship (One-to-Many)
-    modelBuilder.Entity<UserModel>()
-        .HasMany(u => u.Watchlist)
-        .WithOne(w => w.User)
-        .HasForeignKey(w => w.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity(entityType.ClrType)
+          .Property("UpdatedAt")
+          .HasDefaultValueSql("GETUTCDATE()")
+          .ValueGeneratedOnAddOrUpdate();
+      }
+    }
+  }
 
-    // User-PriceAlerts relationship (One-to-Many)
-    modelBuilder.Entity<UserModel>()
-        .HasMany(u => u.PriceAlerts)
-        .WithOne(p => p.User)
-        .HasForeignKey(p => p.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+  public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+  {
+    UpdateTimestamps();
+    return base.SaveChangesAsync(cancellationToken);
+  }
 
-    // Portfolio-StockHoldings relationship (One-to-Many)
-    modelBuilder.Entity<PortfolioModel>()
-        .HasMany(p => p.StockHoldings)
-        .WithOne(s => s.Portfolio)
-        .HasForeignKey(s => s.PortfolioId)
-        .OnDelete(DeleteBehavior.Cascade);
-
-    // Portfolio-Transactions relationship (One-to-Many)
-    modelBuilder.Entity<PortfolioModel>()
-        .HasMany(p => p.Transactions)
-        .WithOne(t => t.Portfolio)
-        .HasForeignKey(t => t.PortfolioId)
-        .OnDelete(DeleteBehavior.Cascade);
+  private void UpdateTimestamps()
+  {
+    var entries = ChangeTracker.Entries<BaseModel>();
+    foreach (var entry in entries)
+    {
+      if (entry.State == EntityState.Added)
+      {
+        entry.Entity.CreatedAt = DateTime.UtcNow;
+        entry.Entity.UpdatedAt = DateTime.UtcNow;
+      }
+      else if (entry.State == EntityState.Modified)
+      {
+        entry.Entity.UpdatedAt = DateTime.UtcNow;
+      }
+    }
   }
 }

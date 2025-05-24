@@ -3,8 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
+namespace stockymodels.models;
+
 public class TransactionModel : BaseModel
 {
+    [Required]
+    [Column("TransactionId")]
+    public override Guid Id { get; set; }
+
     [Required]
     [ForeignKey("Portfolio")]
     public Guid PortfolioId { get; set; }
@@ -35,6 +41,9 @@ public class TransactionModel : BaseModel
 
     [Precision(18, 2)]
     public decimal? LimitPrice { get; set; }
+
+    [Required]
+    public DateTime LastPriceUpdate { get; set; }
 
     // Navigation property
     public virtual PortfolioModel Portfolio { get; set; }

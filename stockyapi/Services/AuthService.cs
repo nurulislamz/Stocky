@@ -5,6 +5,12 @@ using stockyapi.Responses;
 
 namespace stockyapi.Services;
 
+public interface IAuthService
+{
+    public Task<LoginResponse> LoginUser(string email, string password);
+    public Task<RegisterResponse> CreateNewUser(string firstName, string surname, string email, string password);
+}
+
 public class AuthService : IAuthService
 {
     private readonly ITokenService _tokenService;
@@ -16,7 +22,7 @@ public class AuthService : IAuthService
         _context = context;
     }
 
-    public async Task<LoginResponse> ValidateUserCredentials(string email, string password)
+    public async Task<LoginResponse> LoginUser(string email, string password)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (user == null)
@@ -34,7 +40,7 @@ public class AuthService : IAuthService
                 StatusCode = 401,
                 Message = "Invalid credentials",
             };
-
+        
         var token = _tokenService.CreateToken(user);
         LoginData loginData = new LoginData
         {
@@ -86,4 +92,5 @@ public class AuthService : IAuthService
             Data = registerData
         };
     }
+    
 }

@@ -64,8 +64,18 @@ class Program
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
+        // Configure PostgreSQL with retry policy
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        {
+            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
+            {
+                npgsqlOptions.CommandTimeout(30);
+                npgsqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 3,
+                    maxRetryDelay: TimeSpan.FromSeconds(5),
+                    errorCodesToAdd: null);
+            });
+        });
 
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 

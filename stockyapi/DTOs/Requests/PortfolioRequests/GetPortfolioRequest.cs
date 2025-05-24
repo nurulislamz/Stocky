@@ -3,7 +3,7 @@ using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class GetPortfolioRequest : IRequest<GetPortfolioResponse>
+public class UserPortfolioRequest : IRequest<UserPortfolioResponse>
 {
     public string? Symbol { get; set; }
     public DateTime? FromDate { get; set; }

@@ -3,8 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
+namespace stockymodels.models;
+
 public class StockHoldingModel : BaseModel
 {
+    [Required]
+    [Column("StockHoldingId")]
+    public override Guid Id { get; set; }
+
     [Required]
     [ForeignKey("Portfolio")]
     public Guid PortfolioId { get; set; }

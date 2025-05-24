@@ -17,6 +17,6 @@ public class LoginRequestHandler : IRequestHandler<LoginRequest, LoginResponse>
 
     public async Task<LoginResponse> Handle(LoginRequest request, CancellationToken cancellationToken)
     {
-        return await _authService.ValidateUserCredentials(request.Email, request.Password);
+        return await _authService.LoginUser(request.Email, request.Password);
     }
 }

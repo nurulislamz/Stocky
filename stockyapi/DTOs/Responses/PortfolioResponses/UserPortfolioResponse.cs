@@ -2,7 +2,7 @@ using stockyapi.Requests;
 
 namespace stockyapi.Responses;
 
-public class GetPortfolioResponse : BaseResponse<PortfolioData>;
+public class UserPortfolioResponse : BaseResponse<PortfolioData>;
 
 public class PortfolioData
 {

@@ -4,8 +4,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
+namespace stockymodels.models;
+
 public class PortfolioModel : BaseModel
 {
+    [Required]
+    [Column("PortfolioId")]
+    public override Guid Id { get; set; }
+
     [Required]
     [ForeignKey("User")]
     public Guid UserId { get; set; }
@@ -23,7 +29,9 @@ public class PortfolioModel : BaseModel
     public decimal InvestedAmount { get; set; }
 
     // Navigation properties
-    public virtual UserModel User { get; set; }
-    public virtual ICollection<StockHoldingModel> StockHoldings { get; set; }
-    public virtual ICollection<TransactionModel> Transactions { get; set; }
+    public virtual required UserModel User { get; set; }
+
+    public virtual required ICollection<StockHoldingModel> StockHoldings { get; set; }
+
+    public virtual required ICollection<TransactionModel> Transactions { get; set; }
 }

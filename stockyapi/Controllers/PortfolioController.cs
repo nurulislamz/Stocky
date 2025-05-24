@@ -23,7 +23,7 @@ public class PortfolioController : ControllerBase
     }
 
     [HttpGet("portfolio")]
-    public async Task<ActionResult<GetPortfolioResponse>> GetPortfolio([FromBody] GetPortfolioRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<UserPortfolioResponse>> GetPortfolio([FromBody] UserPortfolioRequest request, CancellationToken cancellationToken)
     {
         var response = await _mediator.Send(request, cancellationToken);
         return StatusCode(response.StatusCode, response);

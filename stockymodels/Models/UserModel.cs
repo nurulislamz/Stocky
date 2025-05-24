@@ -1,11 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using stockymodels.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace stockymodels.models;
 
 public class UserModel : BaseModel
 {
 
+  [Required]
+  [ForeignKey("UserId")]
+  public override Guid Id { get; set; }
+  
   [Required]
   [MinLength(8)]
   [MaxLength(50)]

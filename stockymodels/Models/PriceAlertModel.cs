@@ -3,10 +3,14 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
-namespace stockymodels.Models;
+namespace stockymodels.models;
 
 public class PriceAlertModel : BaseModel
 {
+    [Required]
+    [Column("PriceAlertId")]
+    public override Guid Id { get; set; }
+
     [Required]
     [ForeignKey("User")]
     public Guid UserId { get; set; }
@@ -26,7 +30,6 @@ public class PriceAlertModel : BaseModel
 
     public bool IsTriggered { get; set; } = false;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? TriggeredAt { get; set; }
 
     // Navigation property

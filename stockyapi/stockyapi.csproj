@@ -25,6 +25,11 @@
 
   <ItemGroup>
     <Folder Include="Examples\" />
+    <Folder Include="Repository\Crypto\" />
+    <Folder Include="Repository\Indicators\" />
+    <Folder Include="Repository\Real-Time Data\" />
+    <Folder Include="Repository\Stock Analysis\" />
+    <Folder Include="Repository\Stock News\" />
   </ItemGroup>
 
 </Project>
