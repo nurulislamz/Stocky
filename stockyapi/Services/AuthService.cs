@@ -15,82 +15,88 @@ public class AuthService : IAuthService
 {
     private readonly ITokenService _tokenService;
     private readonly ApplicationDbContext _context;
+    private readonly IUserService _userService;
 
-    public AuthService(ITokenService tokenService, ApplicationDbContext context)
+    public AuthService(ITokenService tokenService, ApplicationDbContext context, IUserService userService)
     {
         _tokenService = tokenService;
+        _userService = userService;
         _context = context;
     }
 
     public async Task<LoginResponse> LoginUser(string email, string password)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        // Verify User Exists
+        var user = await _userService.VerifyUserExists(email);
         if (user == null)
-            return new LoginResponse
-            {
-                Success = false,
-                StatusCode = 401,
-                Message = "Invalid credentials",
-            };
-
-        if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
-            return new LoginResponse
-            {
-                Success = false,
-                StatusCode = 401,
-                Message = "Invalid credentials",
-            };
-        
-        var token = _tokenService.CreateToken(user);
-        LoginData loginData = new LoginData
         {
-            Token = token
-        };
+            return new LoginResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "Invalid credentials",
+            };
+        }
+
+        // Verify Password
+        if (!_userService.VerifyUserPassword(password, user.Password))
+        {
+            return new LoginResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "Invalid credentials",
+            };
+        }
+        
+        // Create Token
+        var token = _tokenService.CreateToken(user);
+
 
         return new LoginResponse
         {
             Success = true,
             StatusCode = 200,
-            Data = loginData
+            Data = new LoginData { Token = token }
         };
     }
 
     public async Task<RegisterResponse> CreateNewUser(string firstName, string surname, string email, string password)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == email))
+        // Verify User DNE
+        var checkIfUserExists = await _userService.VerifyUserExists(email);
+        if (checkIfUserExists != null)
+        {
             return new RegisterResponse
             {
                 Success = false,
                 StatusCode = 401,
                 Message = "Email address already exists",
             };
+        }
 
-        var user = new UserModel
+        var userCreated = await _userService.UserCreate(firstName, surname, email, password);
+        if (userCreated == null)
         {
-            FirstName = firstName,
-            Surname = surname,
-            Email = email,
-            Password = BCrypt.Net.BCrypt.HashPassword(password),
-            Role = UserRole.User, // Default role
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        var token = _tokenService.CreateToken(user);
-        RegisterData registerData = new RegisterData
-        {
-            Token = token
-        };
-
+            return new RegisterResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "Failed to Create User",
+            };
+        }
+        
+        var token = _tokenService.CreateToken(userCreated);
         return new RegisterResponse
         {
             Success = true,
             StatusCode = 201,
-            Data = registerData
+            Data = new RegisterData
+            {
+                Token = token,
+                Email = userCreated.Email,
+                UserId = userCreated.Id.ToString()
+            }
         };
     }
-    
 }

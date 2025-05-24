@@ -42,5 +42,5 @@ public class UserPreferencesModel : BaseModel
     public string Timezone { get; set; }
 
     // Navigation property
-    public virtual UserModel User { get; set; }
+    public virtual required UserModel User { get; set; }
 }

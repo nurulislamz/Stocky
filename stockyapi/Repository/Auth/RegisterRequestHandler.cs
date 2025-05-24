@@ -16,6 +16,6 @@ public class RegisterRequestHandler : IRequestHandler<RegisterRequest, RegisterR
 
     public async Task<RegisterResponse> Handle(RegisterRequest request, CancellationToken cancellationToken)
     {
-        return await _authService.CreateNewUser(request.FirstName,request.Surname,request.Email, request.Password);
+        return await _authService.CreateNewUser(request.FirstName, request.Surname, request.Email, request.Password);
     }
 }
