@@ -23,8 +23,8 @@ namespace stockymodels.Migrations
                     Role = table.Column<int>(type: "integer", nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
@@ -40,15 +40,15 @@ namespace stockymodels.Migrations
                     TotalValue = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     CashBalance = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     InvestedAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Portfolios", x => x.PortfolioId);
                     table.ForeignKey(
-                        name: "FK_Portfolios_Users_PortfolioId",
-                        column: x => x.PortfolioId,
+                        name: "FK_Portfolios_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -65,15 +65,15 @@ namespace stockymodels.Migrations
                     Condition = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
                     IsTriggered = table.Column<bool>(type: "boolean", nullable: false),
                     TriggeredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PriceAlerts", x => x.PriceAlertId);
                     table.ForeignKey(
-                        name: "FK_PriceAlerts_Users_PriceAlertId",
-                        column: x => x.PriceAlertId,
+                        name: "FK_PriceAlerts_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -94,15 +94,15 @@ namespace stockymodels.Migrations
                     NewsAlerts = table.Column<bool>(type: "boolean", nullable: false),
                     DefaultCurrency = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
                     Timezone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserPreferences", x => x.UserPreferencesId);
                     table.ForeignKey(
-                        name: "FK_UserPreferences_Users_UserPreferencesId",
-                        column: x => x.UserPreferencesId,
+                        name: "FK_UserPreferences_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -116,18 +116,18 @@ namespace stockymodels.Migrations
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
                     Symbol = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     AddedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Notes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false, defaultValue: ""),
                     TargetPrice = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
                     StopLoss = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Watchlist", x => x.WatchlistId);
                     table.ForeignKey(
-                        name: "FK_Watchlist_Users_WatchlistId",
-                        column: x => x.WatchlistId,
+                        name: "FK_Watchlist_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -143,15 +143,15 @@ namespace stockymodels.Migrations
                     Shares = table.Column<decimal>(type: "numeric", nullable: false),
                     AverageCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     CurrentPrice = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_StockHoldings", x => x.StockHoldingId);
                     table.ForeignKey(
-                        name: "FK_StockHoldings_Portfolios_StockHoldingId",
-                        column: x => x.StockHoldingId,
+                        name: "FK_StockHoldings_Portfolios_PortfolioId",
+                        column: x => x.PortfolioId,
                         principalTable: "Portfolios",
                         principalColumn: "PortfolioId",
                         onDelete: ReferentialAction.Cascade);
@@ -171,16 +171,16 @@ namespace stockymodels.Migrations
                     Status = table.Column<int>(type: "integer", nullable: false),
                     OrderType = table.Column<int>(type: "integer", nullable: false),
                     LimitPrice = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    LastPriceUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "GETUTCDATE()")
+                    LastPriceUpdate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.TransactionId);
                     table.ForeignKey(
-                        name: "FK_Transactions_Portfolios_TransactionId",
-                        column: x => x.TransactionId,
+                        name: "FK_Transactions_Portfolios_PortfolioId",
+                        column: x => x.PortfolioId,
                         principalTable: "Portfolios",
                         principalColumn: "PortfolioId",
                         onDelete: ReferentialAction.Cascade);
@@ -193,9 +193,9 @@ namespace stockymodels.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Portfolios_UserId_PortfolioId",
+                name: "IX_Portfolios_UserId",
                 table: "Portfolios",
-                columns: new[] { "UserId", "PortfolioId" },
+                column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -205,21 +205,14 @@ namespace stockymodels.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PriceAlerts_Symbol_IsTriggered",
+                name: "IX_PriceAlerts_UserId",
                 table: "PriceAlerts",
-                columns: new[] { "Symbol", "IsTriggered" });
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PriceAlerts_UserId_Symbol",
-                table: "PriceAlerts",
-                columns: new[] { "UserId", "Symbol" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StockHoldings_PortfolioId_Symbol",
+                name: "IX_StockHoldings_PortfolioId",
                 table: "StockHoldings",
-                columns: new[] { "PortfolioId", "Symbol" },
-                unique: true);
+                column: "PortfolioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StockHoldings_StockHoldingId",
@@ -228,24 +221,20 @@ namespace stockymodels.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_StockHoldings_Symbol",
-                table: "StockHoldings",
-                column: "Symbol");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_PortfolioId_CreatedAt",
+                name: "IX_Transactions_PortfolioId",
                 table: "Transactions",
-                columns: new[] { "PortfolioId", "CreatedAt" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Transactions_Status",
-                table: "Transactions",
-                column: "Status");
+                column: "PortfolioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_TransactionId",
                 table: "Transactions",
                 column: "TransactionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPreferences_UserId",
+                table: "UserPreferences",
+                column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -255,22 +244,15 @@ namespace stockymodels.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
-                table: "Users",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_Id",
                 table: "Users",
                 column: "Id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Watchlist_UserId_Symbol",
+                name: "IX_Watchlist_UserId",
                 table: "Watchlist",
-                columns: new[] { "UserId", "Symbol" },
-                unique: true);
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Watchlist_WatchlistId",

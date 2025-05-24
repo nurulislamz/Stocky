@@ -8,9 +8,9 @@ namespace stockyapi.Repository.Portfolio;
 
 public class SellTickerInPortfolioRequestHandler : IRequestHandler<SellTickerRequest, SellTickerResponse>
 {
-    private readonly PortfolioService _portfolioService;
+    private readonly IPortfolioService _portfolioService;
 
-    public SellTickerInPortfolioRequestHandler(PortfolioService portfolioservice)
+    public SellTickerInPortfolioRequestHandler(IPortfolioService portfolioservice)
     {
         _portfolioService = portfolioservice;
     }

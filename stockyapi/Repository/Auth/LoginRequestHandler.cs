@@ -8,9 +8,9 @@ namespace stockyapi.Repository.Auth;
 
 public class LoginRequestHandler : IRequestHandler<LoginRequest, LoginResponse>
 {
-    private readonly AuthService _authService;
+    private readonly IAuthService _authService;
 
-    public LoginRequestHandler(AuthService authService)
+    public LoginRequestHandler(IAuthService authService)
     {
         _authService = authService;
     }

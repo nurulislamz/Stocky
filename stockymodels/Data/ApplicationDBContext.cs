@@ -22,45 +22,19 @@ public class ApplicationDbContext : DbContext
   {
     base.OnModelCreating(modelBuilder);
 
-    // Apply all configurations
-    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-
-    // Configure timestamps for all BaseModel entities
+    // Configure all entities that inherit from BaseModel
     foreach (var entityType in modelBuilder.Model.GetEntityTypes())
     {
       if (typeof(BaseModel).IsAssignableFrom(entityType.ClrType))
       {
         modelBuilder.Entity(entityType.ClrType)
           .Property("CreatedAt")
-          .HasDefaultValueSql("GETUTCDATE()");
+          .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
         modelBuilder.Entity(entityType.ClrType)
           .Property("UpdatedAt")
-          .HasDefaultValueSql("GETUTCDATE()")
+          .HasDefaultValueSql("CURRENT_TIMESTAMP")
           .ValueGeneratedOnAddOrUpdate();
-      }
-    }
-  }
-
-  public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-  {
-    UpdateTimestamps();
-    return base.SaveChangesAsync(cancellationToken);
-  }
-
-  private void UpdateTimestamps()
-  {
-    var entries = ChangeTracker.Entries<BaseModel>();
-    foreach (var entry in entries)
-    {
-      if (entry.State == EntityState.Added)
-      {
-        entry.Entity.CreatedAt = DateTime.UtcNow;
-        entry.Entity.UpdatedAt = DateTime.UtcNow;
-      }
-      else if (entry.State == EntityState.Modified)
-      {
-        entry.Entity.UpdatedAt = DateTime.UtcNow;
       }
     }
   }

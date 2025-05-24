@@ -80,6 +80,9 @@ class Program
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
         services.AddTransient<ITokenService, TokenService>();
+        services.AddTransient<IPortfolioService, PortfolioService>();
+        services.AddTransient<IAuthService, AuthService>();
+        services.AddHttpContextAccessor();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
         {

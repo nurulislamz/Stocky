@@ -12,37 +12,40 @@
   <component name="ChangeListManager">
     <list default="true" id="68ab6a32-18ab-433b-81e9-444cfbc92e03" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stocky/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Controllers/PortfolioController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Requests/PortfolioRequests/GetPortfolioRequest.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/GetPortfolioResponse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/DTOs/Responses/PortfolioResponses/UserPortfolioResponse.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/LoginRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/BuyPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/BuyTickerInPortfolioRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetUserPortfolioRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/SellPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/SellTickerInPortfolioRequestHandler.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/AuthService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Services/IAuthService.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Services/IPortfolioService.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockyapi/Services/PortfolioService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Services/PortfolioService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Auth/RegisterRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/BuyTickerInPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/BuyTickerInPortfolioRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetUserPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/GetUserPortfolioRequestHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/SellTickerInPortfolioRequestHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/Repository/Portfolio/SellTickerInPortfolioRequestHandler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.assets.cache" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/Debug/net8.0/stockyapi.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.assets.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.dgspec.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/obj/stockyapi.csproj.nuget.g.targets" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockyapi/stockyapi.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/stockyapi/stockyapi.csproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Data/ApplicationDBContext.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/BaseModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PortfolioModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/PriceAlertModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/StockHoldingModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/StockHoldingModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/TransactionModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/TransactionModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/UserModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/UserModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/UserPreferencesModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/UserPreferencesModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stockymodels/Models/WatchlistModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Models/WatchlistModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250524160504_InitialCreate.Designer.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/20250524160504_InitialCreate.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/Migrations/ApplicationDbContextModelSnapshot.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/Migrations/ApplicationDbContextModelSnapshot.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfo.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfoInputs.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.AssemblyInfoInputs.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.GeneratedMSBuildEditorConfig.editorconfig" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.GeneratedMSBuildEditorConfig.editorconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.assets.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/Debug/net8.0/stockymodels.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/project.packagespec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/project.packagespec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/rider.project.model.nuget.info" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/rider.project.model.nuget.info" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/rider.project.restore.info" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/obj/stockymodels.csproj.nuget.g.targets" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/stockymodels/stockymodels.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -263,5 +266,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="LaunchSettings">
+        <watch expression="((System.AggregateException) $exception).InnerExceptions" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

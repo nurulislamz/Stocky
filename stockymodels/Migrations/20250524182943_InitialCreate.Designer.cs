@@ -12,7 +12,7 @@ using stockymodels.Data;
 namespace stockymodels.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250524160504_InitialCreate")]
+    [Migration("20250524182943_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,6 +28,7 @@ namespace stockymodels.Migrations
             modelBuilder.Entity("stockymodels.models.PortfolioModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("PortfolioId");
 
@@ -38,7 +39,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<decimal>("InvestedAmount")
                         .HasPrecision(18, 2)
@@ -51,7 +52,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -61,15 +62,16 @@ namespace stockymodels.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("UserId", "Id")
+                    b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Portfolios", (string)null);
+                    b.ToTable("Portfolios");
                 });
 
             modelBuilder.Entity("stockymodels.models.PriceAlertModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("PriceAlertId");
 
@@ -81,7 +83,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<bool>("IsTriggered")
                         .HasColumnType("boolean");
@@ -101,7 +103,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -111,17 +113,15 @@ namespace stockymodels.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("Symbol", "IsTriggered");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("UserId", "Symbol")
-                        .IsUnique();
-
-                    b.ToTable("PriceAlerts", (string)null);
+                    b.ToTable("PriceAlerts");
                 });
 
             modelBuilder.Entity("stockymodels.models.StockHoldingModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("StockHoldingId");
 
@@ -132,7 +132,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<decimal>("CurrentPrice")
                         .HasPrecision(18, 2)
@@ -152,34 +152,34 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("Symbol");
+                    b.HasIndex("PortfolioId");
 
-                    b.HasIndex("PortfolioId", "Symbol")
-                        .IsUnique();
-
-                    b.ToTable("StockHoldings", (string)null);
+                    b.ToTable("StockHoldings");
                 });
 
             modelBuilder.Entity("stockymodels.models.TransactionModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("TransactionId");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<DateTime>("LastPriceUpdate")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<decimal?>("LimitPrice")
                         .HasPrecision(18, 2)
@@ -216,18 +216,16 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("Status");
+                    b.HasIndex("PortfolioId");
 
-                    b.HasIndex("PortfolioId", "CreatedAt");
-
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("stockymodels.models.UserModel", b =>
@@ -239,7 +237,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -272,29 +270,27 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("stockymodels.models.UserPreferencesModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("UserPreferencesId");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Currency")
                         .IsRequired()
@@ -333,7 +329,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -343,12 +339,16 @@ namespace stockymodels.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
                     b.ToTable("UserPreferences");
                 });
 
             modelBuilder.Entity("stockymodels.models.WatchlistModel", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("WatchlistId");
 
@@ -358,12 +358,14 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("Notes")
                         .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("character varying(500)")
+                        .HasDefaultValue("");
 
                     b.Property<decimal?>("StopLoss")
                         .HasPrecision(18, 2)
@@ -381,7 +383,7 @@ namespace stockymodels.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("GETUTCDATE()");
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
@@ -391,17 +393,16 @@ namespace stockymodels.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.HasIndex("UserId", "Symbol")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Watchlist", (string)null);
+                    b.ToTable("Watchlist");
                 });
 
             modelBuilder.Entity("stockymodels.models.PortfolioModel", b =>
                 {
                     b.HasOne("stockymodels.models.UserModel", "User")
                         .WithOne("Portfolio")
-                        .HasForeignKey("stockymodels.models.PortfolioModel", "Id")
+                        .HasForeignKey("stockymodels.models.PortfolioModel", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -412,7 +413,7 @@ namespace stockymodels.Migrations
                 {
                     b.HasOne("stockymodels.models.UserModel", "User")
                         .WithMany("PriceAlerts")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -423,7 +424,7 @@ namespace stockymodels.Migrations
                 {
                     b.HasOne("stockymodels.models.PortfolioModel", "Portfolio")
                         .WithMany("StockHoldings")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("PortfolioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -434,7 +435,7 @@ namespace stockymodels.Migrations
                 {
                     b.HasOne("stockymodels.models.PortfolioModel", "Portfolio")
                         .WithMany("Transactions")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("PortfolioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -445,7 +446,7 @@ namespace stockymodels.Migrations
                 {
                     b.HasOne("stockymodels.models.UserModel", "User")
                         .WithOne("Preferences")
-                        .HasForeignKey("stockymodels.models.UserPreferencesModel", "Id")
+                        .HasForeignKey("stockymodels.models.UserPreferencesModel", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -456,7 +457,7 @@ namespace stockymodels.Migrations
                 {
                     b.HasOne("stockymodels.models.UserModel", "User")
                         .WithMany("Watchlist")
-                        .HasForeignKey("Id")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

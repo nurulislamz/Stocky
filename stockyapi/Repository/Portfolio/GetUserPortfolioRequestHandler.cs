@@ -7,9 +7,9 @@ namespace stockyapi.Repository.Portfolio;
 
 public class GetUserPortfolioRequestHandler : IRequestHandler<UserPortfolioRequest, UserPortfolioResponse>
 {
-    private readonly PortfolioService _portfolioService;
+    private readonly IPortfolioService _portfolioService;
 
-    public GetUserPortfolioRequestHandler(PortfolioService portfolioservice)
+    public GetUserPortfolioRequestHandler(IPortfolioService portfolioservice)
     {
         _portfolioService = portfolioservice;
     }

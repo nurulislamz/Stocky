@@ -2,9 +2,6 @@ using MediatR;
 using stockyapi.Requests;
 using stockyapi.Responses;
 using stockyapi.Services;
-using Microsoft.EntityFrameworkCore;
-using stockymodels.Data;
-using stockymodels.models;
 
 namespace stockyapi.Repository.Auth;
 
