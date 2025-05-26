@@ -3,7 +3,8 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useSearchParams } from 'react-router-dom';
-import TVStockChartWidget from "../../components/tradingview/stockChartWidget";
+import TVStockChartWidget from "../../components/tradingview/TVStockChartWidget";
+import TVStockNewsWidget from "../../components/tradingview/TVStockNewsWidget";
 import Grid from "@mui/material/Grid";
 
 interface SearchResultsProps {
@@ -69,7 +70,19 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
             },
           }}
         >
-          <TVStockChartWidget symbol={`${symbol}`} width="100%" height="100%" />
+          <TVStockChartWidget symbol={`${symbol}`} />
+        </Grid>
+        <Grid
+          size={{ xs: 12, lg: 3 }}
+          sx={{
+            height: {
+              xs: "300px",
+              md: "400px",
+              lg: "500px",
+            },
+          }}
+        >
+          <TVStockNewsWidget feedMode="symbol" symbol={`${symbol}`}  />
         </Grid>
       </Grid>
     </Box>
