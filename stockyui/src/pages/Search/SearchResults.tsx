@@ -3,12 +3,14 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useSearchParams } from 'react-router-dom';
+import TVStockChartWidget from "../../components/tradingview/stockChartWidget";
+import Grid from "@mui/material/Grid";
 
 interface SearchResultsProps {
-  query: string;
+  symbol: string;
 }
 
-export default function SearchResults({ query }: SearchResultsProps) {
+export default function SearchResults({ symbol }: SearchResultsProps) {
   const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<any[]>([]);
@@ -16,7 +18,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) return;
+      if (!symbol) return;
       setIsLoading(true);
       try {
         // Fetch results
@@ -29,7 +31,7 @@ export default function SearchResults({ query }: SearchResultsProps) {
     };
 
     fetchResults();
-  }, [query]);
+  }, [symbol]);
 
   if (isLoading) {
     return (
@@ -48,9 +50,28 @@ export default function SearchResults({ query }: SearchResultsProps) {
   }
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h6">Search Results for: {query}</Typography>
-      {/* Here you would render your actual search results */}
+    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+      <Typography align="center" variant="h6">Search Results for: {symbol}</Typography>
+      <Grid
+        container
+        spacing={2}
+        columns={12}
+        paddingTop={2}
+        sx={{ mb: (theme) => theme.spacing(2) }}
+      >
+        <Grid
+          size={{ xs: 12, lg: 9 }}
+          sx={{
+            height: {
+              xs: "300px",
+              md: "400px",
+              lg: "500px",
+            },
+          }}
+        >
+          <TVStockChartWidget symbol={`${symbol}`} width="100%" height="100%" />
+        </Grid>
+      </Grid>
     </Box>
   );
 }

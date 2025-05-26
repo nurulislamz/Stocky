@@ -11,7 +11,7 @@ export default function SearchPage() {
   return (
     <Layout>
       <Header headerName="Search" />
-      {query ? <SearchResults query={query} /> : <SearchHero />}
+      {query ? <SearchResults symbol={query} /> : <SearchHero />}
     </Layout>
   );
 }
