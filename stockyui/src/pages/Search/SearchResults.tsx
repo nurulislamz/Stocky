@@ -70,7 +70,7 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
             },
           }}
         >
-          <TVStockChartWidget symbol={`${symbol}`} />
+          <TVStockChartWidget symbol={`${symbol}`} theme="light" interval="H" locale="en" autosize={true} />
         </Grid>
         <Grid
           size={{ xs: 12, lg: 3 }}
@@ -82,7 +82,7 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
             },
           }}
         >
-          <TVStockNewsWidget feedMode="symbol" symbol={`${symbol}`}  />
+          <TVStockNewsWidget feedMode="symbol" symbol={`${symbol}`} displayMode="compact" />
         </Grid>
       </Grid>
     </Box>

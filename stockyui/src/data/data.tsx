@@ -23,7 +23,7 @@ const data: StatCardProps[] = [
     ],
   },
   {
-    title: "m2 money",
+    title: "M2 Money",
     value: "200k",
     interval: "last 30 days",
     trend: "neutral",
