@@ -105,30 +105,6 @@ export default function SearchHero() {
           />
         </FormControl>
       </Paper>
-
-      {/* Optional: Quick Links or Suggestions */}
-      <Box
-        sx={{
-          mt: 4,
-          display: 'flex',
-          gap: 2,
-          flexWrap: 'wrap',
-          justifyContent: 'center'
-        }}
-      >
-        <Typography variant="body2" color="text.secondary">
-          Popular:
-        </Typography>
-        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-          AAPL
-        </Typography>
-        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-          MSFT
-        </Typography>
-        <Typography variant="body2" color="primary" sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>
-          GOOGL
-        </Typography>
-      </Box>
     </Box>
   );
 }

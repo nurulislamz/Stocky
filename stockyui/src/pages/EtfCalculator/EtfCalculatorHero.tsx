@@ -8,22 +8,21 @@ import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
 import { useNavigate } from 'react-router-dom';
 
-export default function EtfCalculatorPage(props: {
-  disableCustomTheme?: boolean;
-}) {
+export default function EtfCalculatorHero() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
   const [serverError, setServerError] = useState<string | null>(null);
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && search.trim()) {
+    if (e.key === 'Enter' && search.trim()) {
       navigate(`/search?q=${encodeURIComponent(search.trim())}`);
     }
   };
 
   return (
-     <Box
+    <Box
       sx={{
         display: 'flex',
         flexDirection: 'column',
