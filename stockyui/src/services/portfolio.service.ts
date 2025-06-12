@@ -1,61 +1,79 @@
 import { BaseService } from './base.service';
-import { UserPortfolioRequest, BuyTickerRequest, SellTickerRequest, PortfolioResponse, TickerInfo } from './generated/stockyapi';
+import { StockyApi } from './generated/stockyapi';
 
 export class PortfolioService extends BaseService {
-  async getPortfolio(request: UserPortfolioRequest) {
-    return this.api.getPortfolio(request);
+  // API Methods
+  async getPortfolio(request: StockyApi.UserPortfolioRequest) {
+    try {
+      return await this.api.portfolio(request);
+    } catch (error) {
+      console.error('Error fetching portfolio:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to fetch portfolio'
+      } as StockyApi.UserPortfolioResponse;
+    }
   }
 
-  async buyTicker(request: BuyTickerRequest) {
-    return this.api.buyTicker(request);
+  async buyTicker(request: StockyApi.BuyTickerRequest) {
+    try {
+      return await this.api.buy(request);
+    } catch (error) {
+      console.error('Error buying ticker:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to buy ticker'
+      } as StockyApi.BuyTickerResponse;
+    }
   }
 
-  async sellTicker(request: SellTickerRequest) {
-    return this.api.sellTicker(request);
+  async sellTicker(request: StockyApi.SellTickerRequest) {
+    try {
+      return await this.api.sell(request);
+    } catch (error) {
+      console.error('Error selling ticker:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to sell ticker'
+      } as StockyApi.SellTickerResponse;
+    }
   }
 
-  calculateTotalValue(portfolio: PortfolioResponse): number {
-    return portfolio.tickers.reduce((total, ticker) => {
-      return total + (ticker.currentPrice * ticker.quantity);
-    }, 0);
+  // Portfolio Analysis
+  calculateTotalValue(portfolio: StockyApi.PortfolioData): number {
+    return portfolio.totalValue || 0;
   }
 
-  calculateProfitLoss(portfolio: PortfolioResponse): number {
-    return portfolio.tickers.reduce((total, ticker) => {
-      const currentValue = ticker.currentPrice * ticker.quantity;
-      const purchaseValue = ticker.averagePrice * ticker.quantity;
-      return total + (currentValue - purchaseValue);
-    }, 0);
+  calculateProfitLoss(portfolio: StockyApi.PortfolioData): number {
+    return portfolio.items?.reduce((total, item) => {
+      return total + (item.profitLoss || 0);
+    }, 0) || 0;
   }
 
-  getTopPerformers(portfolio: PortfolioResponse, limit: number = 5): TickerInfo[] {
-    return [...portfolio.tickers]
-      .sort((a, b) => {
-        const aReturn = (a.currentPrice - a.averagePrice) / a.averagePrice;
-        const bReturn = (b.currentPrice - b.averagePrice) / b.averagePrice;
-        return bReturn - aReturn;
-      })
+  getTopPerformers(portfolio: StockyApi.PortfolioData, limit: number = 5): StockyApi.PortfolioItem[] {
+    return [...(portfolio.items || [])]
+      .sort((a, b) => (b.profitLossPercentage || 0) - (a.profitLossPercentage || 0))
       .slice(0, limit);
   }
 
-  getWorstPerformers(portfolio: PortfolioResponse, limit: number = 5): TickerInfo[] {
-    return [...portfolio.tickers]
-      .sort((a, b) => {
-        const aReturn = (a.currentPrice - a.averagePrice) / a.averagePrice;
-        const bReturn = (b.currentPrice - b.averagePrice) / b.averagePrice;
-        return aReturn - bReturn;
-      })
+  getWorstPerformers(portfolio: StockyApi.PortfolioData, limit: number = 5): StockyApi.PortfolioItem[] {
+    return [...(portfolio.items || [])]
+      .sort((a, b) => (a.profitLossPercentage || 0) - (b.profitLossPercentage || 0))
       .slice(0, limit);
   }
 
-  calculatePortfolioAllocation(portfolio: PortfolioResponse): Map<string, number> {
+  calculateAllocation(portfolio: StockyApi.PortfolioData): Map<string, number> {
     const totalValue = this.calculateTotalValue(portfolio);
     const allocation = new Map<string, number>();
 
-    portfolio.tickers.forEach(ticker => {
-      const tickerValue = ticker.currentPrice * ticker.quantity;
-      const percentage = (tickerValue / totalValue) * 100;
-      allocation.set(ticker.symbol, percentage);
+    portfolio.items?.forEach(item => {
+      if (item.symbol && item.totalValue) {
+        const percentage = (item.totalValue / totalValue) * 100;
+        allocation.set(item.symbol, percentage);
+      }
     });
 
     return allocation;

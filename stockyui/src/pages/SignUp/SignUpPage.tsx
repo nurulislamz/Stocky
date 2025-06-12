@@ -16,7 +16,7 @@ import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomI
 import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
 import { useState } from "react";
-import { AuthService } from "../../services/auth";
+import { AuthService } from "../../services/auth.service";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -43,6 +43,8 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [nameError, setNameError] = React.useState(false);
   const [nameErrorMessage, setNameErrorMessage] = React.useState('');
+
+  const authService = new AuthService();
 
   const validateInputs = () => {
     let isValid = true;
@@ -118,9 +120,9 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       console.log("Sign up sucessful:", data.token);
 
       // setup auth
-      AuthService.setToken(data.token);
+      authService.setToken(data.token);
 
-      if (!AuthService.isAuthenticated()) {
+      if (!authService.isAuthenticated()) {
         setError("Invalid or expired token recieved");
         return;
       }

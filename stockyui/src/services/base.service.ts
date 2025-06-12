@@ -1,11 +1,9 @@
-import { StockyApi } from './api/stockyapi';
+import { StockyApi } from './generated/stockyapi';
 
 export class BaseService {
-    protected api: StockyApi;
+    protected api: StockyApi.StockyApi;
 
     constructor() {
-        this.api = new StockyApi({
-            baseURL: process.env.REACT_APP_API_URL || 'https://localhost:7001'
-        });
+        this.api = new StockyApi.StockyApi(process.env.REACT_APP_API_URL || 'https://localhost:7001');
     }
 }

@@ -16,7 +16,8 @@ import AppTheme from '../../shared-theme/AppTheme';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomIcons';
 import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
-import { AuthService } from "../../services/auth";
+import { AuthService } from "../../services/auth.service";
+import { StockyApi } from '../../services/generated/stockyapi';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -41,6 +42,8 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   const [serverError, setServerError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const authService = new AuthService();
+
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -61,6 +64,10 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
 
     // call api here
     try {
+
+      const authService = new AuthService();
+      authService.login(new StockyApi.LoginRequest({ email, password }));
+
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -82,9 +89,9 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
       console.log("Login sucessful:", data.token);
 
       // setup auth
-      AuthService.setToken(data.token);
+      authService.setToken(data.token);
 
-      if (!AuthService.isAuthenticated()) {
+      if (!authService.isAuthenticated()) {
         setServerError("Invalid or expired token recieved");
         return;
       }
