@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Copyright from '../../internals/components/Copyright';
-import CustomizedDataGrid from '../../components/CustomizedDataGrid';
+import PortfolioTable from '../../components/PortfolioTable';
 import PortfolioPieChart from '../../components/PortfolioPieChart';
 import PortfolioChart from "../../components/PortfolioChart";
 import { StatCardProps } from "../../components/StatCard";
@@ -61,7 +61,7 @@ export default function MainGrid() {
         Upcoming News
       </Typography>
       <Grid spacing={2} columns={12}>
-        <CustomizedDataGrid />
+        <PortfolioTable />
       </Grid>
       <Copyright sx={{ my: 4 }} />
     </Box>

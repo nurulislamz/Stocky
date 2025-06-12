@@ -6,6 +6,12 @@ import { useSearchParams } from 'react-router-dom';
 import TVStockChartWidget from "../../components/tradingview/TVStockChartWidget";
 import TVStockNewsWidget from "../../components/tradingview/TVStockNewsWidget";
 import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import TradeModal from "../../components/TradeModal";
 
 interface SearchResultsProps {
   symbol: string;
@@ -16,6 +22,8 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -33,6 +41,15 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
 
     fetchResults();
   }, [symbol]);
+
+  const handleTradeClick = (type: 'buy' | 'sell') => {
+    setTradeType(type);
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
 
   if (isLoading) {
     return (
@@ -52,12 +69,68 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
 
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-      <Typography align="center" variant="h6">Search Results for: {symbol}</Typography>
+      <Card variant="outlined" sx={{ height: "100%", flexGrow: 1, mb: 2 }}>
+        <CardContent>
+          <Typography component="h2" variant="h4">
+            {symbol.toUpperCase()}
+          </Typography>
+          <Stack
+            direction="column"
+            sx={{ justifyContent: "space-between", flexGrow: "1", gap: 1 }}
+          >
+            <Stack sx={{ justifyContent: "space-between" }}>
+              <Stack
+                direction="row"
+                sx={{ justifyContent: "space-between", alignItems: "center" }}
+              >
+                <Typography variant="h4" component="p">
+                  $100.00
+                </Typography>
+                <Chip size="small" color="success" label="+2.5%" />
+              </Stack>
+              <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                Company Name
+              </Typography>
+            </Stack>
+            <Stack direction="row" spacing={2} sx={{ width: '100%', justifyContent: 'space-between' }}>
+              <Button
+                variant="contained"
+                onClick={() => handleTradeClick('buy')}
+                sx={{
+                  flex: 1,
+                  backgroundColor: '#1565c0 !important',
+                  '&.MuiButton-contained': {
+                    backgroundColor: '#1565c0 !important'
+                  },
+                  '&:hover': {
+                    backgroundColor: '#1565c0 !important'
+                  }
+                }}
+              >
+                Buy
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleTradeClick('sell')}
+                sx={{
+                  backgroundColor: '#d32f2f',
+                  flex: 1,
+                  '&:hover': {
+                    backgroundColor: '#c62828'
+                  }
+                }}
+              >
+                Sell
+              </Button>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+
       <Grid
         container
         spacing={2}
         columns={12}
-        paddingTop={2}
         sx={{ mb: (theme) => theme.spacing(2) }}
       >
         <Grid
@@ -70,7 +143,13 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
             },
           }}
         >
-          <TVStockChartWidget symbol={`${symbol}`} theme="light" interval="H" locale="en" autosize={true} />
+          <TVStockChartWidget
+            symbol={`${symbol}`}
+            theme="light"
+            interval="H"
+            locale="en"
+            autosize={true}
+          />
         </Grid>
         <Grid
           size={{ xs: 12, lg: 3 }}
@@ -82,9 +161,21 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
             },
           }}
         >
-          <TVStockNewsWidget feedMode="symbol" symbol={`${symbol}`} displayMode="compact" />
+          <TVStockNewsWidget
+            feedMode="symbol"
+            symbol={`${symbol}`}
+            displayMode="compact"
+          />
         </Grid>
       </Grid>
+
+      <TradeModal
+        open={modalOpen}
+        onClose={handleModalClose}
+        symbol={symbol}
+        price="$100.00"
+        type={tradeType}
+      />
     </Box>
   );
 }

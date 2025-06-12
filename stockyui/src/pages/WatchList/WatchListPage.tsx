@@ -5,7 +5,7 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Copyright from '../../internals/components/Copyright';
-import CustomizedDataGrid from '../../components/CustomizedDataGrid';
+import PortfolioTable from '../../components/PortfolioTable';
 
 export default function WatchListPage(props: { disableCustomTheme?: boolean }) {
   return (
@@ -16,7 +16,7 @@ export default function WatchListPage(props: { disableCustomTheme?: boolean }) {
           WatchList
         </Typography>
         <Grid spacing={2} columns={12}>
-          <CustomizedDataGrid />
+          <PortfolioTable />
         </Grid>
         <Copyright sx={{ my: 4 }} />
       </Box>
