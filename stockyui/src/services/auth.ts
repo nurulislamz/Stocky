@@ -1,3 +1,6 @@
+import { BaseService } from './base.service';
+import { LoginRequest, RegisterRequest } from './generated/stockyapi';
+
 // Token mnanagement and authentication service
 interface DecodedToken {
   issuer: string,
@@ -7,9 +10,22 @@ interface DecodedToken {
   signingCredentials: string
 }
 
+export class AuthService extends BaseService {
+  // API Methods
+  async login(request: LoginRequest) {
+    const response = await this.api.login(request);
+    if (response.token) {
+      this.setToken(response.token);
+    }
+    return response;
+  }
 
-export const AuthService = {
-  decodeToken(token: string): DecodedToken | null {
+  async register(request: RegisterRequest) {
+    return this.api.register(request);
+  }
+
+  // Token Management
+  private decodeToken(token: string): DecodedToken | null {
     try {
       const base64Payload = token.split('.')[1];
       const payload = atob(base64Payload);
@@ -18,15 +34,15 @@ export const AuthService = {
     catch {
       return null;
     }
-  },
+  }
 
-  isTokenExpired(token: string): boolean {
+  private isTokenExpired(token: string): boolean {
     const decoded = this.decodeToken(token);
     if (!decoded) return true;
 
     const currentTime = Date.now() / 1000;
     return decoded.expires < currentTime;
-  },
+  }
 
   getToken(): string | null {
     const token = localStorage.getItem("token");
@@ -38,18 +54,18 @@ export const AuthService = {
       return null;
     }
     return token;
-  },
+  }
 
-  setToken: (token: string): void => {
+  setToken(token: string): void {
     localStorage.setItem("token", token)
-  },
+  }
 
-  removeToken: (): void => {
+  removeToken(): void {
     localStorage.removeItem("token")
-  },
+  }
 
   isAuthenticated(): boolean {
     const token = this.getToken();
     return !!token && !this.isTokenExpired(token);
-  },
+  }
 }
