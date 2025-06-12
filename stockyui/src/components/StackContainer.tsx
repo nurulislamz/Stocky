@@ -2,9 +2,11 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 
 const StackContainer = styled(Stack)(({ theme }) => ({
-  height: 'calc((1 - var(--template-frame-height, 0)) * 100dvh)',
-  minHeight: '100%',
+  minHeight: '100vh',
   padding: theme.spacing(2),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   [theme.breakpoints.up('sm')]: {
     padding: theme.spacing(4),
   },

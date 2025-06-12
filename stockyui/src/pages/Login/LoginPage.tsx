@@ -18,28 +18,26 @@ import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
 import { AuthService } from "../../services/auth.service";
 import { StockyApi } from '../../services/generated/stockyapi';
+import CircularProgress from '@mui/material/CircularProgress';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
-interface LoginSuccessResponse {
-  message: string;
-  token: string;
+interface FormData {
+  email: string;
+  password: string;
 }
 
-interface LoginErrorResponse {
-  error: string;
+interface FormErrors {
+  email?: string;
+  password?: string;
+  server?: string;
 }
 
 export default function LoginPage(props: { disableCustomTheme?: boolean }) {
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [formData, setFormData] = useState<FormData>({
+    email: '',
+    password: ''
+  });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [emailError, setEmailError] = useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = useState('');
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
-  const [serverError, setServerError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
   const authService = new AuthService();
@@ -55,80 +53,52 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
+    setErrors({});
 
-    if (emailError || passwordError) {
-      event.preventDefault();
+    if (!validateInputs()) {
       setIsLoading(false);
       return;
     }
 
-    // call api here
     try {
+      const response = await authService.login(new StockyApi.LoginRequest(formData));
 
-      const authService = new AuthService();
-      authService.login(new StockyApi.LoginRequest({ email, password }));
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      // api call fails
-      if (!response.ok) {
-        const errorData = await response.json() as LoginErrorResponse;
-        setServerError(errorData.error || "Login failed");
-        console.error("Login failed:", errorData);
+      if (!response.success) {
+        setErrors({ server: response.message || "Login failed" });
         return;
       }
-
-      const data = await response.json() as LoginSuccessResponse;
-      console.log("Login sucessful:", data.message);
-      console.log("Login sucessful:", data.token);
-
-      // setup auth
-      authService.setToken(data.token);
 
       if (!authService.isAuthenticated()) {
-        setServerError("Invalid or expired token recieved");
+        setErrors({ server: "Invalid or expired token received" });
         return;
       }
 
-      console.log("Login successful:", data.message);
-    }
-    catch (err) {
+      console.log("Login successful:", response.message);
+    } catch (err) {
       console.error("Login error:", err);
-      setServerError("An error occured. Please try again.");
-    }
-    finally {
+      setErrors({ server: "An error occurred. Please try again." });
+    } finally {
       setIsLoading(false);
     }
   };
 
   const validateInputs = () => {
-    let isValid = true;
+    const newErrors: FormErrors = {};
 
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address.';
     }
 
-    if (!password || password.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long.';
     }
 
-    return isValid;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   return (
@@ -144,6 +114,21 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
           >
             Sign in
           </Typography>
+          {errors.email && (
+            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+              {errors.email}
+            </Alert>
+          )}
+          {errors.password && (
+            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+              {errors.password}
+            </Alert>
+          )}
+          {errors.server && (
+            <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
+              {errors.server}
+            </Alert>
+          )}
           <Box
             component="form"
             onSubmit={handleSubmit}
@@ -158,8 +143,8 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
             <FormControl>
               <FormLabel htmlFor="email">Email</FormLabel>
               <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
+                error={!!errors.email}
+                helperText={errors.email}
                 id="email"
                 type="email"
                 name="email"
@@ -169,18 +154,18 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={emailError ? "error" : "primary"}
+                color={!!errors.email ? "error" : "primary"}
                 onChange={(e) => {
-                  setEmail(e.target.value);
-                  setServerError(null);
+                  setFormData({ ...formData, email: e.target.value });
+                  setErrors({ ...errors, email: undefined });
                 }}
               />
             </FormControl>
             <FormControl>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
+                error={!!errors.password}
+                helperText={errors.password}
                 name="password"
                 placeholder="••••••"
                 type="password"
@@ -190,10 +175,10 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
-                color={passwordError ? "error" : "primary"}
+                color={!!errors.password ? "error" : "primary"}
                 onChange={(e) => {
-                  setPassword(e.target.value);
-                  setServerError(null); // Clear error on change
+                  setFormData({ ...formData, password: e.target.value });
+                  setErrors({ ...errors, password: undefined });
                 }}
               />
             </FormControl>
@@ -206,9 +191,10 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
               type="submit"
               fullWidth
               variant="contained"
-              onClick={validateInputs}
+              disabled={isLoading}
+              startIcon={isLoading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : null}
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
             <Link
               component="button"
@@ -248,7 +234,6 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
                 Sign up
               </Link>
             </Typography>
-            {serverError && <Alert severity="error">{serverError}</Alert>}
           </Box>
         </Card>
       </StackContainer>
