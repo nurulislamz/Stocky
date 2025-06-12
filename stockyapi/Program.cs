@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using stockyapi.Services;
 using stockyapi.Options;
+using stockyapi.Extensions;
 using stockymodels.Data;
 using Swashbuckle.AspNetCore;
 using Swashbuckle.AspNetCore.Filters;
@@ -37,8 +38,7 @@ class Program
     {
         if (env.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.UseSwaggerDocumentation();
         }
 
         app.UseRouting();
@@ -60,7 +60,7 @@ class Program
         });
 
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerDocumentation();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
@@ -82,6 +82,7 @@ class Program
         services.AddTransient<ITokenService, TokenService>();
         services.AddTransient<IPortfolioService, PortfolioService>();
         services.AddTransient<IAuthService, AuthService>();
+        services.AddTransient<IUserService, UserService>();
         services.AddHttpContextAccessor();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
