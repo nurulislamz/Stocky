@@ -9,47 +9,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 
-import {
-  IndiaFlag,
-  UsaFlag,
-  BrazilFlag,
-  GlobeFlag,
-} from '../internals/components/CustomIcons';
-
-const data = [
-  { label: 'India', value: 50000 },
-  { label: 'USA', value: 35000 },
-  { label: 'Brazil', value: 10000 },
-  { label: 'Other', value: 5000 },
-];
-
-const countries = [
-  {
-    name: 'India',
-    value: 50,
-    flag: <IndiaFlag />,
-    color: 'hsl(220, 25%, 65%)',
-  },
-  {
-    name: 'USA',
-    value: 35,
-    flag: <UsaFlag />,
-    color: 'hsl(220, 25%, 45%)',
-  },
-  {
-    name: 'Brazil',
-    value: 10,
-    flag: <BrazilFlag />,
-    color: 'hsl(220, 25%, 30%)',
-  },
-  {
-    name: 'Other',
-    value: 5,
-    flag: <GlobeFlag />,
-    color: 'hsl(220, 25%, 20%)',
-  },
-];
-
 interface StyledTextProps {
   variant: 'primary' | 'secondary';
 }
@@ -114,14 +73,45 @@ function PieCenterLabel({ primaryText, secondaryText }: PieCenterLabelProps) {
   );
 }
 
-const colors = [
-  'hsl(220, 20%, 65%)',
-  'hsl(220, 20%, 42%)',
-  'hsl(220, 20%, 35%)',
-  'hsl(220, 20%, 25%)',
-];
+interface PortfolioPieChartProps {
+  data: Array<{
+    id: string;
+    value: number;
+    label: string;
+    color: string;
+  }> | null;
+  totalValue: string;
+  totalLabel: string;
+}
 
-export default function PortfolioPieChart() {
+export default function PortfolioPieChart({ data, totalValue, totalLabel }: PortfolioPieChartProps) {
+  if (!data) {
+    return (
+      <Card
+        variant="outlined"
+        sx={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1, height: '100%', width: '100%'}}
+      >
+        <CardContent>
+          <Typography component="h2" variant="subtitle2" sx={{ mb: 4 }}>
+            Portfolio %
+          </Typography>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            mt: 4,
+            mb: 4,
+            height: '250px'
+          }}>
+            <Typography variant="body1" color="text.secondary">
+              No portfolio data available
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card
       variant="outlined"
@@ -153,21 +143,21 @@ export default function PortfolioPieChart() {
                 outerRadius: 70,
                 paddingAngle: 0,
                 highlightScope: { fade: 'global', highlight: 'item' },
-              },
+              }
             ]}
             slotProps={{
               legend: { direction: "horizontal", position: { horizontal: 'center', vertical: 'bottom' } },
-            }}>
-            <PieCenterLabel primaryText="98.5K" secondaryText="Total" />
+            }}
+          >
+            <PieCenterLabel primaryText={totalValue} secondaryText={totalLabel} />
           </PieChart>
         </Box>
-        {countries.map((country, index) => (
+        {data.map((item) => (
           <Stack
-            key={index}
+            key={item.id}
             direction="row"
             sx={{ alignItems: 'center', gap: 2, pb: 2 }}
           >
-            {country.flag}
             <Stack sx={{ gap: 1, flexGrow: 1 }}>
               <Stack
                 direction="row"
@@ -178,19 +168,18 @@ export default function PortfolioPieChart() {
                 }}
               >
                 <Typography variant="body2" sx={{ fontWeight: '500' }}>
-                  {country.name}
+                  {item.label}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {country.value}%
+                  {item.value}%
                 </Typography>
               </Stack>
               <LinearProgress
                 variant="determinate"
-                aria-label="Number of users by country"
-                value={country.value}
+                value={item.value}
                 sx={{
                   [`& .${linearProgressClasses.bar}`]: {
-                    backgroundColor: country.color,
+                    backgroundColor: item.color,
                   },
                 }}
               />

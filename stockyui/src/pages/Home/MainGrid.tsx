@@ -43,7 +43,7 @@ const Overview = ({ data }: { data: StatCardProps[] }) => {
             },
           }}
         >
-          <PortfolioPieChart />
+          <PortfolioPieChart data={null} totalValue="98.5K" totalLabel="Total" />
         </Grid>
       </Grid>
     </>
@@ -61,7 +61,7 @@ export default function MainGrid() {
         Upcoming News
       </Typography>
       <Grid spacing={2} columns={12}>
-        <PortfolioTable />
+        <PortfolioTable/>
       </Grid>
       <Copyright sx={{ my: 4 }} />
     </Box>

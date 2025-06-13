@@ -71,7 +71,7 @@ export default function PortfolioPage(props: { disableCustomTheme?: boolean }) {
             },
           }}
         >
-          <PortfolioPieChart />
+          <PortfolioPieChart data={null} totalValue="98.5K" totalLabel="Total" />
         </Grid>
         </Grid>
         <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
