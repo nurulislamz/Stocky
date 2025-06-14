@@ -6,7 +6,6 @@ import PortfolioTable from '../../components/PortfolioTable';
 import PortfolioPieChart from '../../components/PortfolioPieChart';
 import PortfolioChart from "../../components/PortfolioChart";
 import StatCardGrid from "../../components/StatCardGrid";
-import { usePortfolio } from '../../contexts/PortfolioContext';
 import { StatCardProps } from '../../components/StatCard';
 
 export default function MainGrid() {
