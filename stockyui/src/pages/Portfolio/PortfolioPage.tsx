@@ -13,6 +13,7 @@ import PortfolioChart from "../../components/PortfolioChart";
 import StatCard, { StatCardProps } from "../../components/StatCard";
 import Layout from "../../templates/Layout";
 import Grid from '@mui/material/Grid';
+import { PortfolioProvider } from '../../contexts/PortfolioContext';
 
 const data: StatCardProps[] = [
   {
@@ -35,54 +36,56 @@ export default function PortfolioPage(props: { disableCustomTheme?: boolean }) {
   }, []);
 
   return (
-    <Layout>
-      <Header headerName="Portfolio" />
+    <PortfolioProvider>
+      <Layout>
+        <Header headerName="Portfolio" />
 
-      <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-        <Typography component="h2" variant="h6" sx={{ mb: 2, fontWeight: 'bold' }} align="center">
-          £{portfolioValue}
-        </Typography>
+        <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+          <Typography component="h2" variant="h6" sx={{ mb: 2, fontWeight: 'bold' }} align="center">
+            £{portfolioValue}
+          </Typography>
 
-      <Grid
-        container
-        spacing={2}
-        columns={12}
-        sx={{ mb: (theme) => theme.spacing(2) }}
-      >
-        <Grid
-          size={{ xs: 12, lg: 9 }}
-          sx={{
-            height: {
-              xs: "300px",
-              md: "400px",
-              lg: "500px",
-            },
-          }}
-        >
-          <PortfolioChart />
-        </Grid>
-        <Grid
-          size={{ xs: 12, lg: 3 }}
-          sx={{
-            height: {
-              xs: "300px",
-              md: "400px",
-              lg: "500px",
-            },
-          }}
-        >
-          <PortfolioPieChart data={null} totalValue="98.5K" totalLabel="Total" />
-        </Grid>
-        </Grid>
-        <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-          Tickers
-        </Typography>
-        <Grid spacing={2} columns={12}>
-          <PortfolioTable />
-        </Grid>
-        <Copyright sx={{ my: 4 }} />
-      </Box>
-    </Layout>
+          <Grid
+            container
+            spacing={2}
+            columns={12}
+            sx={{ mb: (theme) => theme.spacing(2) }}
+          >
+            <Grid
+              size={{ xs: 12, lg: 9 }}
+              sx={{
+                height: {
+                  xs: "300px",
+                  md: "400px",
+                  lg: "500px",
+                },
+              }}
+            >
+              <PortfolioChart />
+            </Grid>
+            <Grid
+              size={{ xs: 12, lg: 3 }}
+              sx={{
+                height: {
+                  xs: "300px",
+                  md: "400px",
+                  lg: "500px",
+                },
+              }}
+            >
+              <PortfolioPieChart data={null} totalValue="98.5K" totalLabel="Total" />
+            </Grid>
+          </Grid>
+          <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+            Tickers
+          </Typography>
+          <Grid spacing={2} columns={12}>
+            <PortfolioTable />
+          </Grid>
+          <Copyright sx={{ my: 4 }} />
+        </Box>
+      </Layout>
+    </PortfolioProvider>
   );
 }
 

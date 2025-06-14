@@ -4,15 +4,19 @@ import HighlightedCard from './HighlightedCard';
 
 export default function StatCardGrid({ data }: { data : StatCardProps[] }) {
   return (
-    <>
-      {data.map((card, index) => (
-        <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
-          <StatCard {...card} />
+    data.length > 0 ? (
+      <>
+        {data.map((card, index) => (
+          <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <StatCard {...card} />
+          </Grid>
+        ))}
+        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          <HighlightedCard />
         </Grid>
-      ))}
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <HighlightedCard />
-      </Grid>
-    </>
+      </>
+    ) : (
+      null
+    )
   );
 }
