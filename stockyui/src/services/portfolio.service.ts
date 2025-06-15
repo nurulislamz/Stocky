@@ -3,9 +3,9 @@ import { StockyApi } from './generated/stockyapi';
 
 export class PortfolioService extends BaseService {
   // API Methods
-  async getPortfolio(request: StockyApi.UserPortfolioRequest) {
+  async getPortfolio() {
     try {
-      return await this.api.portfolio(request);
+      return await this.api.portfolio();
     } catch (error) {
       console.error('Error fetching portfolio:', error);
       return {

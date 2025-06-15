@@ -25,10 +25,9 @@ export interface IStockyApi {
      */
     register(body: RegisterRequest | undefined): Promise<RegisterResponse>;
     /**
-     * @param body (optional) 
      * @return Success
      */
-    portfolio(body: UserPortfolioRequest | undefined): Promise<UserPortfolioResponse>;
+    portfolio(): Promise<UserPortfolioResponse>;
     /**
      * @param body (optional) 
      * @return Success
@@ -39,6 +38,21 @@ export interface IStockyApi {
      * @return Success
      */
     sell(body: SellTickerRequest | undefined): Promise<SellTickerResponse>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    addfunds(body: AddFundsRequest | undefined): Promise<AddFundsResponse>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    subtractfunds(body: SubtractFundsRequest | undefined): Promise<SubtractFundsResponse>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    setfunds(body: SetFundsRequest | undefined): Promise<SetFundsResponse>;
 }
 
 export class StockyApi implements IStockyApi {
@@ -159,13 +173,6 @@ export class StockyApi implements IStockyApi {
             result200 = RegisterResponse.fromJS(resultData200);
             return Promise.resolve<RegisterResponse>(result200);
 
-        } else if (status === 400) {
-            const _responseText = response.data;
-            let result400: any = null;
-            let resultData400  = _responseText;
-            result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
-
         } else if (status !== 200 && status !== 204) {
             const _responseText = response.data;
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
@@ -174,21 +181,16 @@ export class StockyApi implements IStockyApi {
     }
 
     /**
-     * @param body (optional) 
      * @return Success
      */
-    portfolio(body: UserPortfolioRequest | undefined, cancelToken?: CancelToken): Promise<UserPortfolioResponse> {
-        let url_ = this.baseUrl + "/api/Portfolio/portfolio";
+    portfolio( cancelToken?: CancelToken): Promise<UserPortfolioResponse> {
+        let url_ = this.baseUrl + "/api/Portfolio";
         url_ = url_.replace(/[?&]$/, "");
 
-        const content_ = JSON.stringify(body);
-
         let options_: AxiosRequestConfig = {
-            data: content_,
             method: "GET",
             url: url_,
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "text/plain"
             },
             cancelToken
@@ -340,6 +342,298 @@ export class StockyApi implements IStockyApi {
         }
         return Promise.resolve<SellTickerResponse>(null as any);
     }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    addfunds(body: AddFundsRequest | undefined, cancelToken?: CancelToken): Promise<AddFundsResponse> {
+        let url_ = this.baseUrl + "/api/Portfolio/addfunds";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processAddfunds(_response);
+        });
+    }
+
+    protected processAddfunds(response: AxiosResponse): Promise<AddFundsResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = AddFundsResponse.fromJS(resultData200);
+            return Promise.resolve<AddFundsResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<AddFundsResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    subtractfunds(body: SubtractFundsRequest | undefined, cancelToken?: CancelToken): Promise<SubtractFundsResponse> {
+        let url_ = this.baseUrl + "/api/Portfolio/subtractfunds";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSubtractfunds(_response);
+        });
+    }
+
+    protected processSubtractfunds(response: AxiosResponse): Promise<SubtractFundsResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = SubtractFundsResponse.fromJS(resultData200);
+            return Promise.resolve<SubtractFundsResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<SubtractFundsResponse>(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    setfunds(body: SetFundsRequest | undefined, cancelToken?: CancelToken): Promise<SetFundsResponse> {
+        let url_ = this.baseUrl + "/api/Portfolio/setfunds";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processSetfunds(_response);
+        });
+    }
+
+    protected processSetfunds(response: AxiosResponse): Promise<SetFundsResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = SetFundsResponse.fromJS(resultData200);
+            return Promise.resolve<SetFundsResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<SetFundsResponse>(null as any);
+    }
+}
+
+export class AddFundsData implements IAddFundsData {
+    newBalance?: number;
+
+    constructor(data?: IAddFundsData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.newBalance = _data["newBalance"];
+        }
+    }
+
+    static fromJS(data: any): AddFundsData {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddFundsData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["newBalance"] = this.newBalance;
+        return data;
+    }
+}
+
+export interface IAddFundsData {
+    newBalance?: number;
+}
+
+export class AddFundsRequest implements IAddFundsRequest {
+    amount!: number;
+
+    constructor(data?: IAddFundsRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): AddFundsRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddFundsRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface IAddFundsRequest {
+    amount: number;
+}
+
+export class AddFundsResponse implements IAddFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: AddFundsData;
+    error?: string | undefined;
+
+    constructor(data?: IAddFundsResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.statusCode = _data["statusCode"];
+            this.message = _data["message"];
+            this.data = _data["data"] ? AddFundsData.fromJS(_data["data"]) : <any>undefined;
+            this.error = _data["error"];
+        }
+    }
+
+    static fromJS(data: any): AddFundsResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AddFundsResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["statusCode"] = this.statusCode;
+        data["message"] = this.message;
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        data["error"] = this.error;
+        return data;
+    }
+}
+
+export interface IAddFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: AddFundsData;
+    error?: string | undefined;
 }
 
 export class BuyTickerData implements IBuyTickerData {
@@ -750,70 +1044,6 @@ export interface IPortfolioItem {
     lastUpdatedTime?: string | undefined;
 }
 
-export class ProblemDetails implements IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-
-    [key: string]: any;
-
-    constructor(data?: IProblemDetails) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            for (var property in _data) {
-                if (_data.hasOwnProperty(property))
-                    this[property] = _data[property];
-            }
-            this.type = _data["type"];
-            this.title = _data["title"];
-            this.status = _data["status"];
-            this.detail = _data["detail"];
-            this.instance = _data["instance"];
-        }
-    }
-
-    static fromJS(data: any): ProblemDetails {
-        data = typeof data === 'object' ? data : {};
-        let result = new ProblemDetails();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        for (var property in this) {
-            if (this.hasOwnProperty(property))
-                data[property] = this[property];
-        }
-        data["type"] = this.type;
-        data["title"] = this.title;
-        data["status"] = this.status;
-        data["detail"] = this.detail;
-        data["instance"] = this.instance;
-        return data;
-    }
-}
-
-export interface IProblemDetails {
-    type?: string | undefined;
-    title?: string | undefined;
-    status?: number | undefined;
-    detail?: string | undefined;
-    instance?: string | undefined;
-
-    [key: string]: any;
-}
-
 export class RegisterData implements IRegisterData {
     token?: string | undefined;
     email?: string | undefined;
@@ -1118,19 +1348,10 @@ export interface ISellTickerResponse {
     error?: string | undefined;
 }
 
-export enum TransactionStatus {
-    _0 = 0,
-    _1 = 1,
-    _2 = 2,
-}
+export class SetFundsData implements ISetFundsData {
+    newBalance?: number;
 
-export class UserPortfolioRequest implements IUserPortfolioRequest {
-    symbol?: string | undefined;
-    fromDate?: Date | undefined;
-    toDate?: Date | undefined;
-    includeInactive?: boolean | undefined;
-
-    constructor(data?: IUserPortfolioRequest) {
+    constructor(data?: ISetFundsData) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -1141,35 +1362,244 @@ export class UserPortfolioRequest implements IUserPortfolioRequest {
 
     init(_data?: any) {
         if (_data) {
-            this.symbol = _data["symbol"];
-            this.fromDate = _data["fromDate"] ? new Date(_data["fromDate"].toString()) : <any>undefined;
-            this.toDate = _data["toDate"] ? new Date(_data["toDate"].toString()) : <any>undefined;
-            this.includeInactive = _data["includeInactive"];
+            this.newBalance = _data["newBalance"];
         }
     }
 
-    static fromJS(data: any): UserPortfolioRequest {
+    static fromJS(data: any): SetFundsData {
         data = typeof data === 'object' ? data : {};
-        let result = new UserPortfolioRequest();
+        let result = new SetFundsData();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["symbol"] = this.symbol;
-        data["fromDate"] = this.fromDate ? this.fromDate.toISOString() : <any>undefined;
-        data["toDate"] = this.toDate ? this.toDate.toISOString() : <any>undefined;
-        data["includeInactive"] = this.includeInactive;
+        data["newBalance"] = this.newBalance;
         return data;
     }
 }
 
-export interface IUserPortfolioRequest {
-    symbol?: string | undefined;
-    fromDate?: Date | undefined;
-    toDate?: Date | undefined;
-    includeInactive?: boolean | undefined;
+export interface ISetFundsData {
+    newBalance?: number;
+}
+
+export class SetFundsRequest implements ISetFundsRequest {
+    amount!: number;
+
+    constructor(data?: ISetFundsRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): SetFundsRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new SetFundsRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ISetFundsRequest {
+    amount: number;
+}
+
+export class SetFundsResponse implements ISetFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: SetFundsData;
+    error?: string | undefined;
+
+    constructor(data?: ISetFundsResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.statusCode = _data["statusCode"];
+            this.message = _data["message"];
+            this.data = _data["data"] ? SetFundsData.fromJS(_data["data"]) : <any>undefined;
+            this.error = _data["error"];
+        }
+    }
+
+    static fromJS(data: any): SetFundsResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new SetFundsResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["statusCode"] = this.statusCode;
+        data["message"] = this.message;
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        data["error"] = this.error;
+        return data;
+    }
+}
+
+export interface ISetFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: SetFundsData;
+    error?: string | undefined;
+}
+
+export class SubtractFundsData implements ISubtractFundsData {
+    newBalance?: number;
+
+    constructor(data?: ISubtractFundsData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.newBalance = _data["newBalance"];
+        }
+    }
+
+    static fromJS(data: any): SubtractFundsData {
+        data = typeof data === 'object' ? data : {};
+        let result = new SubtractFundsData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["newBalance"] = this.newBalance;
+        return data;
+    }
+}
+
+export interface ISubtractFundsData {
+    newBalance?: number;
+}
+
+export class SubtractFundsRequest implements ISubtractFundsRequest {
+    amount!: number;
+
+    constructor(data?: ISubtractFundsRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.amount = _data["amount"];
+        }
+    }
+
+    static fromJS(data: any): SubtractFundsRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new SubtractFundsRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["amount"] = this.amount;
+        return data;
+    }
+}
+
+export interface ISubtractFundsRequest {
+    amount: number;
+}
+
+export class SubtractFundsResponse implements ISubtractFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: SubtractFundsData;
+    error?: string | undefined;
+
+    constructor(data?: ISubtractFundsResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.statusCode = _data["statusCode"];
+            this.message = _data["message"];
+            this.data = _data["data"] ? SubtractFundsData.fromJS(_data["data"]) : <any>undefined;
+            this.error = _data["error"];
+        }
+    }
+
+    static fromJS(data: any): SubtractFundsResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new SubtractFundsResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["statusCode"] = this.statusCode;
+        data["message"] = this.message;
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        data["error"] = this.error;
+        return data;
+    }
+}
+
+export interface ISubtractFundsResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: SubtractFundsData;
+    error?: string | undefined;
+}
+
+export enum TransactionStatus {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
 }
 
 export class UserPortfolioResponse implements IUserPortfolioResponse {

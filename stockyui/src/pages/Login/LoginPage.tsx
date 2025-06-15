@@ -19,6 +19,8 @@ import StackContainer from '../../components/StackContainer';
 import { AuthService } from "../../services/auth.service";
 import { StockyApi } from '../../services/generated/stockyapi';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 interface FormData {
   email: string;
@@ -32,6 +34,8 @@ interface FormErrors {
 }
 
 export default function LoginPage(props: { disableCustomTheme?: boolean }) {
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: ''
@@ -61,19 +65,25 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
     }
 
     try {
-      const response = await authService.login(new StockyApi.LoginRequest(formData));
+      const api = new AuthService();
+      const response = await api.login(new StockyApi.LoginRequest({
+        email: formData.email,
+        password: formData.password
+      }));
 
       if (!response.success) {
         setErrors({ server: response.message || "Login failed" });
         return;
       }
 
-      if (!authService.isAuthenticated()) {
-        setErrors({ server: "Invalid or expired token received" });
+      if (!response.data?.token) {
+        setErrors({ server: "No token received" });
         return;
       }
 
+      await login(response.data.token);
       console.log("Login successful:", response.message);
+      navigate('/home');
     } catch (err) {
       console.error("Login error:", err);
       setErrors({ server: "An error occurred. Please try again." });

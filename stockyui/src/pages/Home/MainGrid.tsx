@@ -9,30 +9,31 @@ import PortfolioChart from "../../components/PortfolioChart";
 import StatCardGrid from "../../components/StatCardGrid";
 import { StatCardProps } from '../../components/StatCard';
 import { PortfolioService } from '../../services/portfolio.service';
+import { StockyApi } from '../../services/generated/stockyapi';
 
 export default function MainGrid() {
   const portfolioService = new PortfolioService();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<StockyApi.IPortfolioData | null>(null);
 
   // Transform portfolio data into StatCardProps array
   const statCards: StatCardProps[] = data ? [
     {
       title: "Portfolio Value",
-      value: `${data?.totalValue?.toLocaleString()}`,
+      value: `${data.totalValue?.toLocaleString()}`,
       interval: "Last 30 days",
       trend:  new Error("Not implemented") ? "up" : "down",
       data: [] // Assuming you have historical data
     },
     {
       title: "Cash Balance",
-      value: `${data?.cashBalance?.toLocaleString()}`,
+      value: `${data.cashBalance?.toLocaleString()}`,
       interval: "Current",
       trend: "neutral",
       data: [] // Add historical cash balance data if available
     },
     {
       title: "Invested Amount",
-      value: `${data?.investedAmount?.toLocaleString()}`,
+      value: `${data.investedAmount?.toLocaleString()}`,
       interval: "Current",
       trend: "neutral",
       data: [] // Add historical investment data if available
