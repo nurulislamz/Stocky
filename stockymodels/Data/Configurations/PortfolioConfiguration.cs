@@ -10,17 +10,17 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<PortfolioModel>
     {
         builder.ToTable("Portfolios");
 
-        builder.HasIndex(e => new { e.UserId, e.Id })
+        builder.HasIndex(e => e.UserId)
             .IsUnique();
 
         builder.HasMany(p => p.StockHoldings)
             .WithOne(s => s.Portfolio)
-            .HasForeignKey(s => s.Id)
+            .HasForeignKey(s => s.PortfolioId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(p => p.Transactions)
             .WithOne(t => t.Portfolio)
-            .HasForeignKey(t => t.Id)
+            .HasForeignKey(t => t.PortfolioId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

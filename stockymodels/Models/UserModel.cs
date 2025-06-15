@@ -9,7 +9,7 @@ public class UserModel : BaseModel
 {
 
   [Required]
-  [ForeignKey("UserId")]
+  [Column("UserId")]
   public override Guid Id { get; set; }
   
   [Required]
@@ -38,7 +38,7 @@ public class UserModel : BaseModel
   public bool IsActive { get; set; } = true;
 
   public DateTime? LastLogin { get; set; }
-
+  
   // One-to-One Properties
   public virtual PortfolioModel Portfolio { get; set; }
   public virtual UserPreferencesModel Preferences { get; set; }

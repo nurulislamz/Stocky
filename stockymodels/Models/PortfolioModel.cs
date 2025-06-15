@@ -13,7 +13,7 @@ public class PortfolioModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("User")]
+    [ForeignKey("UserId")]
     public Guid UserId { get; set; }
 
     [Required]

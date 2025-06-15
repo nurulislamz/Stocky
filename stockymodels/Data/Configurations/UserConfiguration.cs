@@ -15,22 +15,22 @@ public class UserConfiguration : IEntityTypeConfiguration<UserModel>
 
         builder.HasOne(u => u.Portfolio)
             .WithOne(p => p.User)
-            .HasForeignKey<PortfolioModel>(p => p.Id)
+            .HasForeignKey<PortfolioModel>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(u => u.Preferences)
             .WithOne(p => p.User)
-            .HasForeignKey<UserPreferencesModel>(p => p.Id)
+            .HasForeignKey<UserPreferencesModel>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Watchlist)
             .WithOne(w => w.User)
-            .HasForeignKey(w => w.Id)
+            .HasForeignKey(w => w.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.PriceAlerts)
             .WithOne(p => p.User)
-            .HasForeignKey(p => p.Id)
+            .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

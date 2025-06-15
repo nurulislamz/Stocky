@@ -12,7 +12,7 @@ public class TransactionModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("Portfolio")]
+    [ForeignKey("PortfolioId")]
     public Guid PortfolioId { get; set; }
 
     [Required]
