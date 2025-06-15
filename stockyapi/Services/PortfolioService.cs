@@ -11,6 +11,7 @@ public interface IPortfolioService
     public Task<UserPortfolioResponse> GetUserPortfolio();
     public Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request);
     public Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request);
+    public Task<AddFundsResponse> AddFunds(AddFundsRequest request);
 }
 
 public class PortfolioService : IPortfolioService
@@ -99,6 +100,26 @@ public class PortfolioService : IPortfolioService
                 Success = false,
                 StatusCode = 404,
                 Message = "Portfolio not found"
+            };
+        }
+
+        if (request.Quantity <= 0)
+        {
+            return new BuyTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Quantity must be greater than 0"
+            };
+        }
+
+        if (request.Price <= 0)
+        {
+            return new BuyTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Price must be greater than 0"
             };
         }
 
@@ -274,5 +295,53 @@ public class PortfolioService : IPortfolioService
                 Status = transaction.Status
             }
         };
+    }
+
+    public async Task<AddFundsResponse> AddFunds(AddFundsRequest request)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return new AddFundsResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+        if (portfolio == null)
+        {
+            return new AddFundsResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+
+        try
+        {
+            var newBalance = await _portfolioRepository.AddCashAsync(portfolio.Id, request.Amount);
+            return new AddFundsResponse
+            {
+                Success = true,
+                StatusCode = 200,
+                Data = new AddFundsData
+                {
+                    NewBalance = newBalance
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            return new AddFundsResponse
+            {
+                Success = false,
+                StatusCode = 500,
+                Message = $"Failed to add funds: {ex.Message}"
+            };
+        }
     }
 }

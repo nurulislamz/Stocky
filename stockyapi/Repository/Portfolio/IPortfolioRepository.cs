@@ -28,4 +28,7 @@ public interface IPortfolioRepository
     Task<decimal> GetCashBalanceAsync(Guid portfolioId);
     Task<decimal> GetInvestedAmountAsync(Guid portfolioId);
     Task UpdatePortfolioValueAsync(Guid portfolioId, decimal totalValue, decimal cashBalance, decimal investedAmount);
+
+    // Cash Operations
+    Task<decimal> AddCashAsync(Guid portfolioId, decimal amount);
 }

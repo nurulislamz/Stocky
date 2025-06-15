@@ -15,14 +15,12 @@ public class TransactionModel : BaseModel
     [ForeignKey("PortfolioId")]
     public Guid PortfolioId { get; set; }
 
-    [Required]
     [MaxLength(20)]
-    public required string Symbol { get; set; }
+    public string? Symbol { get; set; }
 
     [Required]
     public TransactionType Type { get; set; }
 
-    [Required]
     public decimal Shares { get; set; }
 
     [Required]

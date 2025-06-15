@@ -22,9 +22,10 @@ public class PortfolioController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("portfolio")]
-    public async Task<ActionResult<UserPortfolioResponse>> GetPortfolio(UserPortfolioRequest request, CancellationToken cancellationToken)
+    [HttpGet()]
+    public async Task<ActionResult<UserPortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
     {
+        var request = new UserPortfolioRequest();
         var response = await _mediator.Send(request, cancellationToken);
         return StatusCode(response.StatusCode, response);
     }
@@ -38,6 +39,13 @@ public class PortfolioController : ControllerBase
 
     [HttpPost("sell")]
     public async Task<ActionResult<SellTickerResponse>> Sell([FromBody] SellTickerRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(request, cancellationToken);
+        return StatusCode(response.StatusCode, response);
+    }
+
+    [HttpPost("addfunds")]
+    public async Task<ActionResult<AddFundsResponse>> AddFundsResponse([FromBody] AddFundsRequest request, CancellationToken cancellationToken)
     {
         var response = await _mediator.Send(request, cancellationToken);
         return StatusCode(response.StatusCode, response);

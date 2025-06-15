@@ -70,7 +70,7 @@ public class PortfolioRepository : IPortfolioRepository
 
     public async Task<StockHoldingModel> AddHoldingAsync(StockHoldingModel holding)
     {
-        _context.StockHoldings.Add(holding);
+        await _context.StockHoldings.AddAsync(holding);
         await _context.SaveChangesAsync();
         return holding;
     }
@@ -93,7 +93,7 @@ public class PortfolioRepository : IPortfolioRepository
 
     public async Task<TransactionModel> AddTransactionAsync(TransactionModel transaction)
     {
-        _context.Transactions.Add(transaction);
+        await _context.Transactions.AddAsync(transaction);
         await _context.SaveChangesAsync();
         return transaction;
     }
@@ -102,7 +102,6 @@ public class PortfolioRepository : IPortfolioRepository
     {
         return await _context.Transactions
             .Where(t => t.PortfolioId == portfolioId)
-            .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
     }
 
@@ -139,5 +138,37 @@ public class PortfolioRepository : IPortfolioRepository
             portfolio.InvestedAmount = investedAmount;
             await UpdateAsync(portfolio);
         }
+    }
+
+    public async Task<decimal> AddCashAsync(Guid portfolioId, decimal amount)
+    {
+        var portfolio = await GetByIdAsync(portfolioId);
+        if (portfolio == null)
+        {
+            throw new ArgumentException("Portfolio not found", nameof(portfolioId));
+        }
+
+        // Create a transaction record
+        var transaction = new TransactionModel
+        {
+            PortfolioId = portfolioId,
+            Type = TransactionType.Deposit,
+            Shares = 0,
+            Price = amount,
+            TotalAmount = amount,
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market,
+            LastPriceUpdate = DateTime.UtcNow
+        };
+
+        // Update portfolio balance
+        portfolio.CashBalance += amount;
+        portfolio.TotalValue += amount;
+
+        // Save changes
+        await AddTransactionAsync(transaction);
+        await UpdateAsync(portfolio);
+
+        return portfolio.CashBalance;
     }
 }
