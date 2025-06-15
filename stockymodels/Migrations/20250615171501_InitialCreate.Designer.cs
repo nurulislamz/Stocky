@@ -12,8 +12,8 @@ using stockymodels.Data;
 namespace stockymodels.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250615152820_Fix_UserId_name")]
-    partial class Fix_UserId_name
+    [Migration("20250615171501_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
