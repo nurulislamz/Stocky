@@ -31,4 +31,6 @@ public interface IPortfolioRepository
 
     // Cash Operations
     Task<decimal> AddCashAsync(Guid portfolioId, decimal amount);
+    Task<decimal> SubtractCashAsync(Guid portfolioId, decimal amount);
+    Task<decimal> SetCashAsync(Guid portfolioId, decimal amount);
 }

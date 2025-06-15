@@ -171,4 +171,75 @@ public class PortfolioRepository : IPortfolioRepository
 
         return portfolio.CashBalance;
     }
+
+    public async Task<decimal> SubtractCashAsync(Guid portfolioId, decimal amount)
+    {
+        var portfolio = await GetByIdAsync(portfolioId);
+        if (portfolio == null)
+        {
+            throw new ArgumentException("Portfolio not found", nameof(portfolioId));
+        }
+
+        if (portfolio.CashBalance < amount)
+        {
+            throw new InvalidOperationException("Insufficient funds");
+        }
+
+        // Create a transaction record
+        var transaction = new TransactionModel
+        {
+            PortfolioId = portfolioId,
+            Type = TransactionType.Withdrawal,
+            Shares = 0,
+            Price = amount,
+            TotalAmount = amount,
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market,
+            LastPriceUpdate = DateTime.UtcNow
+        };
+
+        // Update portfolio balance
+        portfolio.CashBalance -= amount;
+        portfolio.TotalValue -= amount;
+
+        // Save changes
+        await AddTransactionAsync(transaction);
+        await UpdateAsync(portfolio);
+
+        return portfolio.CashBalance;
+    }
+
+    public async Task<decimal> SetCashAsync(Guid portfolioId, decimal amount)
+    {
+        var portfolio = await GetByIdAsync(portfolioId);
+        if (portfolio == null)
+        {
+            throw new ArgumentException("Portfolio not found", nameof(portfolioId));
+        }
+
+        var difference = amount - portfolio.CashBalance;
+
+        // Create a transaction record
+        var transaction = new TransactionModel
+        {
+            PortfolioId = portfolioId,
+            Type = difference >= 0 ? TransactionType.Deposit : TransactionType.Withdrawal,
+            Shares = 0,
+            Price = Math.Abs(difference),
+            TotalAmount = Math.Abs(difference),
+            Status = TransactionStatus.Completed,
+            OrderType = OrderType.Market,
+            LastPriceUpdate = DateTime.UtcNow
+        };
+
+        // Update portfolio balance
+        portfolio.CashBalance = amount;
+        portfolio.TotalValue = portfolio.InvestedAmount + amount;
+
+        // Save changes
+        await AddTransactionAsync(transaction);
+        await UpdateAsync(portfolio);
+
+        return portfolio.CashBalance;
+    }
 }

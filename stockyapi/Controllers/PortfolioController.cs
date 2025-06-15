@@ -45,7 +45,21 @@ public class PortfolioController : ControllerBase
     }
 
     [HttpPost("addfunds")]
-    public async Task<ActionResult<AddFundsResponse>> AddFundsResponse([FromBody] AddFundsRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<AddFundsResponse>> AddFunds([FromBody] AddFundsRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(request, cancellationToken);
+        return StatusCode(response.StatusCode, response);
+    }
+
+    [HttpPost("subtractfunds")]
+    public async Task<ActionResult<SubtractFundsResponse>> SubtractFunds([FromBody] SubtractFundsRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _mediator.Send(request, cancellationToken);
+        return StatusCode(response.StatusCode, response);
+    }
+
+    [HttpPost("setfunds")]
+    public async Task<ActionResult<SetFundsResponse>> SetFunds([FromBody] SetFundsRequest request, CancellationToken cancellationToken)
     {
         var response = await _mediator.Send(request, cancellationToken);
         return StatusCode(response.StatusCode, response);

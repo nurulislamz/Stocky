@@ -12,6 +12,8 @@ public interface IPortfolioService
     public Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request);
     public Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request);
     public Task<AddFundsResponse> AddFunds(AddFundsRequest request);
+    public Task<SetFundsResponse> SetFunds(SetFundsRequest request);
+    public Task<SubtractFundsResponse> SubtractFunds(SubtractFundsRequest request);
 }
 
 public class PortfolioService : IPortfolioService
@@ -321,27 +323,87 @@ public class PortfolioService : IPortfolioService
             };
         }
 
-        try
+        var newBalance = await _portfolioRepository.AddCashAsync(portfolio.Id, request.Amount);
+        return new AddFundsResponse
         {
-            var newBalance = await _portfolioRepository.AddCashAsync(portfolio.Id, request.Amount);
-            return new AddFundsResponse
+            Success = true,
+            StatusCode = 200,
+            Data = new AddFundsData
             {
-                Success = true,
-                StatusCode = 200,
-                Data = new AddFundsData
-                {
-                    NewBalance = newBalance
-                }
-            };
-        }
-        catch (Exception ex)
+                NewBalance = newBalance
+            }
+        };
+    }
+
+    public async Task<SubtractFundsResponse> SubtractFunds(SubtractFundsRequest request)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
         {
-            return new AddFundsResponse
+            return new SubtractFundsResponse
             {
                 Success = false,
-                StatusCode = 500,
-                Message = $"Failed to add funds: {ex.Message}"
+                StatusCode = 401,
+                Message = "User not authenticated"
             };
         }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+        if (portfolio == null)
+        {
+            return new SubtractFundsResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+
+        var newBalance = await _portfolioRepository.SubtractCashAsync(portfolio.Id, request.Amount);
+        return new SubtractFundsResponse
+        {
+            Success = true,
+            StatusCode = 200,
+            Data = new SubtractFundsData
+            {
+                NewBalance = newBalance
+            }
+        };
+    }
+
+    public async Task<SetFundsResponse> SetFunds(SetFundsRequest request)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return new SetFundsResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+        if (portfolio == null)
+        {
+            return new SetFundsResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+
+        var newBalance = await _portfolioRepository.SetCashAsync(portfolio.Id, request.Amount);
+        return new SetFundsResponse
+        {
+            Success = true,
+            StatusCode = 200,
+            Data = new SetFundsData
+            {
+                NewBalance = newBalance
+            }
+        };
     }
 }
