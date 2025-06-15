@@ -4,7 +4,7 @@ using stockyapi.Responses;
 using stockyapi.Services;
 using stockymodels.Data;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.RequestHandlers;
 
 public class BuyTickerInPortfolioRequestHandler : IRequestHandler<BuyTickerRequest, BuyTickerResponse>
 {

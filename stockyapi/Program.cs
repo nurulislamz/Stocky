@@ -7,10 +7,9 @@ using stockyapi.Services;
 using stockyapi.Options;
 using stockyapi.Extensions;
 using stockymodels.Data;
-using Swashbuckle.AspNetCore;
-using Swashbuckle.AspNetCore.Filters;
-using MediatR;
 using System.Text.Json.Serialization;
+using stockyapi.Repository.Portfolio;
+using stockyapi.Repository.User;
 
 class Program
 {
@@ -79,10 +78,14 @@ class Program
 
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
-        services.AddTransient<ITokenService, TokenService>();
-        services.AddTransient<IPortfolioService, PortfolioService>();
-        services.AddTransient<IAuthService, AuthService>();
-        services.AddTransient<IUserService, UserService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IPortfolioService, PortfolioService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
+        
+        services.AddTransient<IPortfolioRepository, PortfolioRepository>();
+        services.AddTransient<IUserRepository, UserRepository>();
+        
         services.AddHttpContextAccessor();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>

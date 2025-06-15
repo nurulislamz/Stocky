@@ -1,10 +1,12 @@
 ﻿using stockyapi.Requests;
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using stockyapi.Responses;
 
 namespace stockyapi.Controllers;
 
+[AllowAnonymous] 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -20,7 +22,8 @@ public class AuthController : ControllerBase
     _mediator = mediator;
   }
 
-  [HttpPost("login")]
+  [AllowAnonymous] 
+  [HttpPost("login")] 
   public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);
@@ -31,9 +34,8 @@ public class AuthController : ControllerBase
     return Ok(response);
   }
 
+  [AllowAnonymous] 
   [HttpPost("register")]
-  [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
-  [ProducesResponseType(StatusCodes.Status400BadRequest)]
   public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);

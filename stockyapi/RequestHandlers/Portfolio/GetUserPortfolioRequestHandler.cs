@@ -3,7 +3,7 @@ using stockyapi.Requests;
 using stockyapi.Responses;
 using stockyapi.Services;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.RequestHandlers;
 
 public class GetUserPortfolioRequestHandler : IRequestHandler<UserPortfolioRequest, UserPortfolioResponse>
 {
@@ -16,7 +16,6 @@ public class GetUserPortfolioRequestHandler : IRequestHandler<UserPortfolioReque
 
     public async Task<UserPortfolioResponse> Handle(UserPortfolioRequest request, CancellationToken cancellationToken)
     {
-        var portfolio =  await _portfolioService.FetchUserPortfolio();
-        return _portfolioService.GetUserPortfolio(portfolio);
+        return await _portfolioService.GetUserPortfolio();
     }
 }

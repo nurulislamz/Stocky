@@ -75,7 +75,7 @@ public class AuthService : IAuthService
             };
         }
 
-        var userCreated = await _userService.UserCreate(firstName, surname, email, password);
+        var userCreated = await _userService.CreateUser(firstName, surname, email, password);
         if (userCreated == null)
         {
             return new RegisterResponse

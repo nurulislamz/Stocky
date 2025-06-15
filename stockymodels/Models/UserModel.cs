@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 
 namespace stockymodels.models;
@@ -14,22 +15,22 @@ public class UserModel : BaseModel
   [Required]
   [MinLength(8)]
   [MaxLength(50)]
-  public string FirstName { get; set; }
+  public required string FirstName { get; set; }
 
   [Required]
   [MinLength(8)]
   [MaxLength(50)]
-  public string Surname { get; set; }
+  public required string Surname { get; set; }
 
   [Required]
   [EmailAddress]
   [MaxLength(255)]
-  public string Email { get; set; }
+  public required string Email { get; set; }
 
   [Required]
   [MinLength(8)]
   [DataType(DataType.Password)]
-  public string Password { get; set; }
+  public required string Password { get; set; }
 
   [Required]
   public UserRole Role { get; set; }

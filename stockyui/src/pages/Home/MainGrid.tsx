@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -7,9 +8,11 @@ import PortfolioPieChart from '../../components/PortfolioPieChart';
 import PortfolioChart from "../../components/PortfolioChart";
 import StatCardGrid from "../../components/StatCardGrid";
 import { StatCardProps } from '../../components/StatCard';
+import { PortfolioService } from '../../services/portfolio.service';
 
 export default function MainGrid() {
-  const { data, refresh } = usePortfolio();
+  const portfolioService = new PortfolioService();
+  const [data, setData] = useState(null);
 
   // Transform portfolio data into StatCardProps array
   const statCards: StatCardProps[] = data ? [

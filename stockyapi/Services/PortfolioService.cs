@@ -1,16 +1,14 @@
 ﻿using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
+using stockyapi.Repository.Portfolio;
 using stockyapi.Requests;
 using stockyapi.Responses;
-using stockymodels.Data;
 using stockymodels.models;
 
 namespace stockyapi.Services;
 
 public interface IPortfolioService
 {
-    public Task<PortfolioModel?> FetchUserPortfolio();
-    public UserPortfolioResponse GetUserPortfolio(PortfolioModel? portfolio);
+    public Task<UserPortfolioResponse> GetUserPortfolio();
     public Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request);
     public Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request);
 }
@@ -18,33 +16,30 @@ public interface IPortfolioService
 public class PortfolioService : IPortfolioService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ApplicationDbContext _context;
+    private readonly IPortfolioRepository _portfolioRepository;
 
-    public PortfolioService(IHttpContextAccessor httpContextAccessor, ApplicationDbContext context)
+    public PortfolioService(
+        IHttpContextAccessor httpContextAccessor,
+        IPortfolioRepository portfolioRepository)
     {
         _httpContextAccessor = httpContextAccessor;
-        _context = context;
+        _portfolioRepository = portfolioRepository;
     }
 
-    public async Task<PortfolioModel?> FetchUserPortfolio()
+    public async Task<UserPortfolioResponse> GetUserPortfolio()
     {
         var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) return null;
+        if (userId == null)
+        {
+            return new UserPortfolioResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
 
-        return await _context.Portfolios
-            .Where(x => x.UserId.ToString() == userId)
-            .Include(portfolioModel => portfolioModel.StockHoldings)
-            .FirstOrDefaultAsync();
-    }
-
-    public bool FetchCheckYouHaveEnoughMoney(decimal price, decimal quantity, decimal currentCash)
-    {
-        decimal totalCost = price * quantity;
-        return totalCost > currentCash ;
-    }
-
-    public UserPortfolioResponse GetUserPortfolio(PortfolioModel? portfolio)
-    {
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
         if (portfolio == null)
         {
             return new UserPortfolioResponse
@@ -78,15 +73,26 @@ public class PortfolioService : IPortfolioService
                 TotalValue = portfolio.TotalValue,
                 CashBalance = portfolio.CashBalance,
                 InvestedAmount = portfolio.InvestedAmount,
-                Items = portfolioItems,
+                Items = portfolioItems
             }
         };
     }
 
     public async Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request)
     {
-        var portfolioData = await FetchUserPortfolio();
-        if (portfolioData == null)
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return new BuyTickerResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+        if (portfolio == null)
         {
             return new BuyTickerResponse
             {
@@ -95,10 +101,10 @@ public class PortfolioService : IPortfolioService
                 Message = "Portfolio not found"
             };
         }
-        
-        // 2. Validate purchase
+
+        // Validate purchase
         var totalCost = request.Price * request.Quantity;
-        if (totalCost > portfolioData.CashBalance)
+        if (totalCost > portfolio.CashBalance)
         {
             return new BuyTickerResponse
             {
@@ -108,27 +114,26 @@ public class PortfolioService : IPortfolioService
             };
         }
 
-        // 3. Create transaction
+        // Create transaction
         var transaction = new TransactionModel
         {
-            PortfolioId = portfolioData.Id,
+            PortfolioId = portfolio.Id,
             Symbol = request.Symbol,
             Type = TransactionType.Buy,
             Shares = request.Quantity,
             Price = request.Price,
             TotalAmount = totalCost,
             Status = TransactionStatus.Completed,
-            OrderType = OrderType.Market
+            OrderType = OrderType.Market,
+            LastPriceUpdate = DateTime.UtcNow
         };
 
-        // 4. Update portfolio  balance
-        portfolioData.CashBalance -= totalCost;
-        portfolioData.InvestedAmount += totalCost;
+        // Update portfolio balance
+        portfolio.CashBalance -= totalCost;
+        portfolio.InvestedAmount += totalCost;
 
-        // 5. Update or create stock holding
-        var existingHolding = portfolioData.StockHoldings
-            .FirstOrDefault(h => h.Symbol == request.Symbol);
-
+        // Update or create stock holding
+        var existingHolding = await _portfolioRepository.GetHoldingAsync(portfolio.Id, request.Symbol);
         if (existingHolding != null)
         {
             // Update existing holding
@@ -137,26 +142,26 @@ public class PortfolioService : IPortfolioService
             existingHolding.Shares = newTotalShares;
             existingHolding.AverageCost = newTotalCost / newTotalShares;
             existingHolding.CurrentPrice = request.Price;
+            await _portfolioRepository.UpdateHoldingAsync(existingHolding);
         }
         else
         {
             // Create new holding
             var newHolding = new StockHoldingModel
             {
-                PortfolioId = portfolioData.Id,
+                PortfolioId = portfolio.Id,
                 Symbol = request.Symbol,
                 Shares = request.Quantity,
                 AverageCost = request.Price,
                 CurrentPrice = request.Price
             };
-            portfolioData.StockHoldings.Add(newHolding);
+            await _portfolioRepository.AddHoldingAsync(newHolding);
         }
 
-        // 6. Save changes
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
+        // Save transaction and update portfolio
+        await _portfolioRepository.AddTransactionAsync(transaction);
+        await _portfolioRepository.UpdateAsync(portfolio);
 
-        // 7. Return response
         return new BuyTickerResponse
         {
             Success = true,
@@ -167,7 +172,7 @@ public class PortfolioService : IPortfolioService
                 Quantity = request.Quantity,
                 Price = request.Price,
                 TotalCost = totalCost,
-                RemainingCashBalance = portfolioData.CashBalance,
+                RemainingCashBalance = portfolio.CashBalance,
                 TransactionTime = DateTime.UtcNow,
                 TransactionId = transaction.Id.ToString(),
                 Status = transaction.Status
@@ -177,8 +182,19 @@ public class PortfolioService : IPortfolioService
 
     public async Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request)
     {
-        var portfolioData = await FetchUserPortfolio();
-        if (portfolioData == null)
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return new SellTickerResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+        if (portfolio == null)
         {
             return new SellTickerResponse
             {
@@ -187,73 +203,72 @@ public class PortfolioService : IPortfolioService
                 Message = "Portfolio not found"
             };
         }
-        
-        // 2. Validate purchase
+
         var total = request.Price * request.Quantity;
 
-        // 3. Create transaction
+        // Create transaction
         var transaction = new TransactionModel
         {
-            PortfolioId = portfolioData.Id,
+            PortfolioId = portfolio.Id,
             Symbol = request.Symbol,
             Type = TransactionType.Sell,
             Shares = request.Quantity,
             Price = request.Price,
             TotalAmount = total,
             Status = TransactionStatus.Completed,
-            OrderType = OrderType.Market
+            OrderType = OrderType.Market,
+            LastPriceUpdate = DateTime.UtcNow
         };
 
-        // 4. Update portfolio
-        portfolioData.CashBalance += total;
-        portfolioData.InvestedAmount -= total;
+        // Update portfolio
+        portfolio.CashBalance += total;
+        portfolio.InvestedAmount -= total;
 
-        // 5. Update or create stock holding
-        var existingHolding = portfolioData.StockHoldings
-            .FirstOrDefault(h => h.Symbol == request.Symbol);
-
+        // Update stock holding
+        var existingHolding = await _portfolioRepository.GetHoldingAsync(portfolio.Id, request.Symbol);
         if (existingHolding == null)
         {
             return new SellTickerResponse
             {
                 Success = false,
                 StatusCode = 404,
-                Message = "Stock is not own"
+                Message = "Stock is not owned"
             };
         }
-        else if (existingHolding.Shares > request.Quantity)
+
+        if (existingHolding.Shares < request.Quantity)
         {
             return new SellTickerResponse
             {
                 Success = false,
-                StatusCode = 404,
-                Message = "You're trying to sell more shares than you own"
+                StatusCode = 400,
+                Message = "Insufficient shares to sell"
             };
         }
 
-        // Update existing holding
+        // Update holding
         var newTotalShares = existingHolding.Shares - request.Quantity;
-        var newTotalCost =  total - (existingHolding.AverageCost * existingHolding.Shares);
+        var newTotalCost = (existingHolding.AverageCost * existingHolding.Shares) - total;
         existingHolding.Shares = newTotalShares;
         existingHolding.AverageCost = newTotalShares == 0 ? 0 : newTotalCost / newTotalShares;
         existingHolding.CurrentPrice = request.Price;
-        
-        // 6. Save changes
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
 
-        // 7. Return response
+        // Save changes
+        await _portfolioRepository.AddTransactionAsync(transaction);
+        await _portfolioRepository.UpdateHoldingAsync(existingHolding);
+        await _portfolioRepository.UpdateAsync(portfolio);
+
         return new SellTickerResponse
         {
             Success = true,
             StatusCode = 200,
-            Data = new SellTickerData()
+            Data = new SellTickerData
             {
                 Symbol = request.Symbol,
                 Quantity = request.Quantity,
                 Price = request.Price,
                 TotalCost = total,
-                RemainingCashBalance = portfolioData.CashBalance,
+                RemainingCashBalance = portfolio.CashBalance,
                 TransactionTime = DateTime.UtcNow,
                 TransactionId = transaction.Id.ToString(),
                 Status = transaction.Status

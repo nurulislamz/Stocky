@@ -17,7 +17,7 @@ public class PriceAlertModel : BaseModel
 
     [Required]
     [StringLength(20)]
-    public string Symbol { get; set; }
+    public required string Symbol { get; set; }
 
     [Required]
     [DataType(DataType.Currency)]

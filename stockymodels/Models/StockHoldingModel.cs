@@ -17,7 +17,7 @@ public class StockHoldingModel : BaseModel
 
     [Required]
     [MaxLength(20)]
-    public string Symbol { get; set; }
+    public required string Symbol { get; set; }
 
     [Required]
     public decimal Shares { get; set; }
@@ -31,5 +31,5 @@ public class StockHoldingModel : BaseModel
     public decimal CurrentPrice { get; set; }
 
     // Navigation property
-    public virtual PortfolioModel Portfolio { get; set; }
+    public  virtual PortfolioModel Portfolio { get; set; }
 }

@@ -1,6 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-using stockymodels.Data;
 using stockymodels.models;
+using stockyapi.Repository.User;
 using stockyapi.Responses;
 
 namespace stockyapi.Services;
@@ -9,21 +8,22 @@ public interface IUserService
 {
     public Task<UserModel?> VerifyUserExists(string email);
     public bool VerifyUserPassword(string requestPassword, string userPassword);
-    public Task<UserModel> UserCreate(string firstName, string surname, string email, string password);
+    public Task<UserModel> CreateUser(string firstName, string surname, string email, string password);
 }
 
 public class UserService : IUserService
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IUserRepository _userRepository;
 
-    public UserService(ApplicationDbContext context)
+    public UserService(IUserRepository userRepository)
     {
-        _context = context;
+        _userRepository = userRepository;
     }
 
+    // Authentication methods
     public async Task<UserModel?> VerifyUserExists(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return await _userRepository.GetByEmailAsync(email);
     }
 
     public bool VerifyUserPassword(string requestPassword, string userPassword)
@@ -31,63 +31,54 @@ public class UserService : IUserService
         return BCrypt.Net.BCrypt.Verify(requestPassword, userPassword);
     }
 
-    public async Task<UserModel> UserCreate(string firstName, string surname, string email, string password)
+    // User creation with related entities
+    public async Task<UserModel> CreateUser(string firstName, string surname, string email, string password)
     {
-        // Start a transaction
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-        try
+        var user = new UserModel
         {
-            var user = new UserModel
-            {
-                FirstName = firstName,
-                Surname = surname,
-                Email = email,
-                Password = BCrypt.Net.BCrypt.HashPassword(password),
-                Role = UserRole.User, // Default role
-                IsActive = true,
-                CreatedAt = DateTime.UtcNow
-            };
+            FirstName = firstName,
+            Surname = surname,
+            Email = email,
+            Password = BCrypt.Net.BCrypt.HashPassword(password),
+            Role = UserRole.User,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
 
-            var portfolio = new PortfolioModel
-            {
-                TotalValue = 0,
-                CashBalance = 0,
-                InvestedAmount = 0,
-                StockHoldings = new List<StockHoldingModel>(),
-                Transactions = new List<TransactionModel>(),
-                User = user
-            };
+        // Create user with related entities
+        var createdUser = await _userRepository.CreateAsync(user);
 
-            var preferences = new UserPreferencesModel
-            {
-                Theme = "light",
-                Currency = "USD",
-                Language = "en",
-                EmailNotifications = true,
-                PushNotifications = true,
-                PriceAlerts = true,
-                NewsAlerts = true,
-                DefaultCurrency = "USD",
-                Timezone = "UTC",
-                User = user
-            };
-
-            // Initialize empty collections
-            user.Watchlist = new List<WatchlistModel>();
-            user.PriceAlerts = new List<PriceAlertModel>();
-
-            _context.Users.Add(user);
-            _context.Portfolios.Add(portfolio);
-            _context.UserPreferences.Add(preferences);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return user;
-        }
-        catch (Exception ex)
+        // Create portfolio
+        var portfolio = new PortfolioModel
         {
-            await transaction.RollbackAsync();
-            throw;
-        }
+            TotalValue = 0,
+            CashBalance = 0,
+            InvestedAmount = 0,
+            StockHoldings = new List<StockHoldingModel>(),
+            Transactions = new List<TransactionModel>(),
+            User = createdUser
+        };
+
+        // Create preferences
+        var preferences = new UserPreferencesModel
+        {
+            Theme = "light",
+            Currency = "USD",
+            Language = "en",
+            EmailNotifications = true,
+            PushNotifications = true,
+            PriceAlerts = true,
+            NewsAlerts = true,
+            DefaultCurrency = "USD",
+            Timezone = "UTC",
+            User = createdUser
+        };
+
+        // Initialize empty collections
+        createdUser.Watchlist = new List<WatchlistModel>();
+        createdUser.PriceAlerts = new List<PriceAlertModel>();
+
+        // Update user with related entities
+        return await _userRepository.UpdateAsync(createdUser);
     }
 }
