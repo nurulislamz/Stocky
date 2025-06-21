@@ -20,7 +20,6 @@ export const ProtectedRoute = () => {
 
   if (!isReallyAuthenticated) {
     console.log('ProtectedRoute - Not authenticated, forcing logout and redirecting to login');
-    forceLogout();
     return <Navigate to="/login" replace />;
   }
 
