@@ -4,6 +4,8 @@ export class BaseService {
     protected api: StockyApi.StockyApi;
 
     constructor() {
-        this.api = new StockyApi.StockyApi(process.env.REACT_APP_API_URL || 'https://localhost:7001');
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5115';
+        console.log('BaseService - API URL:', apiUrl);
+        this.api = new StockyApi.StockyApi(apiUrl);
     }
 }

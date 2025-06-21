@@ -1,4 +1,5 @@
-import {useState} from 'react';
+import { Navigate } from 'react-router-dom';
+import {useState, useMemo } from 'react';
 import Alert from "@mui/material/Alert";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -34,8 +35,9 @@ interface FormErrors {
 }
 
 export default function LoginPage(props: { disableCustomTheme?: boolean }) {
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const authService = useMemo(() => new AuthService(), []);
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: ''
@@ -44,7 +46,9 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
 
-  const authService = new AuthService();
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,8 +69,7 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
     }
 
     try {
-      const api = new AuthService();
-      const response = await api.login(new StockyApi.LoginRequest({
+      const response = await authService.login(new StockyApi.LoginRequest({
         email: formData.email,
         password: formData.password
       }));
@@ -83,7 +86,6 @@ export default function LoginPage(props: { disableCustomTheme?: boolean }) {
 
       await login(response.data.token);
       console.log("Login successful:", response.message);
-      navigate('/home');
     } catch (err) {
       console.error("Login error:", err);
       setErrors({ server: "An error occurred. Please try again." });

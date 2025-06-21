@@ -52,7 +52,6 @@ public class AuthService : IAuthService
         // Create Token
         var token = _tokenService.CreateToken(user);
 
-
         return new LoginResponse
         {
             Success = true,

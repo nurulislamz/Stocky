@@ -1,4 +1,5 @@
-import React from 'react';
+import { Navigate } from 'react-router-dom';
+import React, { useMemo, useState} from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -17,9 +18,9 @@ import ColorModeSelect from '../../shared-theme/ColorModeSelect';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from '../../components/CustomIcons';
 import Card from '../../components/Card';
 import StackContainer from '../../components/StackContainer';
-import { useState } from "react";
 import { AuthService } from "../../services/auth.service";
 import { StockyApi } from '../../services/generated/stockyapi';
+import { useAuth } from '../../hooks/useAuth';
 
 interface FormData {
   firstName: string;
@@ -37,6 +38,10 @@ interface FormErrors {
 }
 
 export default function SignUp(props: { disableCustomTheme?: boolean }) {
+
+  const authService = useMemo(() => new AuthService(), []);
+
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     surname: '',
@@ -46,7 +51,9 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const authService = new AuthService();
+  if (isAuthenticated) {
+    return <Navigate to="/home" replace />
+  }
 
   const validateInputs = () => {
     const newErrors: FormErrors = {};
@@ -101,7 +108,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
       console.log("Signup successful:", response.message);
     } catch (err) {
       console.error("Signup error:", err);
-      setErrors({ server: "An error occurred. Please try again." });
+      setErrors({ server: "Unknown error occurred. Please try again." });
     } finally {
       setIsLoading(false);
     }

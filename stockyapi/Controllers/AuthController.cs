@@ -22,26 +22,18 @@ public class AuthController : ControllerBase
     _mediator = mediator;
   }
 
-  [AllowAnonymous] 
   [HttpPost("login")] 
   public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);
 
-    if (!response.Success)
-      return StatusCode(response.StatusCode, response);
-
     return Ok(response);
   }
 
-  [AllowAnonymous] 
   [HttpPost("register")]
   public async Task<ActionResult<RegisterResponse>> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
   {
     var response = await _mediator.Send(request, cancellationToken);
-
-    if (!response.Success)
-      return StatusCode(response.StatusCode, response);
 
     return Ok(response);
   }

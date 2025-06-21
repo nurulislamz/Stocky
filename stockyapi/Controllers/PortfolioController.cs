@@ -26,42 +26,36 @@ public class PortfolioController : ControllerBase
     public async Task<ActionResult<UserPortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
     {
         var request = new UserPortfolioRequest();
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 
     [HttpPost("buy")]
     public async Task<ActionResult<BuyTickerResponse>> Buy([FromBody] BuyTickerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 
     [HttpPost("sell")]
     public async Task<ActionResult<SellTickerResponse>> Sell([FromBody] SellTickerRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 
     [HttpPost("addfunds")]
     public async Task<ActionResult<AddFundsResponse>> AddFunds([FromBody] AddFundsRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 
     [HttpPost("subtractfunds")]
     public async Task<ActionResult<SubtractFundsResponse>> SubtractFunds([FromBody] SubtractFundsRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 
     [HttpPost("setfunds")]
     public async Task<ActionResult<SetFundsResponse>> SetFunds([FromBody] SetFundsRequest request, CancellationToken cancellationToken)
     {
-        var response = await _mediator.Send(request, cancellationToken);
-        return StatusCode(response.StatusCode, response);
+        return await _mediator.Send(request, cancellationToken);
     }
 }
