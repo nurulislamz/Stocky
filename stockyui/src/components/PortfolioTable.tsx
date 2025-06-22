@@ -4,52 +4,63 @@ import { usePortfolio } from '../hooks/usePortfolio';
 import { StockyApi } from '../services/generated/stockyapi';
 
 const columns: GridColDef[] = [
-  { field: 'symbol', headerName: 'Symbol', width: 100, align: 'right', headerAlign: 'right' },
-  { field: 'quantity', headerName: 'Shares', width: 100, type: 'number', align: 'right', headerAlign: 'right' },
+  { field: 'symbol', headerName: 'Symbol', flex: 1, minWidth: 100, align: 'right', headerAlign: 'right' },
+  { field: 'quantity', headerName: 'Shares', flex: 1, minWidth: 100, type: 'number', align: 'right', headerAlign: 'right' },
   {
     field: 'averageBuyPrice',
     headerName: 'Avg Price',
-    width: 120,
+    flex: 1,
+    minWidth: 120,
     align: 'right',
     headerAlign: 'right'
   },
   {
     field: 'currentPrice',
     headerName: 'Current Price',
-    width: 120,
+    flex: 1,
+    minWidth: 120,
     align: 'right',
     headerAlign: 'right'
   },
   {
     field: 'totalValue',
     headerName: 'Total Value',
-    width: 120,
+    flex: 1,
+    minWidth: 120,
     align: 'right',
     headerAlign: 'right'
   },
   {
     field: 'profitLoss',
     headerName: 'P/L',
-    width: 120,
+    flex: 1,
+    minWidth: 120,
     align: 'right',
     headerAlign: 'right'
   },
   {
     field: 'profitLossPercentage',
     headerName: 'P/L %',
-    width: 100,
+    flex: 1,
+    minWidth: 100,
     align: 'right',
     headerAlign: 'right'
   },
   {
     field: 'actions',
     headerName: 'Actions',
-    width: 120,
+    flex: 1,
+    minWidth: 120,
     sortable: false,
-    align: 'center',
-    headerAlign: 'center',
+    align: 'right',
+    headerAlign: 'right',
     renderCell: (params) => (
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{
+        display: 'flex',
+        gap: '8px',
+        justifyContent: 'flex-end',
+        width: '100%'
+      }}>
         <button
           onClick={() => console.log('Edit clicked for id:', params.row.id)}
           style={{
@@ -57,7 +68,8 @@ const columns: GridColDef[] = [
             background: 'none',
             color: '#1976d2',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '4px',
+            textAlign: 'right',
           }}
         >
           Edit
@@ -69,7 +81,8 @@ const columns: GridColDef[] = [
             background: 'none',
             color: '#d32f2f',
             cursor: 'pointer',
-            padding: '4px'
+            padding: '4px',
+            textAlign: 'right',
           }}
         >
           Delete

@@ -55,21 +55,16 @@ const StyledText = styled('text', {
 
 interface PieCenterLabelProps {
   primaryText: string;
-  secondaryText: string;
 }
 
-function PieCenterLabel({ primaryText, secondaryText }: PieCenterLabelProps) {
+function PieCenterLabel({ primaryText  }: PieCenterLabelProps) {
   const { width, height, left, top } = useDrawingArea();
-  const primaryY = top + height / 2 - 10;
-  const secondaryY = primaryY + 24;
+  const primaryY = top + height / 2 ;
 
   return (
     <React.Fragment>
       <StyledText variant="primary" x={left + width / 2} y={primaryY}>
         {primaryText}
-      </StyledText>
-      <StyledText variant="secondary" x={left + width / 2} y={secondaryY}>
-        {secondaryText}
       </StyledText>
     </React.Fragment>
   );
@@ -87,7 +82,8 @@ interface PortfolioPieChartProps {
 }
 
 export default function PortfolioPieChart() {
-  const { items, fetchPortfolio } = usePortfolio();
+  const { items, totalValue, cashBalance, investedAmount, fetchPortfolio } = usePortfolio();
+
   let colors: string[] = [
     '#3B82F6', // Blue
     '#EF4444', // Red
@@ -105,8 +101,6 @@ export default function PortfolioPieChart() {
     if (!items || items.length === 0) {
       return [];
     }
-
-    console.log(items);
 
     return items.map((item: StockyApi.PortfolioItem, index: number) => ({
       id: item.symbol || `item-${index}`,
@@ -185,7 +179,7 @@ export default function PortfolioPieChart() {
               legend: { direction: "horizontal", position: { horizontal: 'center', vertical: 'bottom' } },
             }}
           >
-            <PieCenterLabel primaryText={`£${0}`} secondaryText={`£${0}`} />
+            <PieCenterLabel primaryText={`£${totalValue}`} />
           </PieChart>
         </Box>
         {data.map((item) => (

@@ -42,7 +42,6 @@ export default function PortfolioPage(props: { disableCustomTheme?: boolean }) {
     cashBalance,
     investedAmount,
     isLoading,
-    error,
     fetchPortfolio
   } = usePortfolio();
 
@@ -263,9 +262,7 @@ export default function PortfolioPage(props: { disableCustomTheme?: boolean }) {
           </Button>
         </Box>
 
-        <Grid spacing={2} columns={12}>
-          <PortfolioTable />
-        </Grid>
+        <PortfolioTable />
         <Copyright sx={{ my: 4 }} />
       </Box>
 
