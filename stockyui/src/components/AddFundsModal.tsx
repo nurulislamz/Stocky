@@ -11,32 +11,19 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import NumbersIcon from '@mui/icons-material/Numbers';
 import { usePortfolio } from '../hooks/usePortfolio';
 
-interface BuyTradeModalProps {
+interface AddFundsModalProps {
   open: boolean;
   onClose: () => void;
-  symbol: string;
-  price?: string;
 }
 
-export default function BuyTradeModal({ open, onClose, symbol, price: initialPrice }: BuyTradeModalProps) {
-  const [ticker, setTicker] = React.useState(symbol);
-  const [price, setPrice] = React.useState(initialPrice || '');
-  const [quantity, setQuantity] = React.useState('');
+export default function AddFundsModal({ open, onClose }: AddFundsModalProps) {
+  const [amount, setAmount] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [error, setError] = React.useState('');
 
-  const { buyTicker  } = usePortfolio();
-
-  // Update price when initialPrice prop changes
-  React.useEffect(() => {
-    if (initialPrice) {
-      setPrice(initialPrice);
-    }
-  }, [initialPrice]);
+  const { addFunds } = usePortfolio();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,25 +31,21 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
     setError('');
 
     try {
-      const symbolToUse = ticker || symbol;
-      const quantityNum = parseInt(quantity);
-      const priceNum = parseFloat(price);
+      const amountNum = parseFloat(amount);
 
-      if (!symbolToUse || !quantityNum || !priceNum) {
-        setError('Please fill in all fields');
+      if (!amountNum || amountNum <= 0) {
+        setError('Please enter a valid amount');
         return;
       }
 
-      const result = await buyTicker(symbolToUse, quantityNum, priceNum);
+      const result = await addFunds(amountNum);
 
       if (result.success) {
-        console.log(`Buy ${quantity} shares of ${symbolToUse} at ${price}`);
+        console.log(`Successfully added £${amount} to portfolio`);
         onClose();
-        setTicker('');
-        setPrice('');
-        setQuantity('');
+        setAmount('');
       } else {
-        setError(result.message || 'Transaction failed');
+        setError(result.message || 'Failed to add funds');
       }
     } catch (error) {
       setError('An unexpected error occurred');
@@ -71,21 +54,19 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
     }
   };
 
-  const total = quantity && price ? (parseFloat(price) * parseInt(quantity)).toFixed(2) : '0.00';
-
   return (
     <Modal
       open={open}
       onClose={onClose}
-      aria-labelledby="trade-modal-title"
+      aria-labelledby="add-funds-modal-title"
     >
       <Box sx={{
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: { xs: '90%', sm: 500 },
-        maxWidth: 500,
+        width: { xs: '90%', sm: 400 },
+        maxWidth: 400,
         outline: 'none',
       }}>
         <Paper
@@ -114,7 +95,7 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
                     fontSize: { xs: '1.5rem', sm: '1.75rem' }
                   }}
                 >
-                  Buy {ticker || 'Stock'}
+                  Add Funds
                 </Typography>
               </Box>
               <IconButton
@@ -130,7 +111,7 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
               </IconButton>
             </Box>
             <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-              {'Add to your portfolio'}
+              Add money to your portfolio balance
             </Typography>
           </Box>
 
@@ -138,82 +119,20 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
           <Box sx={{ p: 3, backgroundColor: 'white' }}>
             <form onSubmit={handleSubmit} noValidate>
               <Stack spacing={3}>
-                {!symbol && (
-                  <TextField
-                    label="Ticker Symbol"
-                    value={ticker}
-                    onChange={(e) => setTicker(e.target.value.toUpperCase())}
-                    required
-                    fullWidth
-                    variant="outlined"
-                    InputProps={{
-                      startAdornment: <TrendingUpIcon sx={{ mr: 1, ml: 1, color: 'text.secondary' }} />,
-                      sx: { pl: 0 }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        '&:hover fieldset': {
-                          borderColor: '#667eea',
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#667eea',
-                        },
-                      },
-                      '& .MuiInputLabel-root': {
-                        backgroundColor: 'white',
-                        px: 1,
-                      },
-                    }}
-                  />
-                )}
-
                 <TextField
-                  label="Price per Share"
+                  label="Amount"
                   type="number"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   required
                   fullWidth
                   variant="outlined"
+                  placeholder="0.00"
                   InputProps={{
                     startAdornment: <AttachMoneyIcon sx={{ mr: 1, ml: 1, color: 'text.secondary' }} />,
                     inputProps: {
-                      min: 0,
+                      min: 0.01,
                       step: 0.01
-                    },
-                    sx: { pl: 0 }
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 2,
-                      '&:hover fieldset': {
-                        borderColor: '#667eea',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
-                      },
-                    },
-                    '& .MuiInputLabel-root': {
-                      backgroundColor: 'white',
-                      px: 1,
-                    },
-                  }}
-                />
-
-                <TextField
-                  label="Quantity"
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  required
-                  fullWidth
-                  variant="outlined"
-                  InputProps={{
-                    startAdornment: <NumbersIcon sx={{ mr: 1, ml: 1, color: 'text.secondary' }} />,
-                    inputProps: {
-                      min: 1,
-                      step: 1
                     },
                     sx: { pl: 0 }
                   }}
@@ -241,25 +160,27 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
                   </Typography>
                 )}
 
-                {/* Total Calculation */}
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 2,
-                    backgroundColor: '#f8f9fa',
-                    borderRadius: 2,
-                    border: '1px solid #e9ecef',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                      Total Value:
-                    </Typography>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
-                      ${total}
-                    </Typography>
-                  </Box>
-                </Paper>
+                {/* Amount Display */}
+                {amount && (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: 2,
+                      border: '1px solid #e9ecef',
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                        Amount to Add:
+                      </Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#667eea' }}>
+                        £{parseFloat(amount) ? parseFloat(amount).toFixed(2) : '0.00'}
+                      </Typography>
+                    </Box>
+                  </Paper>
+                )}
 
                 <Divider sx={{ my: 1 }} />
 
@@ -272,21 +193,21 @@ export default function BuyTradeModal({ open, onClose, symbol, price: initialPri
                     size="large"
                     disabled={isSubmitting}
                     sx={{
-                      backgroundColor: '#667eea',
+                      backgroundColor: '#4caf50',
                       borderRadius: 2,
                       py: { xs: 2, sm: 1.5 },
                       fontWeight: 600,
                       textTransform: 'none',
                       fontSize: { xs: '1.1rem', sm: '1rem' },
                       '&:hover': {
-                        backgroundColor: '#5a6fd8',
+                        backgroundColor: '#45a049',
                         transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
                       },
                       transition: 'all 0.2s ease-in-out',
                     }}
                   >
-                    {isSubmitting ? 'Processing...' : `Buy Shares`}
+                    {isSubmitting ? 'Adding Funds...' : 'Add Funds'}
                   </Button>
                   <Button
                     variant="outlined"

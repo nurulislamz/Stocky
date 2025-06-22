@@ -74,7 +74,7 @@ export default function MainGrid() {
             },
           }}
         >
-          <PortfolioPieChart data={null} totalValue="98.5K" totalLabel="Total" />
+          <PortfolioPieChart/>
         </Grid>
       </Grid>
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>

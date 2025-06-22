@@ -77,9 +77,9 @@ export const usePortfolio = () => {
   const sellTicker = async (symbol: string, quantity: number, price: number) => {
     try {
       const request = new StockyApi.SellTickerRequest({
-        symbol: symbol,
-        quantity: quantity,
-        price: price
+        symbol,
+        quantity,
+        price
       });
 
       const response = await portfolioService.sellTicker(request);
@@ -96,6 +96,46 @@ export const usePortfolio = () => {
     }
   };
 
+  const addFunds = async (amount: number) => {
+    try {
+      const request = new StockyApi.AddFundsRequest({
+        amount
+      });
+
+      const response = await portfolioService.addFunds(request);
+
+      if (response.success) {
+        // Refresh portfolio after successful funds addition
+        await fetchPortfolio();
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, message: response.message || 'Failed to add funds' };
+      }
+    } catch (error) {
+      return { success: false, message: 'Failed to add funds' };
+    }
+  };
+
+  const subtractFunds = async (amount: number) => {
+    try {
+      const request = new StockyApi.SubtractFundsRequest({
+        amount
+      });
+
+      const response = await portfolioService.subtractFunds(request);
+
+      if (response.success) {
+        // Refresh portfolio after successful funds subtraction
+        await fetchPortfolio();
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, message: response.message || 'Failed to subtract funds' };
+      }
+    } catch (error) {
+      return { success: false, message: 'Failed to subtract funds' };
+    }
+  };
+
   useEffect(() => {
     fetchPortfolio();
   }, []);
@@ -104,6 +144,8 @@ export const usePortfolio = () => {
     ...portfolioState,
     fetchPortfolio,
     buyTicker,
-    sellTicker
+    sellTicker,
+    addFunds,
+    subtractFunds
   };
 };

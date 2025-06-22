@@ -1,52 +1,53 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { usePortfolio } from '../hooks/usePortfolio';
+import { StockyApi } from '../services/generated/stockyapi';
 
 const columns: GridColDef[] = [
-  { field: 'symbol', headerName: 'Symbol', width: 100 },
-  { field: 'companyName', headerName: 'Company', width: 200 },
-  { field: 'shares', headerName: 'Shares', width: 100, type: 'number' },
+  { field: 'symbol', headerName: 'Symbol', width: 100, align: 'right', headerAlign: 'right' },
+  { field: 'quantity', headerName: 'Shares', width: 100, type: 'number', align: 'right', headerAlign: 'right' },
   {
-    field: 'avgPrice',
+    field: 'averageBuyPrice',
     headerName: 'Avg Price',
     width: 120,
-    type: 'number',
-    valueFormatter: ({ value }: { value: number }) => `$${value.toFixed(2)}`
+    align: 'right',
+    headerAlign: 'right'
   },
   {
     field: 'currentPrice',
     headerName: 'Current Price',
     width: 120,
-    type: 'number',
-    valueFormatter: ({ value }: { value: number }) => `$${value.toFixed(2)}`
+    align: 'right',
+    headerAlign: 'right'
   },
   {
     field: 'totalValue',
     headerName: 'Total Value',
     width: 120,
-    type: 'number',
-    valueFormatter: ({ value }: { value: number }) => `$${value.toFixed(2)}`
+    align: 'right',
+    headerAlign: 'right'
   },
   {
     field: 'profitLoss',
     headerName: 'P/L',
     width: 120,
-    type: 'number',
-    valueFormatter: ({ value }: { value: number }) => `$${value.toFixed(2)}`,
-    cellClassName: (params) => params.value >= 0 ? 'positive' : 'negative'
+    align: 'right',
+    headerAlign: 'right'
   },
   {
-    field: 'profitLossPercent',
+    field: 'profitLossPercentage',
     headerName: 'P/L %',
     width: 100,
-    type: 'number',
-    valueFormatter: ({ value }: { value: number }) => `${value.toFixed(2)}%`,
-    cellClassName: (params) => params.value >= 0 ? 'positive' : 'negative'
+    align: 'right',
+    headerAlign: 'right'
   },
   {
     field: 'actions',
     headerName: 'Actions',
     width: 120,
     sortable: false,
+    align: 'center',
+    headerAlign: 'center',
     renderCell: (params) => (
       <div style={{ display: 'flex', gap: '8px' }}>
         <button
@@ -79,7 +80,35 @@ const columns: GridColDef[] = [
 ];
 
 export default function PortfolioTable() {
-  const [rows, setRows] = React.useState<any[]>([]);
+  const { items, isLoading, error } = usePortfolio();
+
+  const rows = React.useMemo(() => {
+    if (!items || items.length === 0) {
+      return [];
+    }
+
+    console.log(items);
+
+    return items.map((item: StockyApi.PortfolioItem, index: number) => ({
+      id: item.symbol || `item-${index}`,
+      symbol: item.symbol || '',
+      quantity: item.quantity || 0,
+      averageBuyPrice: `£${item.averageBuyPrice || 0}`,
+      currentPrice: `£${item.currentPrice || 0}`,
+      totalValue: `£${item.totalValue || 0}`,
+      profitLoss: `£${item.profitLoss || 0}`,
+      profitLossPercentage: `${item.profitLossPercentage || 0}%`,
+      lastUpdatedTime: item.lastUpdatedTime || ''
+    }));
+  }, [items]);
+
+  if (isLoading) {
+    return <div>Loading portfolio data...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading portfolio: {error}</div>;
+  }
 
   return (
     <DataGrid

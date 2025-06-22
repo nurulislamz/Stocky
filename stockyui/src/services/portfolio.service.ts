@@ -42,6 +42,45 @@ export class PortfolioService extends BaseService {
     }
   }
 
+  async addFunds(request: StockyApi.AddFundsRequest) {
+    try {
+      return await this.api.addfunds(request);
+    } catch (error) {
+      console.error('Error adding funds:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to add funds'
+      } as StockyApi.AddFundsResponse;
+    }
+  }
+
+  async subtractFunds(request: StockyApi.SubtractFundsRequest) {
+    try {
+      return await this.api.subtractfunds(request);
+    } catch (error) {
+      console.error('Error subtracting funds:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to subtract funds'
+      } as StockyApi.SubtractFundsResponse;
+    }
+  }
+
+  async setFunds(request: StockyApi.SetFundsRequest) {
+    try {
+      return await this.api.setfunds(request);
+    } catch (error) {
+      console.error('Error setting funds:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to set funds'
+      } as StockyApi.SetFundsResponse;
+    }
+  }
+
   // Portfolio Analysis
   calculateTotalValue(portfolio: StockyApi.PortfolioData): number {
     return portfolio.totalValue || 0;

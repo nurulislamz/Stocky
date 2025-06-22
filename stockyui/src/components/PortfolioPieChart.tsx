@@ -8,6 +8,8 @@ import CardContent from '@mui/material/CardContent';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
+import { usePortfolio } from '../hooks/usePortfolio';
+import { StockyApi } from '../services/generated/stockyapi';
 
 interface StyledTextProps {
   variant: 'primary' | 'secondary';
@@ -84,7 +86,37 @@ interface PortfolioPieChartProps {
   totalLabel: string;
 }
 
-export default function PortfolioPieChart({ data, totalValue, totalLabel }: PortfolioPieChartProps) {
+export default function PortfolioPieChart() {
+  const { items, fetchPortfolio } = usePortfolio();
+  let colors: string[] = [
+    '#3B82F6', // Blue
+    '#EF4444', // Red
+    '#10B981', // Green
+    '#F59E0B', // Amber
+    '#8B5CF6', // Purple
+    '#06B6D4', // Cyan
+    '#F97316', // Orange
+    '#84CC16', // Lime
+    '#EC4899', // Pink
+    '#6366F1'  // Indigo
+  ];
+
+  const data = React.useMemo(() => {
+    if (!items || items.length === 0) {
+      return [];
+    }
+
+    console.log(items);
+
+    return items.map((item: StockyApi.PortfolioItem, index: number) => ({
+      id: item.symbol || `item-${index}`,
+      value: item.quantity || 0,
+      averageBuyPrice: item.averageBuyPrice || 0,
+      label: item.symbol || "",
+      color: colors[index % colors.length]
+    }));
+  }, [items]);
+
   if (!data) {
     return (
       <Card
@@ -143,13 +175,17 @@ export default function PortfolioPieChart({ data, totalValue, totalLabel }: Port
                 outerRadius: 70,
                 paddingAngle: 0,
                 highlightScope: { fade: 'global', highlight: 'item' },
+                valueFormatter: (value, context) => {
+                  const item = data[context.dataIndex];
+                  return `Avg: £${item?.averageBuyPrice?.toFixed(2) || '0.00'}`;
+                }
               }
             ]}
             slotProps={{
               legend: { direction: "horizontal", position: { horizontal: 'center', vertical: 'bottom' } },
             }}
           >
-            <PieCenterLabel primaryText={totalValue} secondaryText={totalLabel} />
+            <PieCenterLabel primaryText={`£${0}`} secondaryText={`£${0}`} />
           </PieChart>
         </Box>
         {data.map((item) => (
