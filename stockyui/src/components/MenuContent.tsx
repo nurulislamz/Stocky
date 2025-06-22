@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocation, useMatch } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -22,6 +22,8 @@ import DashboardRoundedIcon from '@mui/icons-material/DashboardRounded';
 import ShowChartRoundedIcon from '@mui/icons-material/ShowChartRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { Link } from 'react-router-dom';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
+import { useAuth } from '../hooks/useAuth';
 
 
 const mainListItems = [
@@ -70,11 +72,19 @@ const secondaryListItems = [
     text: "Feedback",
     icon: <HelpRoundedIcon />,
     to: "/feedback"
-  },
+  }
 ];
 
 export default function MenuContent() {
   const currentLocation = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    window.location.reload();
+  };
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
@@ -87,7 +97,16 @@ export default function MenuContent() {
               to={item.to}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
@@ -97,10 +116,34 @@ export default function MenuContent() {
           <ListItem key={index} disablePadding sx={{ display: "block" }}>
             <ListItemButton component={Link} to={item.to}>
               <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemText
+                primary={item.text}
+                sx={{
+                  '& .MuiListItemText-primary': {
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
+        <ListItem disablePadding sx={{ display: "block" }}>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon><LogoutRoundedIcon /></ListItemIcon>
+            <ListItemText
+              primary="Logout"
+              sx={{
+                '& .MuiListItemText-primary': {
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }
+              }}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Stack>
   );

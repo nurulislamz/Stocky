@@ -7,7 +7,7 @@ import PortfolioPage from './pages/Portfolio/PortfolioPage';
 import EtfCalculatorPage from './pages/EtfCalculator/EtfCalculatorPage';
 import WatchListPage from './pages/WatchList/WatchListPage';
 import MarketDataPage from './pages/MarketData/MarketDataPage';
-import { ProtectedRoute } from './ProtectedRoute';
+import { ProtectedRoute } from './contexts/ProtectedRoute';
 
 const App = () => {
   return (

@@ -28,8 +28,11 @@ public class TokenService : ITokenService
     // Create claims (user info)
     var claims = new[]
     {
-      new Claim(ClaimTypes.Email, user.Email),
-      new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+      new Claim("email", user.Email),
+      new Claim("userId", user.Id.ToString()),
+      new Claim("firstName", user.FirstName),
+      new Claim("surname", user.Surname),
+      new Claim("role", user.Role.ToString())
     };
 
     // Create token

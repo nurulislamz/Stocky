@@ -9,6 +9,14 @@ interface DecodedToken {
   signingCredentials: string;
 }
 
+interface UserInfo {
+  id: string;
+  email: string;
+  firstName: string;
+  surname: string;
+  role: string;
+}
+
 export class AuthService extends BaseService {
   // API Methods
   async login(request: StockyApi.LoginRequest) {
@@ -39,6 +47,27 @@ export class AuthService extends BaseService {
     if (!decoded) return true;
     const currentTime = Date.now() / 1000;
     return decoded.expires < currentTime;
+  }
+
+  getUserInfo(): UserInfo | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const base64Payload = token.split(".")[1];
+      const payload = atob(base64Payload);
+      const decoded = JSON.parse(payload);
+
+      return {
+        id: decoded.userId,
+        email: decoded.email,
+        firstName: decoded.firstName,
+        surname: decoded.surname,
+        role: decoded.role
+      };
+    } catch {
+      return null;
+    }
   }
 
   getToken(): string | null {

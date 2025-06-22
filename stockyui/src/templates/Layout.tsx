@@ -9,14 +9,21 @@ import Stack from '@mui/material/Stack';
 import AppNavbar from '../components/AppNavbar';
 import SideMenu from "../components/SideMenu";
 import AppTheme from "../shared-theme/AppTheme";
+import { useAuth } from '../hooks/useAuth';
 
 export default function Layout(props: { disableCustomTheme?: boolean, children: React.ReactNode }) {
+  const { user } = useAuth();
+
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
         {/* Side Menu */}
-        <SideMenu />
+        <SideMenu
+          firstname={user?.firstName || 'User'}
+          surname={user?.surname || 'User'}
+          email={user?.email || 'user@email.com'}
+        />
         <AppNavbar />
 
         {/* Main content */}
