@@ -31,14 +31,14 @@ public class PortfolioService : IPortfolioService
 
     public async Task<UserPortfolioResponse> GetUserPortfolio()
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new UserPortfolioResponse
             {
                 Success = false,
                 StatusCode = 401,
-                Message = "User not authenticated"
+                Message = "UserId not found"
             };
         }
 
@@ -64,7 +64,7 @@ public class PortfolioService : IPortfolioService
             ProfitLossPercentage = holding.AverageCost != 0
                 ? ((holding.CurrentPrice - holding.AverageCost) / holding.AverageCost) * 100
                 : 0,
-            LastUpdatedTime = holding.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss") ?? holding.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            LastUpdatedTime = holding.UpdatedAt.ToString("yyyy-MM-dd HH:mm:ss")
         }).ToList();
 
         return new UserPortfolioResponse
@@ -83,7 +83,7 @@ public class PortfolioService : IPortfolioService
 
     public async Task<BuyTickerResponse> BuyTickerInPortfolio(BuyTickerRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new BuyTickerResponse
@@ -205,7 +205,7 @@ public class PortfolioService : IPortfolioService
 
     public async Task<SellTickerResponse> SellTickerInPortfolio(SellTickerRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new SellTickerResponse
@@ -301,7 +301,7 @@ public class PortfolioService : IPortfolioService
 
     public async Task<AddFundsResponse> AddFunds(AddFundsRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new AddFundsResponse
@@ -337,7 +337,7 @@ public class PortfolioService : IPortfolioService
 
     public async Task<SubtractFundsResponse> SubtractFunds(SubtractFundsRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new SubtractFundsResponse
@@ -373,7 +373,7 @@ public class PortfolioService : IPortfolioService
 
     public async Task<SetFundsResponse> SetFunds(SetFundsRequest request)
     {
-        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
         if (userId == null)
         {
             return new SetFundsResponse

@@ -45,23 +45,30 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow
         };
 
-        // Create user with related entities
+        // Create user first
         var createdUser = await _userRepository.CreateAsync(user);
 
-        // Create portfolio
+        // Create portfolio using repository
         var portfolio = new PortfolioModel
         {
+            Id = createdUser.Id,
+            UserId = createdUser.Id,
             TotalValue = 0,
             CashBalance = 0,
             InvestedAmount = 0,
+            User = createdUser,
             StockHoldings = new List<StockHoldingModel>(),
             Transactions = new List<TransactionModel>(),
-            User = createdUser
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
+        await _userRepository.CreateUserPortfolioAsync(portfolio);
 
-        // Create preferences
+        // Create preferences using repository
         var preferences = new UserPreferencesModel
         {
+            Id = createdUser.Id,
+            UserId = createdUser.Id,
             Theme = "light",
             Currency = "USD",
             Language = "en",
@@ -71,14 +78,13 @@ public class UserService : IUserService
             NewsAlerts = true,
             DefaultCurrency = "USD",
             Timezone = "UTC",
-            User = createdUser
+            User = createdUser,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
+        await _userRepository.CreateUserPreferencesAsync(preferences);
 
-        // Initialize empty collections
-        createdUser.Watchlist = new List<WatchlistModel>();
-        createdUser.PriceAlerts = new List<PriceAlertModel>();
-
-        // Update user with related entities
-        return await _userRepository.UpdateAsync(createdUser);
+        // Return user with related entities
+        return await _userRepository.GetByIdAsync(createdUser.Id);
     }
 }

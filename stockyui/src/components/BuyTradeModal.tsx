@@ -13,25 +13,62 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import NumbersIcon from '@mui/icons-material/Numbers';
+import { usePortfolio } from '../hooks/usePortfolio';
 
-interface TradeModalProps {
+interface BuyTradeModalProps {
   open: boolean;
   onClose: () => void;
   symbol: string;
-  price: string;
-  type: 'buy' | 'sell';
+  price?: string;
 }
 
-export default function TradeModal({ open, onClose, symbol, type }: TradeModalProps) {
+export default function BuyTradeModal({ open, onClose, symbol, price: initialPrice }: BuyTradeModalProps) {
   const [ticker, setTicker] = React.useState(symbol);
-  const [price, setPrice] = React.useState('');
+  const [price, setPrice] = React.useState(initialPrice || '');
   const [quantity, setQuantity] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { buyTicker  } = usePortfolio();
+
+  // Update price when initialPrice prop changes
+  React.useEffect(() => {
+    if (initialPrice) {
+      setPrice(initialPrice);
+    }
+  }, [initialPrice]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement trade logic
-    console.log(`${type.toUpperCase()} ${quantity} shares of ${ticker} at ${price}`);
-    onClose();
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const symbolToUse = ticker || symbol;
+      const quantityNum = parseInt(quantity);
+      const priceNum = parseFloat(price);
+
+      if (!symbolToUse || !quantityNum || !priceNum) {
+        setError('Please fill in all fields');
+        return;
+      }
+
+      const result = await buyTicker(symbolToUse, quantityNum, priceNum);
+
+      if (result.success) {
+        console.log(`Buy ${quantity} shares of ${symbolToUse} at ${price}`);
+        onClose();
+        setTicker('');
+        setPrice('');
+        setQuantity('');
+      } else {
+        setError(result.message || 'Transaction failed');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const total = quantity && price ? (parseFloat(price) * parseInt(quantity)).toFixed(2) : '0.00';
@@ -77,7 +114,7 @@ export default function TradeModal({ open, onClose, symbol, type }: TradeModalPr
                     fontSize: { xs: '1.5rem', sm: '1.75rem' }
                   }}
                 >
-                  {type === 'buy' ? 'Buy' : 'Sell'} {ticker || 'Stock'}
+                  Buy {ticker || 'Stock'}
                 </Typography>
               </Box>
               <IconButton
@@ -93,13 +130,13 @@ export default function TradeModal({ open, onClose, symbol, type }: TradeModalPr
               </IconButton>
             </Box>
             <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
-              {type === 'buy' ? 'Add to your portfolio' : 'Sell from your portfolio'}
+              {'Add to your portfolio'}
             </Typography>
           </Box>
 
           {/* Content */}
           <Box sx={{ p: 3, backgroundColor: 'white' }}>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <Stack spacing={3}>
                 {!symbol && (
                   <TextField
@@ -197,6 +234,13 @@ export default function TradeModal({ open, onClose, symbol, type }: TradeModalPr
                   }}
                 />
 
+                {/* Error Display */}
+                {error && (
+                  <Typography variant="body2" sx={{ color: 'error.main', textAlign: 'center' }}>
+                    {error}
+                  </Typography>
+                )}
+
                 {/* Total Calculation */}
                 <Paper
                   elevation={0}
@@ -226,28 +270,30 @@ export default function TradeModal({ open, onClose, symbol, type }: TradeModalPr
                     type="submit"
                     fullWidth
                     size="large"
+                    disabled={isSubmitting}
                     sx={{
-                      backgroundColor: type === 'buy' ? '#667eea' : '#d32f2f',
+                      backgroundColor: '#667eea',
                       borderRadius: 2,
                       py: 1.5,
                       fontWeight: 600,
                       textTransform: 'none',
                       fontSize: '1rem',
                       '&:hover': {
-                        backgroundColor: type === 'buy' ? '#5a6fd8' : '#c62828',
+                        backgroundColor: '#5a6fd8',
                         transform: 'translateY(-1px)',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                       },
                       transition: 'all 0.2s ease-in-out',
                     }}
                   >
-                    {type === 'buy' ? 'Buy Shares' : 'Sell Shares'}
+                    {isSubmitting ? 'Processing...' : `Buy Shares`}
                   </Button>
                   <Button
                     variant="outlined"
                     onClick={onClose}
                     fullWidth
                     size="large"
+                    disabled={isSubmitting}
                     sx={{
                       borderRadius: 2,
                       py: 1.5,

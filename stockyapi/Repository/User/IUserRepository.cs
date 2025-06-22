@@ -16,19 +16,22 @@ public interface IUserRepository
     Task<bool> UpdateLastLoginAsync(Guid userId);
     Task<bool> UpdateUserStatusAsync(Guid userId, bool isActive);
     Task<bool> UpdateUserRoleAsync(Guid userId, UserRole role);
-    
+
     // User preferences operations
     Task<UserPreferencesModel?> GetUserPreferencesAsync(Guid userId);
+    Task<UserPreferencesModel> CreateUserPreferencesAsync(UserPreferencesModel preferences);
     Task<UserPreferencesModel> UpdateUserPreferencesAsync(UserPreferencesModel preferences);
-    
+
     // User portfolio operations
     Task<PortfolioModel?> GetUserPortfolioAsync(Guid userId);
-    
+    Task<PortfolioModel> CreateUserPortfolioAsync(PortfolioModel portfolio);
+    Task<PortfolioModel> UpdateUserPortfolioAsync(PortfolioModel portfolio);
+
     // User watchlist operations
     Task<IEnumerable<WatchlistModel>> GetUserWatchlistAsync(Guid userId);
     Task<WatchlistModel> AddToWatchlistAsync(Guid userId, string ticker);
     Task RemoveFromWatchlistAsync(Guid userId, string ticker);
-    
+
     // User price alerts operations
     Task<IEnumerable<PriceAlertModel>> GetUserPriceAlertsAsync(Guid userId);
     Task<PriceAlertModel> AddPriceAlertAsync(Guid userId, string ticker, decimal targetPrice);

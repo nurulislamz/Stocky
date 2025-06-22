@@ -11,7 +11,7 @@ import Stack from "@mui/material/Stack";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import TradeModal from "../../components/TradeModal";
+import BuyTradeModal from "../../components/BuyTradeModal";
 
 interface SearchResultsProps {
   symbol: string;
@@ -169,12 +169,11 @@ export default function SearchResults({ symbol }: SearchResultsProps) {
         </Grid>
       </Grid>
 
-      <TradeModal
+      <BuyTradeModal
         open={modalOpen}
         onClose={handleModalClose}
         symbol={symbol}
         price="$100.00"
-        type={tradeType}
       />
     </Box>
   );

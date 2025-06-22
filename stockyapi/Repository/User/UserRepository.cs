@@ -97,6 +97,13 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(p => p.UserId == userId);
     }
 
+    public async Task<UserPreferencesModel> CreateUserPreferencesAsync(UserPreferencesModel preferences)
+    {
+        await _context.UserPreferences.AddAsync(preferences);
+        await _context.SaveChangesAsync();
+        return preferences;
+    }
+
     public async Task<UserPreferencesModel> UpdateUserPreferencesAsync(UserPreferencesModel preferences)
     {
         _context.UserPreferences.Update(preferences);
@@ -110,6 +117,20 @@ public class UserRepository : IUserRepository
             .Include(p => p.StockHoldings)
             .Include(p => p.Transactions)
             .FirstOrDefaultAsync(p => p.Id == userId);
+    }
+
+    public async Task<PortfolioModel> CreateUserPortfolioAsync(PortfolioModel portfolio)
+    {
+        await _context.Portfolios.AddAsync(portfolio);
+        await _context.SaveChangesAsync();
+        return portfolio;
+    }
+
+    public async Task<PortfolioModel> UpdateUserPortfolioAsync(PortfolioModel portfolio)
+    {
+        _context.Portfolios.Update(portfolio);
+        await _context.SaveChangesAsync();
+        return portfolio;
     }
 
     public async Task<IEnumerable<WatchlistModel>> GetUserWatchlistAsync(Guid userId)

@@ -15,7 +15,7 @@ import PortfolioChart from "../../components/PortfolioChart";
 import StatCard, { StatCardProps } from "../../components/StatCard";
 import Layout from "../../templates/Layout";
 import Grid from '@mui/material/Grid';
-import TradeModal from '../../components/TradeModal';
+import BuyTradeModal from '../../components/BuyTradeModal';
 
 const data: StatCardProps[] = [
   {
@@ -110,12 +110,11 @@ export default function PortfolioPage(props: { disableCustomTheme?: boolean }) {
         <Copyright sx={{ my: 4 }} />
       </Box>
 
-      <TradeModal
+      <BuyTradeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         symbol=""
         price="$0.00"
-        type={tradeType}
       />
     </Layout>
   );

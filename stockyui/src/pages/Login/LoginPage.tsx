@@ -20,7 +20,6 @@ import StackContainer from '../../components/StackContainer';
 import { AuthService } from "../../services/auth.service";
 import { StockyApi } from '../../services/generated/stockyapi';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
 interface FormData {

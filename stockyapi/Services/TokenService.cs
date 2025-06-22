@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,6 +13,15 @@ namespace stockyapi.Services;
 public interface ITokenService
 {
   string CreateToken(UserModel user);
+}
+
+public static class ClaimTypes
+{
+    public const string UserId = "userId";
+    public const string FirstName = "firstName";
+    public const string Surname = "surname";
+    public const string Role = "role";
+    public const string Email = "email";
 }
 
 public class TokenService : ITokenService
@@ -28,11 +38,11 @@ public class TokenService : ITokenService
     // Create claims (user info)
     var claims = new[]
     {
-      new Claim("email", user.Email),
-      new Claim("userId", user.Id.ToString()),
-      new Claim("firstName", user.FirstName),
-      new Claim("surname", user.Surname),
-      new Claim("role", user.Role.ToString())
+      new Claim(ClaimTypes.Email, user.Email),
+      new Claim(ClaimTypes.UserId, user.Id.ToString()),
+      new Claim(ClaimTypes.FirstName, user.FirstName),
+      new Claim(ClaimTypes.Surname, user.Surname),
+      new Claim(ClaimTypes.Role, user.Role.ToString())
     };
 
     // Create token
