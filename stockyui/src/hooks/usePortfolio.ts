@@ -96,6 +96,26 @@ export const usePortfolio = () => {
     }
   };
 
+  const deleteTicker = async (symbol: string) => {
+    try {
+      const request = new StockyApi.DeleteTickerRequest({
+        symbol
+      });
+
+      const response = await portfolioService.deleteTicker(request);
+
+      if (response.success) {
+        // Refresh portfolio after successful deletion
+        await fetchPortfolio();
+        return { success: true, message: response.message };
+      } else {
+        return { success: false, message: response.message || 'Failed to delete ticker' };
+      }
+    } catch (error) {
+      return { success: false, message: 'Failed to delete ticker' };
+    }
+  };
+
   const addFunds = async (amount: number) => {
     try {
       const request = new StockyApi.AddFundsRequest({
@@ -145,6 +165,7 @@ export const usePortfolio = () => {
     fetchPortfolio,
     buyTicker,
     sellTicker,
+    deleteTicker,
     addFunds,
     subtractFunds
   };

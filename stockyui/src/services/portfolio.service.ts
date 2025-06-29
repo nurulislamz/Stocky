@@ -81,6 +81,19 @@ export class PortfolioService extends BaseService {
     }
   }
 
+  async deleteTicker(request: StockyApi.DeleteTickerRequest) {
+    try {
+      return await this.api.delete(request);
+    } catch (error) {
+      console.error('Error deleting ticker:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to delete ticker'
+      } as StockyApi.DeleteTickerResponse;
+    }
+  }
+
   // Portfolio Analysis
   calculateTotalValue(portfolio: StockyApi.PortfolioData): number {
     return portfolio.totalValue || 0;

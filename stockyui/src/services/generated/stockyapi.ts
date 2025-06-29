@@ -53,6 +53,11 @@ export interface IStockyApi {
      * @return Success
      */
     setfunds(body: SetFundsRequest | undefined): Promise<SetFundsResponse>;
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    delete(body: DeleteTickerRequest | undefined): Promise<DeleteTickerResponse>;
 }
 
 export class StockyApi implements IStockyApi {
@@ -510,6 +515,62 @@ export class StockyApi implements IStockyApi {
         }
         return Promise.resolve<SetFundsResponse>(null as any);
     }
+
+    /**
+     * @param body (optional) 
+     * @return Success
+     */
+    delete(body: DeleteTickerRequest | undefined, cancelToken?: CancelToken): Promise<DeleteTickerResponse> {
+        let url_ = this.baseUrl + "/api/Portfolio/delete";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: AxiosRequestConfig = {
+            data: content_,
+            method: "POST",
+            url: url_,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            },
+            cancelToken
+        };
+
+        return this.instance.request(options_).catch((_error: any) => {
+            if (isAxiosError(_error) && _error.response) {
+                return _error.response;
+            } else {
+                throw _error;
+            }
+        }).then((_response: AxiosResponse) => {
+            return this.processDelete(_response);
+        });
+    }
+
+    protected processDelete(response: AxiosResponse): Promise<DeleteTickerResponse> {
+        const status = response.status;
+        let _headers: any = {};
+        if (response.headers && typeof response.headers === "object") {
+            for (const k in response.headers) {
+                if (response.headers.hasOwnProperty(k)) {
+                    _headers[k] = response.headers[k];
+                }
+            }
+        }
+        if (status === 200) {
+            const _responseText = response.data;
+            let result200: any = null;
+            let resultData200  = _responseText;
+            result200 = DeleteTickerResponse.fromJS(resultData200);
+            return Promise.resolve<DeleteTickerResponse>(result200);
+
+        } else if (status !== 200 && status !== 204) {
+            const _responseText = response.data;
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+        }
+        return Promise.resolve<DeleteTickerResponse>(null as any);
+    }
 }
 
 export class AddFundsData implements IAddFundsData {
@@ -793,6 +854,130 @@ export interface IBuyTickerResponse {
     statusCode?: number;
     message?: string | undefined;
     data?: BuyTickerData;
+    error?: string | undefined;
+}
+
+export class DeleteTickerData implements IDeleteTickerData {
+    symbol?: string | undefined;
+
+    constructor(data?: IDeleteTickerData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.symbol = _data["symbol"];
+        }
+    }
+
+    static fromJS(data: any): DeleteTickerData {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteTickerData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["symbol"] = this.symbol;
+        return data;
+    }
+}
+
+export interface IDeleteTickerData {
+    symbol?: string | undefined;
+}
+
+export class DeleteTickerRequest implements IDeleteTickerRequest {
+    symbol!: string;
+
+    constructor(data?: IDeleteTickerRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.symbol = _data["symbol"];
+        }
+    }
+
+    static fromJS(data: any): DeleteTickerRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteTickerRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["symbol"] = this.symbol;
+        return data;
+    }
+}
+
+export interface IDeleteTickerRequest {
+    symbol: string;
+}
+
+export class DeleteTickerResponse implements IDeleteTickerResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: DeleteTickerData;
+    error?: string | undefined;
+
+    constructor(data?: IDeleteTickerResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.success = _data["success"];
+            this.statusCode = _data["statusCode"];
+            this.message = _data["message"];
+            this.data = _data["data"] ? DeleteTickerData.fromJS(_data["data"]) : <any>undefined;
+            this.error = _data["error"];
+        }
+    }
+
+    static fromJS(data: any): DeleteTickerResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteTickerResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["success"] = this.success;
+        data["statusCode"] = this.statusCode;
+        data["message"] = this.message;
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        data["error"] = this.error;
+        return data;
+    }
+}
+
+export interface IDeleteTickerResponse {
+    success?: boolean;
+    statusCode?: number;
+    message?: string | undefined;
+    data?: DeleteTickerData;
     error?: string | undefined;
 }
 
