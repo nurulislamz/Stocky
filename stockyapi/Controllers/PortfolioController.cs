@@ -58,4 +58,10 @@ public class PortfolioController : ControllerBase
     {
         return await _mediator.Send(request, cancellationToken);
     }
+
+    [HttpPost("delete")]
+    public async Task<ActionResult<DeleteTickerResponse>> SetFunds([FromBody] DeleteTickerRequest request, CancellationToken cancellationToken)
+    {
+        return await _mediator.Send(request, cancellationToken);
+    }
 }

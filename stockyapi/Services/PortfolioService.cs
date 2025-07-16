@@ -14,6 +14,7 @@ public interface IPortfolioService
     public Task<AddFundsResponse> AddFunds(AddFundsRequest request);
     public Task<SetFundsResponse> SetFunds(SetFundsRequest request);
     public Task<SubtractFundsResponse> SubtractFunds(SubtractFundsRequest request);
+    public Task<DeleteTickerResponse> DeleteTicker(DeleteTickerRequest request);
 }
 
 public class PortfolioService : IPortfolioService
@@ -403,6 +404,55 @@ public class PortfolioService : IPortfolioService
             Data = new SetFundsData
             {
                 NewBalance = newBalance
+            }
+        };
+    }
+
+    public async Task<DeleteTickerResponse> DeleteTicker(DeleteTickerRequest request)
+    {
+        var userId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.UserId);
+        if (userId == null)
+        {
+            return new DeleteTickerResponse
+            {
+                Success = false,
+                StatusCode = 401,
+                Message = "User not authenticated"
+            };
+        }
+
+        var portfolio = await _portfolioRepository.GetByUserIdAsync(Guid.Parse(userId));
+
+        if (portfolio == null)
+        {
+            return new DeleteTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Portfolio not found"
+            };
+        }
+
+        var holding = await _portfolioRepository.GetHoldingAsync(portfolio.Id, request.Symbol);
+        if (holding == null)
+        {
+            return new DeleteTickerResponse
+            {
+                Success = false,
+                StatusCode = 404,
+                Message = "Stock is not owned"
+            };
+        }
+
+        await _portfolioRepository.DeleteHoldingAsync(holding.Id);
+
+        return new DeleteTickerResponse
+        {
+            Success = true,
+            StatusCode = 200,
+            Data = new DeleteTickerData
+            {
+                Symbol = request.Symbol
             }
         };
     }
