@@ -4,7 +4,7 @@ using stockyapi.Responses;
 using stockyapi.Services;
 using stockymodels.Data;
 
-namespace stockyapi.Repository.Auth;
+namespace stockyapi.RequestHandlers.Auth;
 
 public class LoginRequestHandler : IRequestHandler<LoginRequest, LoginResponse>
 {

@@ -3,7 +3,7 @@ using stockyapi.Requests;
 using stockyapi.Responses;
 using stockyapi.Services;
 
-namespace stockyapi.Repository.Auth;
+namespace stockyapi.RequestHandlers.Auth;
 
 public class RegisterRequestHandler : IRequestHandler<RegisterRequest, RegisterResponse>
 {

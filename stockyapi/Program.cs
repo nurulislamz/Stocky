@@ -10,6 +10,7 @@ using stockymodels.Data;
 using System.Text.Json.Serialization;
 using stockyapi.Repository.Portfolio;
 using stockyapi.Repository.User;
+using stockyapi.Repository.AI;
 
 class Program
 {
@@ -82,10 +83,11 @@ class Program
         services.AddScoped<IPortfolioService, PortfolioService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
-        
+
         services.AddTransient<IPortfolioRepository, PortfolioRepository>();
         services.AddTransient<IUserRepository, UserRepository>();
-        
+        services.AddTransient<IStockyAiRepository, StockyAiRepository>();
+
         services.AddHttpContextAccessor();
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
