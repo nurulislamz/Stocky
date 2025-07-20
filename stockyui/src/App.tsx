@@ -7,6 +7,7 @@ import PortfolioPage from './pages/Portfolio/PortfolioPage';
 import EtfCalculatorPage from './pages/EtfCalculator/EtfCalculatorPage';
 import WatchListPage from './pages/WatchList/WatchListPage';
 import MarketDataPage from './pages/MarketData/MarketDataPage';
+import UserSettingsPage from './pages/UserSettings/UserSettingsPage';
 import { ProtectedRoute } from './contexts/ProtectedRoute';
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="/etfcalculator" element={<EtfCalculatorPage />} />
           <Route path="/watchlist" element={<WatchListPage />} />
           <Route path="/marketdata" element={<MarketDataPage />} />
+          <Route path="/settings" element={<UserSettingsPage />} />
         </Route>
 
         {/* Redirect root to home */}
