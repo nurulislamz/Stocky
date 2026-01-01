@@ -29,6 +29,7 @@ public class UserModel : BaseModel
 
   [Required]
   [MinLength(8)]
+  [MaxLength(255)]
   [DataType(DataType.Password)]
   public required string Password { get; set; }
 
