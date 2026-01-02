@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using MediatR;
-using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class SellTickerRequest : IRequest<SellTickerResponse>
+public class SellTickerRequest
 {
     [Required]
     public required string Symbol { get; set; }
