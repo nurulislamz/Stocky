@@ -1,0 +1,23 @@
+using stockyapi.Requests;
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using stockyapi.Responses;
+
+namespace stockyapi.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class AiController : ControllerBase
+{
+  private readonly ILogger<AiController> _logger;
+
+  public AiController(
+    ILogger<AiController> logger
+    )
+  {
+    _logger = logger;
+  }
+
+}
