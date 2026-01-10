@@ -1,7 +1,6 @@
-using stockyapi.Requests;
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using stockyapi.Requests;
 using stockyapi.Responses;
 
 namespace stockyapi.Controllers;
@@ -11,30 +10,23 @@ namespace stockyapi.Controllers;
 [Route("api/[controller]")]
 public class AccountSettingsController : ControllerBase
 {
-  private readonly IMediator _mediator;
   private readonly ILogger<AccountSettingsController> _logger;
 
   public AccountSettingsController(
-    ILogger<AccountSettingsController> logger,
-    IMediator mediator)
+    ILogger<AccountSettingsController> logger)
   {
     _logger = logger;
-    _mediator = mediator;
   }
 
   [HttpPost("change-password")]
-  public async Task<ActionResult<ChangePasswordResponse>> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken cancellationToken)
+  public async Task<ActionResult> ChangePassword([FromBody] string request, CancellationToken cancellationToken)
   {
-    var response = await _mediator.Send(request, cancellationToken);
-
-    return Ok(response);
+    throw new NotImplementedException();
   }
 
   [HttpPost("set-openai-api-key")]
-  public async Task<ActionResult<SetOpenAiApiKeyResponse>> SetOpenAiApiKey([FromBody] SetOpenAiApiKeyRequest request, CancellationToken cancellationToken)
+  public async Task<ActionResult> SetOpenAiApiKey([FromBody] string request, CancellationToken cancellationToken)
   {
-    var response = await _mediator.Send(request, cancellationToken);
-
-    return Ok(response);
+    throw new NotImplementedException();
   }
 }

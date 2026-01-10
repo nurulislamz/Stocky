@@ -9,7 +9,8 @@ public class ApplicationDbContext : DbContext
   public DbSet<UserModel> Users { get; set; }
   public DbSet<PortfolioModel> Portfolios { get; set; }
   public DbSet<StockHoldingModel> StockHoldings { get; set; }
-  public DbSet<TransactionModel> Transactions { get; set; }
+  public DbSet<AssetTransactionModel> AssetTransactions { get; set; }
+  public DbSet<FundsTransactionModel> FundsTransactions { get; set; }
   public DbSet<WatchlistModel> Watchlist { get; set; }
   public DbSet<UserPreferencesModel> UserPreferences { get; set; }
   public DbSet<PriceAlertModel> PriceAlerts { get; set; }

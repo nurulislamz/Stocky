@@ -5,7 +5,7 @@ using stockyapi.Repository.AI;
 
 namespace stockyapi.RequestHandlers.Ai;
 
-public class AiRequestHandler : IRequestHandler<AiRequest, AiResponse>
+public class AiRequestHandler
 {
     private readonly IStockyAiRepository _stockyAiRepository;
 
@@ -16,7 +16,7 @@ public class AiRequestHandler : IRequestHandler<AiRequest, AiResponse>
 
     public async Task<AiResponse> Handle(AiRequest request, CancellationToken cancellationToken)
     {
-        var chatGptResponse = await _stockyAiRepository.CreateAsync(request.Prompt, request.ApiKey);
+        var chatGptResponse = await _stockyAiRepository.CreateAsync(request.Prompt);
 
         return new AiResponse
         {
