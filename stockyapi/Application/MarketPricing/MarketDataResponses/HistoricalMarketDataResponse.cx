@@ -1,0 +1,10 @@
+﻿namespace stockyapi.Responses;
+
+public class HistoricalPriceDataResponse : BaseResponse<HistoricalPriceData>;
+
+public class HistoricalPriceData
+{
+  public string Symbol { get; set; }
+  public decimal CurrentPrice { get; set; }
+  public DateTime Timestamp { get; set; }
+}
