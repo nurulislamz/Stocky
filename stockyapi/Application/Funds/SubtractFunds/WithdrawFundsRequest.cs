@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using MediatR;
-using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class SubtractFundsRequest : IRequest<SubtractFundsResponse>
+public class WithdrawFundsRequest
 {
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]

@@ -4,9 +4,9 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class TransactionConfiguration : IEntityTypeConfiguration<TransactionModel>
+public class TransactionConfiguration : IEntityTypeConfiguration<AssetTransactionModel>
 {
-    public void Configure(EntityTypeBuilder<TransactionModel> builder)
+    public void Configure(EntityTypeBuilder<AssetTransactionModel> builder)
     {
         builder.ToTable("Transactions");
 
