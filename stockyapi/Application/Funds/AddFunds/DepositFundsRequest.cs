@@ -1,10 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using MediatR;
-using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class AddFundsRequest : IRequest<AddFundsResponse>
+public class DepositFundsRequest
 {
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]

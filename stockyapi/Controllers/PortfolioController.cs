@@ -1,7 +1,11 @@
-using stockyapi.Requests;
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
+using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using stockyapi.Application.Portfolio;
+using stockyapi.Failures;
+using stockyapi.Middleware;
+using stockyapi.Requests;
 using stockyapi.Responses;
 
 namespace stockyapi.Controllers;
@@ -9,59 +13,94 @@ namespace stockyapi.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class PortfolioController : ControllerBase
+public class PortfolioController : BaseController
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<PortfolioController> _logger;
+    private readonly IPortfolioApi _portfolioApi;
 
     public PortfolioController(
-        ILogger<PortfolioController> logger,
-        IMediator mediator)
+        IPortfolioApi portfolioApi)
     {
-        _logger = logger;
-        _mediator = mediator;
+        _portfolioApi = portfolioApi;
     }
-
-    [HttpGet()]
-    public async Task<ActionResult<UserPortfolioResponse>> GetPortfolio(CancellationToken cancellationToken)
+    
+    [HttpGet("holdings")]
+    public async Task<ActionResult<ListHoldingsResponse>> ListHoldings(CancellationToken cancellationToken)
     {
-        var request = new UserPortfolioRequest();
-        return await _mediator.Send(request, cancellationToken);
+        var response = await _portfolioApi.ListHoldings(cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
-
+    
+    [HttpGet("holdings/id/{id}")]
+    public async Task<ActionResult<GetHoldingsResponse>> GetHoldingsById(
+        [FromRoute] 
+        [RegularExpression(@"^[^,]+(,[^,]+)*$", ErrorMessage = "The request must be a comma-separated list with at least one item.")]
+        [CommaSeparated]
+        string[] ids, 
+        CancellationToken cancellationToken)
+    {
+        var requestedHoldingIds = ids.Select(Guid.Parse);
+        var response = await _portfolioApi.GetHoldingsById(requestedHoldingIds.ToArray(), cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
+    }
+    
+    [HttpGet("holdings/ticker/{symbols}")]
+    public async Task<ActionResult<GetHoldingsResponse>> GetHoldingsByTicker(
+        [FromRoute]
+        [RegularExpression(@"^[^,]+(,[^,]+)*$", ErrorMessage = "The request must be a comma-separated list with at least one item.")]
+        [CommaSeparated]
+        string[] symbols, 
+        CancellationToken cancellationToken)
+    {
+        var response = await _portfolioApi.GetHoldingsByTicker(symbols, cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
+    }
+    
     [HttpPost("buy")]
     public async Task<ActionResult<BuyTickerResponse>> Buy([FromBody] BuyTickerRequest request, CancellationToken cancellationToken)
     {
-        return await _mediator.Send(request, cancellationToken);
+        var response= await _portfolioApi.BuyTicker(request, cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
 
     [HttpPost("sell")]
     public async Task<ActionResult<SellTickerResponse>> Sell([FromBody] SellTickerRequest request, CancellationToken cancellationToken)
     {
-        return await _mediator.Send(request, cancellationToken);
+        var response= await _portfolioApi.SellTicker(request, cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
-
-    [HttpPost("addfunds")]
-    public async Task<ActionResult<AddFundsResponse>> AddFunds([FromBody] AddFundsRequest request, CancellationToken cancellationToken)
+    
+    [HttpDelete("holdings/id/{id}")]
+    public async Task<ActionResult<DeleteHoldingsResponse>> DeleteHoldingsById(
+        [FromRoute] 
+        [RegularExpression(@"^[^,]+(,[^,]+)*$", ErrorMessage = "The request must be a comma-separated list with at least one item.")]
+        [CommaSeparated]
+        string[] ids, 
+        CancellationToken cancellationToken)
     {
-        return await _mediator.Send(request, cancellationToken);
+        var requestedHoldingIds = ids.Select(Guid.Parse);
+        var response = await _portfolioApi.DeleteHoldingsById(requestedHoldingIds.ToArray(), cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
-
-    [HttpPost("subtractfunds")]
-    public async Task<ActionResult<SubtractFundsResponse>> SubtractFunds([FromBody] SubtractFundsRequest request, CancellationToken cancellationToken)
+    
+    [HttpDelete("holdings/ticker/{symbol}")]
+    public async Task<ActionResult<DeleteHoldingsResponse>> DeleteHoldingsByTicker(
+        [FromRoute]
+        [RegularExpression(@"^[^,]+(,[^,]+)*$", ErrorMessage = "The request must be a comma-separated list with at least one item.")]
+        [CommaSeparated]
+        string[] symbols, 
+        CancellationToken cancellationToken)
     {
-        return await _mediator.Send(request, cancellationToken);
+        var requestedHoldingIds = symbols.Select(Guid.Parse);
+        var response = await _portfolioApi.DeleteHoldingsById(requestedHoldingIds.ToArray(), cancellationToken);
+        return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
-
-    [HttpPost("setfunds")]
-    public async Task<ActionResult<SetFundsResponse>> SetFunds([FromBody] SetFundsRequest request, CancellationToken cancellationToken)
+    
+    [HttpPut("holdings/ticker/{symbol}")]
+    public async Task<ActionResult<DeleteHoldingsResponse>> UpdateHoldingsByTicker(
+        [FromRoute]
+        string symbol, 
+        CancellationToken cancellationToken)
     {
-        return await _mediator.Send(request, cancellationToken);
-    }
-
-    [HttpPost("delete")]
-    public async Task<ActionResult<DeleteTickerResponse>> SetFunds([FromBody] DeleteTickerRequest request, CancellationToken cancellationToken)
-    {
-        return await _mediator.Send(request, cancellationToken);
+        throw new NotImplementedException();
     }
 }

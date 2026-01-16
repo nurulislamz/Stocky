@@ -33,5 +33,6 @@ public class PortfolioModel : BaseModel
 
     public virtual required ICollection<StockHoldingModel> StockHoldings { get; set; }
 
-    public virtual required ICollection<TransactionModel> Transactions { get; set; }
+    public virtual required ICollection<AssetTransactionModel> Transactions { get; set; }
+    public virtual required ICollection<FundsTransactionModel> Funds { get; set; }
 }
