@@ -7,8 +7,8 @@ public interface IYahooFinanceService
 {
     Task<Result<ChartResultArray>> GetChartAsync(
         string symbol,
-        string range,
-        string interval,
+        YahooRange range,
+        YahooInterval interval,
         CancellationToken cancellationToken = default
     );
 

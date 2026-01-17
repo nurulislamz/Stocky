@@ -1,455 +1,161 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using System.Net.Http.Json;
-using stockyapi.Failures;
-using stockyapi.Middleware;
+﻿using stockyapi.Middleware;
+using stockyapi.Repository.YahooFinance.Helper;
 using stockyapi.Services.YahooFinance;
 using stockyapi.Services.YahooFinance.Types;
 
 namespace stockyapi.Repository.YahooFinance;
 
-public class YahooFinanceService : IYahooFinanceService
+public sealed class YahooFinanceService : IYahooFinanceService
 {
-    private readonly HttpClient _httpClient;
-    private readonly IMemoryCache _cache;
-    private readonly ILogger<YahooFinanceService> _logger;
-    private readonly SemaphoreSlim _throttler;
-    private const int MaxRequestsPerMinute = 50;
+    private readonly YahooExecutionHelper _executor;
 
-    public YahooFinanceService(
-        HttpClient httpClient,
-        IMemoryCache cache,
-        ILogger<YahooFinanceService> logger
-    )
+    public YahooFinanceService(YahooExecutionHelper executor)
     {
-        _httpClient = httpClient;
-        _cache = cache;
-        _logger = logger;
-        _throttler = new SemaphoreSlim(MaxRequestsPerMinute);
+        _executor = executor;
     }
 
-    public async Task<Result<ChartResultArray>> GetChartAsync(string symbol, YahooRange range, YahooInterval interval,
-        CancellationToken cancellationToken = default)
-    {
-        var rangeStr = range.ToApiString();
-        var intervalStr = interval.ToApiString();
-
-        var cacheKey = $"chart:{symbol}:{rangeStr}:{intervalStr}";
-
-        if (_cache.TryGetValue(cacheKey, out ChartResultArray? cachedResult) && cachedResult is not null)
-        {
-            return cachedResult;
-        }
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            // Yahoo Finance Chart API v8
-            // Example: https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1d&interval=1m
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Chart, symbol, range, interval);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo Finance API Error: {response.StatusCode}");
-
-            var result =
-                await response.Content.ReadFromJsonAsync<ChartResultArray>(cancellationToken: cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize Yahoo Finance response");
-
-            // Cache for 1 minute (charts update frequently during market hours)
-            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
-
-            return Result<ChartResultArray>.Success(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Exception in GetChartAsync for {Symbol}", symbol);
-            return Result<ChartResultArray>.Fail(new InternalServerFailure500(ex.Message));
-        }
-        finally
-        {
-            _throttler.Release();
-        }
-    }
-
-    public async Task<Result<FundamentalsTimeSeriesResults>> GetFundamentalsTimeSeriesAsync(
+    public Task<Result<ChartResultArray>> GetChartAsync(
         string symbol,
-        CancellationToken cancellationToken = default,
+        YahooRange range,
+        YahooInterval interval,
+        CancellationToken ct = default)
+    {
+        return _executor.ExecuteAsync<ChartResultArray>(
+            cacheKey: $"chart:{symbol}:{range}:{interval}",
+            cacheTtl: TimeSpan.FromMinutes(10),
+            uri: YahooEndpointBuilder.BuildChartUri(symbol, range, interval),
+            ct
+        );
+    }
+
+    public Task<Result<FundamentalsTimeSeriesResults>> GetFundamentalsTimeSeriesAsync(
+        string symbol,
+        CancellationToken ct = default,
         params string[] types)
     {
-        var typesStr = string.Join(",", types);
-        var cacheKey = $"fundamentals:{symbol}:{typesStr}";
-
-        if (_cache.TryGetValue(cacheKey, out FundamentalsTimeSeriesResults? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.FundamentalsTimeSeries,
-                symbol,
-                types: types
-            );
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<FundamentalsTimeSeriesResults>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize fundamentals response");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromHours(1));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetFundamentalsTimeSeriesAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<FundamentalsTimeSeriesResults>(
+            cacheKey: $"fundamentals:{symbol}:{string.Join(",", types)}",
+            cacheTtl: TimeSpan.FromHours(1),
+            uri: YahooEndpointBuilder.BuildFundamentalsTimeSeriesUri(symbol, types),
+            ct
+        );
     }
 
-    public async Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
+    public Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
         string symbol,
         string period1,
         string period2,
         string interval,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var cacheKey = $"historical:{symbol}:{period1}:{period2}:{interval}";
-
-        if (_cache.TryGetValue(cacheKey, out HistoricalHistoryResult? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.Historical,
-                symbol,
-                period1: period1,
-                period2: period2,
-                interval: interval
-            );
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<HistoricalHistoryResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize historical data");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromHours(6));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetHistoricalAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<HistoricalHistoryResult>(
+            cacheKey: $"historical:{symbol}:{period1}:{period2}:{interval}",
+            cacheTtl: TimeSpan.FromHours(6),
+            uri: YahooEndpointBuilder.BuildHistoricalUri(symbol, period1, period2, interval),
+            ct
+        );
     }
 
-    public async Task<Result<InsightsResult>> GetInsightsAsync(string symbol,
-        CancellationToken cancellationToken = default)
+    public Task<Result<InsightsResult>> GetInsightsAsync(
+        string symbol,
+        CancellationToken ct = default)
     {
-        var cacheKey = $"insights:{symbol}";
-
-        if (_cache.TryGetValue(cacheKey, out InsightsResult? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Insights, symbol);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<InsightsResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize insights");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromHours(12));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetInsightsAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<InsightsResult>(
+            cacheKey: $"insights:{symbol}",
+            cacheTtl: TimeSpan.FromHours(12),
+            uri: YahooEndpointBuilder.BuildInsightsUri(symbol),
+            ct
+        );
     }
 
-    public Task<Result<OptionsResult>> GetOptionsAsync(string symbol, CancellationToken cancellationToken = default)
-        => GetOptionsAsync(symbol, null, cancellationToken);
+    public Task<Result<OptionsResult>> GetOptionsAsync(
+        string symbol,
+        CancellationToken ct = default)
+        => GetOptionsAsync(symbol, null, ct);
 
-    public async Task<Result<OptionsResult>> GetOptionsAsync(
+    public Task<Result<OptionsResult>> GetOptionsAsync(
         string symbol,
         string? date,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var cacheKey = $"options:{symbol}:{date ?? "latest"}";
-
-        if (_cache.TryGetValue(cacheKey, out OptionsResult? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.Options,
-                symbol,
-                date: date
-            );
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<OptionsResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize options");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(15));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetOptionsAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<OptionsResult>(
+            cacheKey: $"options:{symbol}:{date ?? "latest"}",
+            cacheTtl: TimeSpan.FromMinutes(15),
+            uri: YahooEndpointBuilder.BuildOptionsUri(symbol, date),
+            ct
+        );
     }
 
-    public async Task<Result<QuoteResponseArray>> GetQuoteAsync(
-        CancellationToken cancellationToken = default,
+    public Task<Result<QuoteResponseArray>> GetQuoteAsync(
+        CancellationToken ct = default,
         params string[] symbols)
     {
-        var symbolsStr = string.Join(",", symbols);
-        var cacheKey = $"quote:{symbolsStr}";
-
-        if (_cache.TryGetValue(cacheKey, out QuoteResponseArray? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Quote, symbols: symbols);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<QuoteResponseArray>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize quotes");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromSeconds(30));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetQuoteAsync failed");
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<QuoteResponseArray>(
+            cacheKey: $"quote:{string.Join(",", symbols)}",
+            cacheTtl: TimeSpan.FromSeconds(30),
+            uri: YahooEndpointBuilder.BuildQuoteUri(symbols),
+            ct
+        );
     }
 
-    public async Task<Result<QuoteSummaryResult>> GetQuoteSummaryAsync(
+    public Task<Result<QuoteSummaryResult>> GetQuoteSummaryAsync(
         string symbol,
-        CancellationToken cancellationToken = default,
+        CancellationToken ct = default,
         params string[] modules)
     {
-        var modulesStr = string.Join(",", modules);
-        var cacheKey = $"quotesummary:{symbol}:{modulesStr}";
-
-        if (_cache.TryGetValue(cacheKey, out QuoteSummaryResult? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.QuoteSummary,
-                symbol,
-                modules: modules
-            );
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<QuoteSummaryResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize quote summary");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromHours(2));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetQuoteSummaryAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<QuoteSummaryResult>(
+            cacheKey: $"quotesummary:{symbol}:{string.Join(",", modules)}",
+            cacheTtl: TimeSpan.FromHours(2),
+            uri: YahooEndpointBuilder.BuildQuoteSummaryUri(symbol, modules),
+            ct
+        );
     }
 
-    public async Task<Result<RecommendationsBySymbolResponseArray>> GetRecommendationsBySymbolAsync(
+    public Task<Result<RecommendationsBySymbolResponseArray>> GetRecommendationsBySymbolAsync(
         string symbol,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.RecommendationsBySymbol, symbol);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result =
-                await response.Content.ReadFromJsonAsync<RecommendationsBySymbolResponseArray>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize recommendations");
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetRecommendationsBySymbolAsync failed for {Symbol}", symbol);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<RecommendationsBySymbolResponseArray>(
+            cacheKey: $"recommendations:{symbol}",
+            cacheTtl: TimeSpan.FromHours(6),
+            uri: YahooEndpointBuilder.BuildRecommendationsBySymbolUri(symbol),
+            ct
+        );
     }
 
-    public async Task<Result<ScreenerResult>> RunScreenerAsync(string screenerId,
-        CancellationToken cancellationToken = default)
+    public Task<Result<ScreenerResult>> RunScreenerAsync(
+        string screenerId,
+        CancellationToken ct = default)
     {
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Screener, screenerId: screenerId);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<ScreenerResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize screener result");
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "RunScreenerAsync failed for {ScreenerId}", screenerId);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<ScreenerResult>(
+            cacheKey: $"screener:{screenerId}",
+            cacheTtl: TimeSpan.FromMinutes(5),
+            uri: YahooEndpointBuilder.BuildScreenerUri(screenerId),
+            ct
+        );
     }
 
-    public async Task<Result<SearchResult>> SearchAsync(string query, CancellationToken cancellationToken = default)
+    public Task<Result<SearchResult>> SearchAsync(
+        string query,
+        CancellationToken ct = default)
     {
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Search, query: query);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<SearchResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize search result");
-
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "SearchAsync failed for query {Query}", query);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<SearchResult>(
+            cacheKey: $"search:{query}",
+            cacheTtl: TimeSpan.FromMinutes(10),
+            uri: YahooEndpointBuilder.BuildSearchUri(query),
+            ct
+        );
     }
 
-    public async Task<Result<TrendingSymbolsResult>> GetTrendingSymbolsAsync(
+    public Task<Result<TrendingSymbolsResult>> GetTrendingSymbolsAsync(
         string region,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
-        var cacheKey = $"trending:{region}";
-
-        if (_cache.TryGetValue(cacheKey, out TrendingSymbolsResult? cached))
-            return cached!;
-
-        await _throttler.WaitAsync(cancellationToken);
-
-        try
-        {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.TrendingSymbols, region: region);
-
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return new InternalServerFailure500($"Yahoo API error: {response.StatusCode}");
-
-            var result = await response.Content.ReadFromJsonAsync<TrendingSymbolsResult>(cancellationToken);
-            if (result is null)
-                return new InternalServerFailure500("Failed to deserialize trending symbols");
-
-            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetTrendingSymbolsAsync failed for region {Region}", region);
-            return new InternalServerFailure500(ex.Message);
-        }
-        finally
-        {
-            _throttler.Release();
-        }
+        return _executor.ExecuteAsync<TrendingSymbolsResult>(
+            cacheKey: $"trending:{region}",
+            cacheTtl: TimeSpan.FromMinutes(10),
+            uri: YahooEndpointBuilder.BuildTrendingSymbolsUri(region),
+            ct
+        );
     }
 }

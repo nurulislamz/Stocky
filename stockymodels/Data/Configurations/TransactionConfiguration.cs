@@ -10,7 +10,6 @@ public class TransactionConfiguration : IEntityTypeConfiguration<AssetTransactio
     {
         builder.ToTable("Transactions");
 
-        builder.HasIndex(e => e.Status);
         builder.HasIndex(e => new { e.PortfolioId, e.CreatedAt });
     }
 }

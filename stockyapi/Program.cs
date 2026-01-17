@@ -60,6 +60,8 @@ class Program
         services.AddEndpointsApiExplorer();
         services.AddSwaggerDocumentation();
 
+        // TODO: Add SqlLite 
+        
         // Configure PostgreSQL with retry policy
         services.AddDbContext<ApplicationDbContext>(options =>
         {
