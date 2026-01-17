@@ -9,13 +9,13 @@ namespace stockyapi.Services.YahooFinance.Types;
 public sealed class TrendingSymbolsResult : YahooFinanceDto
 {
     [JsonPropertyName("count")]
-    public int? Count { get; set; }
+    public int Count { get; set; }
 
     [JsonPropertyName("jobTimestamp")]
-    public long? JobTimestamp { get; set; }
+    public long JobTimestamp { get; set; }
 
     [JsonPropertyName("startInterval")]
-    public long? StartInterval { get; set; }
+    public long StartInterval { get; set; }
 
     [JsonPropertyName("quotes")]
     public List<TrendingSymbol> Quotes { get; set; } = [];
@@ -24,5 +24,5 @@ public sealed class TrendingSymbolsResult : YahooFinanceDto
 public sealed class TrendingSymbol : YahooFinanceDto
 {
     [JsonPropertyName("symbol")]
-    public string? Symbol { get; set; }
+    public string Symbol { get; set; } = null!;
 }

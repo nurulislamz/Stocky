@@ -10,7 +10,7 @@ namespace stockyapi.Services.YahooFinance.Types;
 public sealed class ChartResultArray : YahooFinanceDto
 {
     [JsonPropertyName("meta")]
-    public ChartMeta? Meta { get; set; }
+    public ChartMeta Meta { get; set; } = null!;
 
     [JsonPropertyName("quotes")]
     public List<ChartResultArrayQuote> Quotes { get; set; } = [];
@@ -22,7 +22,8 @@ public sealed class ChartResultArray : YahooFinanceDto
 public sealed class ChartResultArrayQuote : YahooFinanceDto
 {
     [JsonPropertyName("date")]
-    public DateTimeOffset? Date { get; set; }
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("open")]
     public decimal? Open { get; set; }
@@ -46,13 +47,13 @@ public sealed class ChartResultArrayQuote : YahooFinanceDto
 public sealed class ChartResultObject : YahooFinanceDto
 {
     [JsonPropertyName("meta")]
-    public ChartMeta? Meta { get; set; }
+    public ChartMeta Meta { get; set; } = null!;
 
     [JsonPropertyName("timestamp")]
     public List<long>? Timestamp { get; set; }
 
     [JsonPropertyName("indicators")]
-    public ChartIndicatorsObject? Indicators { get; set; }
+    public ChartIndicatorsObject Indicators { get; set; } = null!;
 
     [JsonPropertyName("events")]
     public ChartEventsObject? Events { get; set; }
@@ -64,19 +65,19 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal? ChartPreviousClose { get; set; }
 
     [JsonPropertyName("currency")]
-    public string? Currency { get; set; }
+    public string Currency { get; set; } = null!;
 
     [JsonPropertyName("currentTradingPeriod")]
-    public JsonElement? CurrentTradingPeriod { get; set; } // complex (trading periods), keep flexible
+    public ChartMetaCurrentTradingPeriod CurrentTradingPeriod { get; set; } = null!;
 
     [JsonPropertyName("dataGranularity")]
-    public string? DataGranularity { get; set; }
+    public string DataGranularity { get; set; } = null!;
 
     [JsonPropertyName("exchangeName")]
-    public string? ExchangeName { get; set; }
+    public string ExchangeName { get; set; } = null!;
 
     [JsonPropertyName("exchangeTimezoneName")]
-    public string? ExchangeTimezoneName { get; set; }
+    public string ExchangeTimezoneName { get; set; } = null!;
 
     [JsonPropertyName("fiftyTwoWeekHigh")]
     public decimal? FiftyTwoWeekHigh { get; set; }
@@ -85,19 +86,20 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal? FiftyTwoWeekLow { get; set; }
 
     [JsonPropertyName("firstTradeDate")]
-    public long? FirstTradeDate { get; set; }
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
+    public DateTimeOffset? FirstTradeDate { get; set; }
 
     [JsonPropertyName("fullExchangeName")]
     public string? FullExchangeName { get; set; }
 
     [JsonPropertyName("gmtoffset")]
-    public int? Gmtoffset { get; set; }
+    public int Gmtoffset { get; set; }
 
     [JsonPropertyName("hasPrePostMarketData")]
     public bool? HasPrePostMarketData { get; set; }
 
     [JsonPropertyName("instrumentType")]
-    public string? InstrumentType { get; set; }
+    public string InstrumentType { get; set; } = null!;
 
     [JsonPropertyName("longName")]
     public string? LongName { get; set; }
@@ -106,10 +108,10 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal? PreviousClose { get; set; }
 
     [JsonPropertyName("priceHint")]
-    public int? PriceHint { get; set; }
+    public int PriceHint { get; set; }
 
     [JsonPropertyName("range")]
-    public string? Range { get; set; }
+    public string Range { get; set; } = null!;
 
     [JsonPropertyName("regularMarketDayHigh")]
     public decimal? RegularMarketDayHigh { get; set; }
@@ -118,10 +120,11 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal? RegularMarketDayLow { get; set; }
 
     [JsonPropertyName("regularMarketPrice")]
-    public decimal? RegularMarketPrice { get; set; }
+    public decimal RegularMarketPrice { get; set; }
 
     [JsonPropertyName("regularMarketTime")]
-    public long? RegularMarketTime { get; set; }
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset RegularMarketTime { get; set; }
 
     [JsonPropertyName("regularMarketVolume")]
     public long? RegularMarketVolume { get; set; }
@@ -133,22 +136,112 @@ public sealed class ChartMeta : YahooFinanceDto
     public string? ShortName { get; set; }
 
     [JsonPropertyName("symbol")]
-    public string? Symbol { get; set; }
+    public string Symbol { get; set; } = null!;
 
     [JsonPropertyName("timezone")]
-    public string? Timezone { get; set; }
+    public string Timezone { get; set; } = null!;
 
     [JsonPropertyName("tradingPeriods")]
-    public JsonElement? TradingPeriods { get; set; } // complex, keep flexible
+    [JsonConverter(typeof(ChartMetaTradingPeriodsValueConverter))]
+    public ChartMetaTradingPeriodsValue? TradingPeriods { get; set; }
 
     [JsonPropertyName("validRanges")]
-    public List<string>? ValidRanges { get; set; }
+    public List<string> ValidRanges { get; set; } = [];
+}
+
+public sealed class ChartMetaCurrentTradingPeriod : YahooFinanceDto
+{
+    [JsonPropertyName("pre")]
+    public ChartMetaTradingPeriod Pre { get; set; } = null!;
+
+    [JsonPropertyName("regular")]
+    public ChartMetaTradingPeriod Regular { get; set; } = null!;
+
+    [JsonPropertyName("post")]
+    public ChartMetaTradingPeriod Post { get; set; } = null!;
+}
+
+public sealed class ChartMetaTradingPeriod : YahooFinanceDto
+{
+    [JsonPropertyName("timezone")]
+    public string Timezone { get; set; } = null!;
+
+    [JsonPropertyName("start")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset Start { get; set; }
+
+    [JsonPropertyName("end")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset End { get; set; }
+
+    [JsonPropertyName("gmtoffset")]
+    public int Gmtoffset { get; set; }
+}
+
+public sealed class ChartMetaTradingPeriods : YahooFinanceDto
+{
+    [JsonPropertyName("pre")]
+    public List<List<ChartMetaTradingPeriod>>? Pre { get; set; }
+
+    [JsonPropertyName("post")]
+    public List<List<ChartMetaTradingPeriod>>? Post { get; set; }
+
+    [JsonPropertyName("regular")]
+    public List<List<ChartMetaTradingPeriod>>? Regular { get; set; }
+}
+
+public sealed class ChartMetaTradingPeriodsValue : YahooFinanceDto
+{
+    public ChartMetaTradingPeriods? Structured { get; set; }
+    public List<List<ChartMetaTradingPeriod>>? Sessions { get; set; }
+}
+
+public sealed class ChartMetaTradingPeriodsValueConverter : JsonConverter<ChartMetaTradingPeriodsValue>
+{
+    public override ChartMetaTradingPeriodsValue? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return null;
+        }
+
+        if (reader.TokenType == JsonTokenType.StartObject)
+        {
+            var structured = JsonSerializer.Deserialize<ChartMetaTradingPeriods>(ref reader, options);
+            return new ChartMetaTradingPeriodsValue { Structured = structured };
+        }
+
+        if (reader.TokenType == JsonTokenType.StartArray)
+        {
+            var sessions = JsonSerializer.Deserialize<List<List<ChartMetaTradingPeriod>>>(ref reader, options);
+            return new ChartMetaTradingPeriodsValue { Sessions = sessions };
+        }
+
+        throw new JsonException("Unexpected token when parsing tradingPeriods.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, ChartMetaTradingPeriodsValue value, JsonSerializerOptions options)
+    {
+        if (value.Structured is not null)
+        {
+            JsonSerializer.Serialize(writer, value.Structured, options);
+            return;
+        }
+
+        if (value.Sessions is not null)
+        {
+            JsonSerializer.Serialize(writer, value.Sessions, options);
+            return;
+        }
+
+        writer.WriteNullValue();
+    }
 }
 
 public sealed class ChartIndicatorsObject : YahooFinanceDto
 {
     [JsonPropertyName("quote")]
-    public List<ChartIndicatorQuote>? Quote { get; set; }
+    public List<ChartIndicatorQuote> Quote { get; set; } = [];
 
     [JsonPropertyName("adjclose")]
     public List<ChartIndicatorAdjclose>? Adjclose { get; set; }
@@ -157,19 +250,19 @@ public sealed class ChartIndicatorsObject : YahooFinanceDto
 public sealed class ChartIndicatorQuote : YahooFinanceDto
 {
     [JsonPropertyName("open")]
-    public List<decimal?>? Open { get; set; }
+    public List<decimal?> Open { get; set; } = [];
 
     [JsonPropertyName("high")]
-    public List<decimal?>? High { get; set; }
+    public List<decimal?> High { get; set; } = [];
 
     [JsonPropertyName("low")]
-    public List<decimal?>? Low { get; set; }
+    public List<decimal?> Low { get; set; } = [];
 
     [JsonPropertyName("close")]
-    public List<decimal?>? Close { get; set; }
+    public List<decimal?> Close { get; set; } = [];
 
     [JsonPropertyName("volume")]
-    public List<long?>? Volume { get; set; }
+    public List<long?> Volume { get; set; } = [];
 }
 
 public sealed class ChartIndicatorAdjclose : YahooFinanceDto
@@ -199,23 +292,25 @@ public sealed class ChartEventsObject : YahooFinanceDto
 public sealed class ChartEventDividend : YahooFinanceDto
 {
     [JsonPropertyName("amount")]
-    public decimal? Amount { get; set; }
+    public decimal Amount { get; set; }
 
     [JsonPropertyName("date")]
-    public long? Date { get; set; }
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset Date { get; set; }
 }
 
 public sealed class ChartEventSplit : YahooFinanceDto
 {
     [JsonPropertyName("date")]
-    public long? Date { get; set; }
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("denominator")]
-    public int? Denominator { get; set; }
+    public int Denominator { get; set; }
 
     [JsonPropertyName("numerator")]
-    public int? Numerator { get; set; }
+    public int Numerator { get; set; }
 
     [JsonPropertyName("splitRatio")]
-    public string? SplitRatio { get; set; }
+    public string SplitRatio { get; set; } = null!;
 }
