@@ -397,9 +397,11 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public List<object>? CorporateActions { get; set; }
 
     [JsonPropertyName("earningsCallTimestampStart")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? EarningsCallTimestampStart { get; set; }
 
     [JsonPropertyName("earningsCallTimestampEnd")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? EarningsCallTimestampEnd { get; set; }
 
     [JsonPropertyName("isEarningsDateEstimate")]
@@ -412,6 +414,7 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public decimal? PreMarketChangePercent { get; set; }
 
     [JsonPropertyName("preMarketTime")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? PreMarketTime { get; set; }
 
     [JsonPropertyName("preMarketPrice")]

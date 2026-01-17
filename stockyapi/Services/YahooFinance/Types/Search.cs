@@ -76,6 +76,7 @@ public sealed class SearchNews : YahooFinanceDto
     public string Link { get; set; } = null!;
 
     [JsonPropertyName("providerPublishTime")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ProviderPublishTime { get; set; }
 
     [JsonPropertyName("publisher")]
@@ -134,12 +135,14 @@ public sealed class SearchQuote : YahooFinanceDto
     public decimal? Score { get; set; }
 
     [JsonPropertyName("newListingDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? NewListingDate { get; set; }
 
     [JsonPropertyName("prevName")]
     public string? PrevName { get; set; }
 
     [JsonPropertyName("nameChangeDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? NameChangeDate { get; set; }
 
     [JsonPropertyName("sector")]

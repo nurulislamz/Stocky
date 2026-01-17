@@ -9,6 +9,7 @@ namespace stockyapi.Services.YahooFinance.Types;
 public sealed class OptionsResult : YahooFinanceDto
 {
     [JsonPropertyName("expirationDates")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetListConverter))]
     public List<DateTimeOffset> ExpirationDates { get; set; } = [];
 
     [JsonPropertyName("hasMiniOptions")]
@@ -30,6 +31,7 @@ public sealed class OptionsResult : YahooFinanceDto
 public sealed class Option : YahooFinanceDto
 {
     [JsonPropertyName("expirationDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ExpirationDate { get; set; }
 
     [JsonPropertyName("hasMiniOptions")]
@@ -63,6 +65,7 @@ public sealed class CallOrPut : YahooFinanceDto
     public string? Currency { get; set; }
 
     [JsonPropertyName("expiration")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Expiration { get; set; }
 
     [JsonPropertyName("impliedVolatility")]
@@ -75,6 +78,7 @@ public sealed class CallOrPut : YahooFinanceDto
     public decimal LastPrice { get; set; }
 
     [JsonPropertyName("lastTradeDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset LastTradeDate { get; set; }
 
     [JsonPropertyName("openInterest")]

@@ -102,6 +102,7 @@ public class QuoteBase : YahooFinanceDto
     public decimal? RegularMarketChangePercent { get; set; }
 
     [JsonPropertyName("regularMarketTime")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? RegularMarketTime { get; set; }
 
     [JsonPropertyName("regularMarketVolume")]
@@ -129,6 +130,7 @@ public class QuoteBase : YahooFinanceDto
     public int ExchangeDataDelayedBy { get; set; }
 
     [JsonPropertyName("firstTradeDateMilliseconds")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? FirstTradeDateMilliseconds { get; set; }
 
     [JsonPropertyName("priceHint")]
@@ -138,6 +140,7 @@ public class QuoteBase : YahooFinanceDto
     public decimal? PostMarketChangePercent { get; set; }
 
     [JsonPropertyName("postMarketTime")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? PostMarketTime { get; set; }
 
     [JsonPropertyName("postMarketPrice")]
@@ -186,12 +189,15 @@ public class QuoteBase : YahooFinanceDto
     public decimal? TrailingThreeMonthNavReturns { get; set; }
 
     [JsonPropertyName("ipoExpectedDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? IpoExpectedDate { get; set; }
 
     [JsonPropertyName("newListingDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? NewListingDate { get; set; }
 
     [JsonPropertyName("nameChangeDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? NameChangeDate { get; set; }
 
     [JsonPropertyName("prevName")]
@@ -228,6 +234,7 @@ public sealed class QuoteAltSymbol : YahooFinanceDto
     public string? UnderlyingExchangeSymbol { get; set; }
 
     [JsonPropertyName("expireDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ExpireDate { get; set; }
 
     [JsonPropertyName("expireIsoDate")]

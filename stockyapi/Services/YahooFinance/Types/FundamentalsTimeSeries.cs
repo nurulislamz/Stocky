@@ -353,6 +353,7 @@ public sealed class FundamentalsTimeSeriesResult : YahooFinanceDto
     public decimal? CustomerAccounts { get; set; }
 
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("decreaseinInterestBearingDepositsinBank")]

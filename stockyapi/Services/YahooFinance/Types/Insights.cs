@@ -159,9 +159,11 @@ public sealed class InsightsValuation : YahooFinanceDto
 public sealed class InsightsEvent : YahooFinanceDto
 {
     [JsonPropertyName("startDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset StartDate { get; set; }
 
     [JsonPropertyName("endDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset EndDate { get; set; }
 
     [JsonPropertyName("eventType")]
@@ -195,6 +197,7 @@ public sealed class InsightsReport : YahooFinanceDto
     public string Provider { get; set; } = null!;
 
     [JsonPropertyName("reportDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ReportDate { get; set; }
 
     [JsonPropertyName("reportTitle")]
@@ -228,6 +231,7 @@ public sealed class InsightsResearchReport : YahooFinanceDto
     public string Title { get; set; } = null!;
 
     [JsonPropertyName("reportDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ReportDate { get; set; }
 
     [JsonPropertyName("summary")]
@@ -243,6 +247,7 @@ public sealed class InsightsSecReport : YahooFinanceDto
     public string Description { get; set; } = null!;
 
     [JsonPropertyName("filingDate")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset FilingDate { get; set; }
 
     [JsonPropertyName("formType")]
@@ -264,6 +269,7 @@ public sealed class InsightsSecReport : YahooFinanceDto
 public sealed class InsightsSigDev : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("headline")]
@@ -312,6 +318,7 @@ public sealed class InsightsUpsell : YahooFinanceDto
     public List<string>? MsBearishSummary { get; set; }
 
     [JsonPropertyName("msBullishBearishSummariesPublishDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? MsBullishBearishSummariesPublishDate { get; set; }
 
     [JsonPropertyName("msBullishSummary")]

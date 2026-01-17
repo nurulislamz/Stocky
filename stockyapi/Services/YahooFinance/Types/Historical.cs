@@ -13,6 +13,7 @@ public sealed class HistoricalStockSplitsResult : List<HistoricalRowStockSplit> 
 public sealed class HistoricalRowHistory : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("open")]
@@ -37,6 +38,7 @@ public sealed class HistoricalRowHistory : YahooFinanceDto
 public sealed class HistoricalRowDividend : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("dividends")]
@@ -46,6 +48,7 @@ public sealed class HistoricalRowDividend : YahooFinanceDto
 public sealed class HistoricalRowStockSplit : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("stockSplits")]
