@@ -9,37 +9,37 @@ namespace stockyapi.Services.YahooFinance.Types;
 public sealed class OptionsResult : YahooFinanceDto
 {
     [JsonPropertyName("expirationDates")]
-    public List<long>? ExpirationDates { get; set; }
+    public List<DateTimeOffset> ExpirationDates { get; set; } = [];
 
     [JsonPropertyName("hasMiniOptions")]
-    public bool? HasMiniOptions { get; set; }
+    public bool HasMiniOptions { get; set; }
 
     [JsonPropertyName("options")]
-    public List<Option>? Options { get; set; }
+    public List<Option> Options { get; set; } = [];
 
     [JsonPropertyName("quote")]
-    public Quote? Quote { get; set; } // yahoo-finance2 uses Quote union
+    public Quote Quote { get; set; } = null!;
 
     [JsonPropertyName("strikes")]
-    public List<decimal>? Strikes { get; set; }
+    public List<decimal> Strikes { get; set; } = [];
 
     [JsonPropertyName("underlyingSymbol")]
-    public string? UnderlyingSymbol { get; set; }
+    public string UnderlyingSymbol { get; set; } = null!;
 }
 
 public sealed class Option : YahooFinanceDto
 {
     [JsonPropertyName("expirationDate")]
-    public long? ExpirationDate { get; set; }
+    public DateTimeOffset ExpirationDate { get; set; }
 
     [JsonPropertyName("hasMiniOptions")]
-    public bool? HasMiniOptions { get; set; }
+    public bool HasMiniOptions { get; set; }
 
     [JsonPropertyName("calls")]
-    public List<CallOrPut>? Calls { get; set; }
+    public List<CallOrPut> Calls { get; set; } = [];
 
     [JsonPropertyName("puts")]
-    public List<CallOrPut>? Puts { get; set; }
+    public List<CallOrPut> Puts { get; set; } = [];
 }
 
 public sealed class CallOrPut : YahooFinanceDto
@@ -54,28 +54,28 @@ public sealed class CallOrPut : YahooFinanceDto
     public decimal? Change { get; set; }
 
     [JsonPropertyName("contractSize")]
-    public string? ContractSize { get; set; }
+    public string ContractSize { get; set; } = null!;
 
     [JsonPropertyName("contractSymbol")]
-    public string? ContractSymbol { get; set; }
+    public string ContractSymbol { get; set; } = null!;
 
     [JsonPropertyName("currency")]
     public string? Currency { get; set; }
 
     [JsonPropertyName("expiration")]
-    public long? Expiration { get; set; }
+    public DateTimeOffset Expiration { get; set; }
 
     [JsonPropertyName("impliedVolatility")]
-    public decimal? ImpliedVolatility { get; set; }
+    public decimal ImpliedVolatility { get; set; }
 
     [JsonPropertyName("inTheMoney")]
-    public bool? InTheMoney { get; set; }
+    public bool InTheMoney { get; set; }
 
     [JsonPropertyName("lastPrice")]
-    public decimal? LastPrice { get; set; }
+    public decimal LastPrice { get; set; }
 
     [JsonPropertyName("lastTradeDate")]
-    public long? LastTradeDate { get; set; }
+    public DateTimeOffset LastTradeDate { get; set; }
 
     [JsonPropertyName("openInterest")]
     public long? OpenInterest { get; set; }
@@ -84,7 +84,7 @@ public sealed class CallOrPut : YahooFinanceDto
     public decimal? PercentChange { get; set; }
 
     [JsonPropertyName("strike")]
-    public decimal? Strike { get; set; }
+    public decimal Strike { get; set; }
 
     [JsonPropertyName("volume")]
     public long? Volume { get; set; }

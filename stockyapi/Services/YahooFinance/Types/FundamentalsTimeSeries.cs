@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace stockyapi.Services.YahooFinance.Types;
 
@@ -11,10 +10,16 @@ namespace stockyapi.Services.YahooFinance.Types;
 /// fundamentalsTimeSeries() returns results keyed by type/period; the JSR type surface is very large.
 /// Keep correct at the container level and safely preserve series content.
 /// </summary>
-public sealed class FundamentalsTimeSeriesResults : YahooFinanceDto
+public sealed class FundamentalsTimeSeriesResults : List<FundamentalsTimeSeriesResult> { }
+
+public sealed class FundamentalsTimeSeriesResult : YahooFinanceDto
 {
-    // yahoo-finance2 returns an object/array structure depending on options; keep flexible.
-    // If you want to harden this later, we can map it once you capture a sample payload.
-    [JsonPropertyName("timeseries")]
-    public JsonElement? Timeseries { get; set; }
+    [JsonPropertyName("date")]
+    public DateTimeOffset Date { get; set; }
+
+    [JsonPropertyName("TYPE")]
+    public string Type { get; set; } = null!;
+
+    [JsonPropertyName("periodType")]
+    public string? PeriodType { get; set; }
 }
