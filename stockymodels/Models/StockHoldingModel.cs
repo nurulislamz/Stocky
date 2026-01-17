@@ -17,7 +17,7 @@ public class StockHoldingModel : BaseModel
 
     [Required]
     [MaxLength(20)]
-    public required string Symbol { get; set; }
+    public required string Ticker { get; set; }
 
     [Required]
     public decimal Shares { get; set; }
@@ -25,10 +25,6 @@ public class StockHoldingModel : BaseModel
     [Required]
     [Precision(18, 2)]
     public decimal AverageCost { get; set; }
-
-    [Required]
-    [Precision(18, 2)]
-    public decimal CurrentPrice { get; set; }
 
     // Navigation property
     public  virtual PortfolioModel Portfolio { get; set; }

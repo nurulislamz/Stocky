@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
-using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class RegisterRequest : IRequest<RegisterResponse>
+public class RegisterRequest
 {
   [Required]
   [StringLength(50)]

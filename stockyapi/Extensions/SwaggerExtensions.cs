@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
 using System.Reflection;
+using Microsoft.OpenApi;
 
 namespace stockyapi.Extensions;
 
@@ -28,20 +26,20 @@ public static class SwaggerExtensions
                 Scheme = "Bearer"
             });
 
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
+            // c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            // {
+            //     {
+            //         new OpenApiSecurityScheme
+            //         {
+            //             Reference = new OpenApiReference
+            //             {
+            //                 Type = ReferenceType.SecurityScheme,
+            //                 Id = "Bearer"
+            //             }
+            //         },
+            //         Array.Empty<string>()
+            //     }
+            // });
 
             // Include XML Comments
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

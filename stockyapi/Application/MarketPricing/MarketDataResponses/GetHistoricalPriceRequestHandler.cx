@@ -1,0 +1,42 @@
+﻿using MediatR;
+using stockyapi.Requests;
+using stockyapi.Responses;
+using stockyapi.Repository.YahooFinance;
+
+namespace stockyapi.RequestHandlers;
+
+public class HistoricalPriceRequestHandler
+{
+    private readonly IYahooFinanceRepository _yahooFinanceRepository;
+
+    public HistoricalPriceRequestHandler(IYahooFinanceRepository yahooFinanceRepository)
+    {
+        _yahooFinanceRepository = yahooFinanceRepository;
+    }
+
+    public async Task<HistoricalPriceDataResponse> Handle(HistoricalPriceDataRequest request, CancellationToken cancellationToken)
+    {
+        var priceData = await _yahooFinanceRepository.GetHistoricalTickerPriceAsync(request.Ticker, ToDateTimeOffsetUtc(request.StartDate), ToDateTimeOffsetUtc(request.EndDate)); 
+        if (priceData.Error != null)
+        {
+            return new HistoricalPriceDataResponse
+            {
+                Success = false,
+                Error = priceData.Error
+            };
+        }
+
+        return new HistoricalPriceDataResponse
+        {
+            Success = true,
+            Data = priceData.Data,
+            StatusCode = 200
+        };
+    }
+
+    public static string ToDateTimeOffsetUtc(DateOnly dateOnly)
+    {
+        var dateTime = new DateTimeOffset(dateOnly.ToDateTime(TimeOnly.MinValue)).ToUnixTimeSeconds();
+        return dateTime.ToString();
+    }
+}

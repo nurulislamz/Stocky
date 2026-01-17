@@ -24,8 +24,6 @@
     <PackageReference Include="openai" Version="2.8.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
-    <PackageReference Include="MediatR" Version="14.0.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,13 +31,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Examples\" />
-    <Folder Include="Repository\Crypto\" />
-    <Folder Include="Repository\Finviz\" />
-    <Folder Include="Repository\Indicators\" />
-    <Folder Include="Repository\Real-Time Data\" />
-    <Folder Include="Repository\Stock Analysis\" />
-    <Folder Include="Repository\Stock News\" />
+    <Folder Include="Application\HoldingDetails\" />
+    <Folder Include="DTOs\Auth\" />
+    <Folder Include="Services\AI\" />
+    <Folder Include="Services\Crypto\" />
+    <Folder Include="Services\Finviz\" />
+    <Folder Include="Services\Indicators\" />
+    <Folder Include="Services\Real-Time Data\" />
+    <Folder Include="Services\Stock Analysis\" />
+    <Folder Include="Services\Stock News\" />
   </ItemGroup>
 
 </Project>

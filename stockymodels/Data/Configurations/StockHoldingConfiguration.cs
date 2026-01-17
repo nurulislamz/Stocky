@@ -10,8 +10,8 @@ public class StockHoldingConfiguration : IEntityTypeConfiguration<StockHoldingMo
     {
         builder.ToTable("StockHoldings");
 
-        builder.HasIndex(e => e.Symbol);
-        builder.HasIndex(e => new { e.PortfolioId, e.Symbol })
+        builder.HasIndex(e => e.Ticker);
+        builder.HasIndex(e => new { e.PortfolioId, Symbol = e.Ticker })
             .IsUnique();
     }
 }
