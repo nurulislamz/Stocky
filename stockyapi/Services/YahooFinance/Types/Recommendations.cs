@@ -9,10 +9,10 @@ namespace stockyapi.Services.YahooFinance.Types;
 public sealed class RecommendationsBySymbolResponse : YahooFinanceDto
 {
     [JsonPropertyName("symbol")]
-    public string? Symbol { get; set; }
+    public string Symbol { get; set; } = null!;
 
     [JsonPropertyName("recommendedSymbols")]
-    public List<RecommendedSymbol>? RecommendedSymbols { get; set; }
+    public List<RecommendedSymbol> RecommendedSymbols { get; set; } = [];
 }
 
 public sealed class RecommendationsBySymbolResponseArray : List<RecommendationsBySymbolResponse> { }
@@ -20,8 +20,8 @@ public sealed class RecommendationsBySymbolResponseArray : List<RecommendationsB
 public sealed class RecommendedSymbol : YahooFinanceDto
 {
     [JsonPropertyName("symbol")]
-    public string? Symbol { get; set; }
+    public string Symbol { get; set; } = null!;
 
     [JsonPropertyName("score")]
-    public decimal? Score { get; set; }
+    public decimal Score { get; set; }
 }

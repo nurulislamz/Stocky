@@ -46,7 +46,7 @@ public class YahooFinanceService : IYahooFinanceService
         {
             // Yahoo Finance Chart API v8
             // Example: https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=1d&interval=1m
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Chart, symbol, range, interval);
+            var url = YahooEndpointBuilder.BuildChartUri(symbol, range, interval);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
 
@@ -89,11 +89,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.FundamentalsTimeSeries,
-                symbol,
-                types: types
-            );
+            var url = YahooEndpointBuilder.BuildFundamentalsTimeSeriesUri(symbol, types);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -133,13 +129,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.Historical,
-                symbol,
-                period1: period1,
-                period2: period2,
-                interval: interval
-            );
+            var url = YahooEndpointBuilder.BuildHistoricalUri(symbol, period1, period2, interval);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -175,7 +165,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Insights, symbol);
+            var url = YahooEndpointBuilder.BuildInsightsUri(symbol);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -216,11 +206,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.Options,
-                symbol,
-                date: date
-            );
+            var url = YahooEndpointBuilder.BuildOptionsUri(symbol, date);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -258,7 +244,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Quote, symbols: symbols);
+            var url = YahooEndpointBuilder.BuildQuoteUri(symbols);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -297,11 +283,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(
-                YahooEndpoint.QuoteSummary,
-                symbol,
-                modules: modules
-            );
+            var url = YahooEndpointBuilder.BuildQuoteSummaryUri(symbol, modules);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -333,7 +315,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.RecommendationsBySymbol, symbol);
+            var url = YahooEndpointBuilder.BuildRecommendationsBySymbolUri(symbol);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -364,7 +346,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Screener, screenerId: screenerId);
+            var url = YahooEndpointBuilder.BuildScreenerUri(screenerId);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -393,7 +375,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.Search, query: query);
+            var url = YahooEndpointBuilder.BuildSearchUri(query);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -429,7 +411,7 @@ public class YahooFinanceService : IYahooFinanceService
 
         try
         {
-            var url = YahooEndpointBuilder.Build(YahooEndpoint.TrendingSymbols, region: region);
+            var url = YahooEndpointBuilder.BuildTrendingSymbolsUri(region);
 
             var response = await _httpClient.GetAsync(url, cancellationToken);
             if (!response.IsSuccessStatusCode)
