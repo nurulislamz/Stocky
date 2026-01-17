@@ -22,6 +22,7 @@ public sealed class ChartResultArray : YahooFinanceDto
 public sealed class ChartResultArrayQuote : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("open")]
@@ -85,6 +86,7 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal? FiftyTwoWeekLow { get; set; }
 
     [JsonPropertyName("firstTradeDate")]
+    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? FirstTradeDate { get; set; }
 
     [JsonPropertyName("fullExchangeName")]
@@ -121,6 +123,7 @@ public sealed class ChartMeta : YahooFinanceDto
     public decimal RegularMarketPrice { get; set; }
 
     [JsonPropertyName("regularMarketTime")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset RegularMarketTime { get; set; }
 
     [JsonPropertyName("regularMarketVolume")]
@@ -164,9 +167,11 @@ public sealed class ChartMetaTradingPeriod : YahooFinanceDto
     public string Timezone { get; set; } = null!;
 
     [JsonPropertyName("start")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Start { get; set; }
 
     [JsonPropertyName("end")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset End { get; set; }
 
     [JsonPropertyName("gmtoffset")]
@@ -290,12 +295,14 @@ public sealed class ChartEventDividend : YahooFinanceDto
     public decimal Amount { get; set; }
 
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 }
 
 public sealed class ChartEventSplit : YahooFinanceDto
 {
     [JsonPropertyName("date")]
+    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset Date { get; set; }
 
     [JsonPropertyName("denominator")]
@@ -306,4 +313,61 @@ public sealed class ChartEventSplit : YahooFinanceDto
 
     [JsonPropertyName("splitRatio")]
     public string SplitRatio { get; set; } = null!;
+}
+
+public sealed class UnixSecondsDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
+{
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64());
+        }
+
+        if (reader.TokenType == JsonTokenType.String && long.TryParse(reader.GetString(), out var seconds))
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(seconds);
+        }
+
+        throw new JsonException("Expected unix timestamp in seconds.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
+    {
+        writer.WriteNumberValue(value.ToUnixTimeSeconds());
+    }
+}
+
+public sealed class UnixSecondsNullableDateTimeOffsetConverter : JsonConverter<DateTimeOffset?>
+{
+    public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return null;
+        }
+
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(reader.GetInt64());
+        }
+
+        if (reader.TokenType == JsonTokenType.String && long.TryParse(reader.GetString(), out var seconds))
+        {
+            return DateTimeOffset.FromUnixTimeSeconds(seconds);
+        }
+
+        throw new JsonException("Expected unix timestamp in seconds or null.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
+    {
+        if (value is null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        writer.WriteNumberValue(value.Value.ToUnixTimeSeconds());
+    }
 }
