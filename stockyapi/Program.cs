@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +7,12 @@ using stockyapi.Options;
 using stockyapi.Extensions;
 using stockymodels.Data;
 using System.Text.Json.Serialization;
+using stockyapi.Controllers;
+using stockyapi.Middleware;
 using stockyapi.Repository.Portfolio;
 using stockyapi.Repository.User;
 using stockyapi.Repository.AI;
+using stockyapi.Repository.YahooFinance;
 
 class Program
 {
@@ -23,18 +25,17 @@ class Program
         var cs = builder.Configuration.GetConnectionString("DefaultConnection");
         logger.LogInformation("ConnectionString={cs}", cs);
 
-        // Configure services
         ConfigureServices(builder.Services, builder.Configuration);
 
         var app = builder.Build();
 
         // Configure the HTTP request pipeline
-        ConfigureHostBuilder(app, app.Environment);
+        ConfigureMiddleware(app, app.Environment);
 
         app.Run();
     }
 
-    private static void ConfigureHostBuilder(IApplicationBuilder app, IHostEnvironment env)
+    private static void ConfigureMiddleware(IApplicationBuilder app, IHostEnvironment env)
     {
         if (env.IsDevelopment())
         {
@@ -46,10 +47,7 @@ class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseHttpsRedirection();
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapControllers();
-        });
+        app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
@@ -61,8 +59,6 @@ class Program
 
         services.AddEndpointsApiExplorer();
         services.AddSwaggerDocumentation();
-
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
         // Configure PostgreSQL with retry policy
         services.AddDbContext<ApplicationDbContext>(options =>
@@ -77,19 +73,30 @@ class Program
             });
         });
 
+        // Registers a request-scoped user context abstraction.
+        // This allows application handlers to access the current authenticated user
+        // (e.g. UserId) without directly depending on HttpContext or ASP.NET.
+        // HttpUserContext is the web-layer implementation that reads claims from HttpContext.
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserContext, HttpUserContext>();
+
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
 
+        // Service DIs
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IPortfolioService, PortfolioService>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IUserService, UserService>();
+        services.AddHttpClient<IYahooFinanceRepository, YahooFinanceRepository>(client =>
+        {
+            client.BaseAddress = new Uri("https://query1.finance.yahoo.com/v8/finance/");
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
+        });
 
-        services.AddTransient<IPortfolioRepository, PortfolioRepository>();
-        services.AddTransient<IUserRepository, UserRepository>();
-        services.AddTransient<IStockyAiRepository, StockyAiRepository>();
+        // Repository DIs
+        services.AddScoped<IFundsRepository, FundsRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IStockyAiRepository, StockyAiRepository>();
+        services.AddMemoryCache();
 
-        services.AddHttpContextAccessor();
-
+        // Authentication Services
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opts =>
         {
             opts.TokenValidationParameters = new TokenValidationParameters
@@ -103,6 +110,7 @@ class Program
             };
         });
 
+        // Local Dev CORS
         services.AddCors(options =>
         {
             options.AddPolicy("AllowLocalReactApp",
