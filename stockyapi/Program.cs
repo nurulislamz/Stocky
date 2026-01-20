@@ -93,7 +93,6 @@ class Program
         // Repository DIs
         services.AddScoped<IFundsRepository, FundsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IStockyAiRepository, StockyAiRepository>();
         services.AddMemoryCache();
 
         // Authentication Services

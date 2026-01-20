@@ -32,7 +32,6 @@
 
   <ItemGroup>
     <Folder Include="Application\HoldingDetails\" />
-    <Folder Include="DTOs\Auth\" />
     <Folder Include="Services\AI\" />
     <Folder Include="Services\Crypto\" />
     <Folder Include="Services\Finviz\" />

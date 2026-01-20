@@ -33,3 +33,4 @@ yarn-error.log*
 stockyapi/obj/
 stockymodels/obj/
 stockyui/obj/
+Stocky.sln.DotSettings.user

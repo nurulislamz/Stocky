@@ -1,6 +1,6 @@
 ﻿namespace stockyapi.Responses;
 
-public class HistoricalPriceDataResponse : BaseResponse<HistoricalPriceData>;
+public class HistoricalPriceDataResponse;
 
 public class HistoricalPriceData
 {

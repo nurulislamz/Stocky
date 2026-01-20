@@ -4,7 +4,7 @@ using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
-public class HistoricalPriceDataRequest : IRequest<HistoricalPriceDataResponse>
+public class HistoricalPriceDataRequest
 {
     [Required]
     public required string Ticker { get; set; }
