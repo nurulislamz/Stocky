@@ -8,7 +8,7 @@ public static class YahooEndpointBuilder
     private const string Query1Host = "https://query1.finance.yahoo.com";
     private const string Query2Host = "https://query2.finance.yahoo.com";
 
-    public static Uri BuildChartUri(string symbol, YahooRange range, YahooInterval interval)
+    public static Uri BuildChartUri(string symbol, YahooRange range, YahooInterval interval, YahooFields[] fields)
     {
         var symbolValue = RequireValue(symbol, nameof(symbol));
         return BuildUri(
@@ -17,7 +17,8 @@ public static class YahooEndpointBuilder
             new Dictionary<string, string?>
             {
                 ["range"] = range.ToApiString(),
-                ["interval"] = interval.ToApiString()
+                ["interval"] = interval.ToApiString(),
+                ["fields"] = string.Join(',', nameof(fields))
             }
         );
     }

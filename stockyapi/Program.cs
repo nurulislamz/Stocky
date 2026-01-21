@@ -13,6 +13,7 @@ using stockyapi.Repository.Portfolio;
 using stockyapi.Repository.User;
 using stockyapi.Repository.YahooFinance;
 using Polly;
+using stockyapi.Services.YahooFinance;
 
 class Program
 {

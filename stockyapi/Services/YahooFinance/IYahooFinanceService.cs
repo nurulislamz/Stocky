@@ -1,7 +1,7 @@
 ﻿using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.Types;
 
-namespace stockyapi.Repository.YahooFinance;
+namespace stockyapi.Services.YahooFinance;
 
 public interface IYahooFinanceService
 {
@@ -9,6 +9,7 @@ public interface IYahooFinanceService
         string symbol,
         YahooRange range,
         YahooInterval interval,
+        YahooFields[] fields,
         CancellationToken cancellationToken = default
     );
 
