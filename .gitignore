@@ -34,3 +34,7 @@ stockyapi/obj/
 stockymodels/obj/
 stockyui/obj/
 Stocky.sln.DotSettings.user
+stockyintegrationtests/bin/
+stockyunittests/bin/
+stockyunittests/obj/
+stockyintegrationtests/obj/
