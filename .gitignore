@@ -38,3 +38,5 @@ stockyintegrationtests/bin/
 stockyunittests/bin/
 stockyunittests/obj/
 stockyintegrationtests/obj/
+stockytests/bin/
+stockytests/obj/
