@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
-using stockyapi.Responses;
 
 namespace stockyapi.Requests;
 
