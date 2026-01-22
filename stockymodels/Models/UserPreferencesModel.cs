@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
+using stockymodels.models.eums;
 
 namespace stockymodels.models;
 
@@ -12,17 +12,19 @@ public class UserPreferencesModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("UserId")]
     public Guid UserId { get; set; }
 
     [Required]
-    public string Theme { get; set; } = "light";
+    [MaxLength(20)]
+    public Theme Theme { get; set; } = Theme.Light;
 
     [Required]
-    public string Currency { get; set; } = "USD";
+    [MaxLength(10)]
+    public DefaultCurrency Currency { get; set; } = eums.DefaultCurrency.GDP;
 
     [Required]
-    public string Language { get; set; } = "en";
+    [MaxLength(10)]
+    public Language Language { get; set; } = Language.English;
 
     [Required]
     public bool EmailNotifications { get; set; } = true;
@@ -34,13 +36,9 @@ public class UserPreferencesModel : BaseModel
     public bool NewsAlerts { get; set; } = true;
 
     [Required]
-    [StringLength(3)]
-    public string DefaultCurrency { get; set; } = "USD";
-
-    [Required]
     [StringLength(10)]
-    public string Timezone { get; set; }
+    public string Timezone { get; set; } = "UTC";
 
     // Navigation property
-    public virtual required UserModel User { get; set; }
+    public virtual UserModel User { get; set; } = null!;
 }

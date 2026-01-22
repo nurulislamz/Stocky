@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
 
 namespace stockymodels.models;
 
@@ -22,7 +21,7 @@ public class WatchlistModel : BaseModel
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
     [StringLength(500)]
-    public string Notes { get; set; }
+    public string? Notes { get; set; }
 
     [DataType(DataType.Currency)]
     [Precision(18,2)]
@@ -33,5 +32,5 @@ public class WatchlistModel : BaseModel
     public decimal? StopLoss { get; set; }
 
     // Navigation property
-    public virtual UserModel User { get; set; }
+    public virtual UserModel? User { get; set; }
 }

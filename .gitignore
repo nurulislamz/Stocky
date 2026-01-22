@@ -40,3 +40,5 @@ stockyunittests/obj/
 stockyintegrationtests/obj/
 stockytests/bin/
 stockytests/obj/
+stockydb.db
+Stocky.sln.DotSettings.user

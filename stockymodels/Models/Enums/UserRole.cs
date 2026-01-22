@@ -1,3 +1,5 @@
+namespace stockymodels.models;
+
 public enum UserRole
 {
     User,

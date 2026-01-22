@@ -1,3 +1,5 @@
+using stockymodels.models;
+
 namespace stockyapi.Application.Portfolio;
 // TODO: Fix namespacing everywhere
 

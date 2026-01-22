@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
 
 namespace stockymodels.models;
 
@@ -12,7 +11,6 @@ public class StockHoldingModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("PortfolioId")]
     public Guid PortfolioId { get; set; }
 
     [Required]
@@ -20,6 +18,7 @@ public class StockHoldingModel : BaseModel
     public required string Ticker { get; set; }
 
     [Required]
+    [Precision(18, 4)]
     public decimal Shares { get; set; }
 
     [Required]
@@ -27,5 +26,5 @@ public class StockHoldingModel : BaseModel
     public decimal AverageCost { get; set; }
 
     // Navigation property
-    public  virtual PortfolioModel Portfolio { get; set; }
+    public virtual PortfolioModel? Portfolio { get; set; }
 }

@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
 
 namespace stockymodels.models;
 
@@ -12,27 +11,27 @@ public class AssetTransactionModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("PortfolioId")]
     public Guid PortfolioId { get; init; }
 
+    [Required]
     [MaxLength(20)]
     public required string Ticker { get; init; }
 
     [Required]
-    public required TransactionType Type { get; init; }
+    public TransactionType Type { get; init; }
 
     [Required]
     [Precision(18, 2)]
-    public required decimal Quantity { get; init; }
+    public decimal Quantity { get; init; }
 
     [Required]
     [Precision(18, 2)]
-    public required decimal Price { get; init; }
+    public decimal Price { get; init; }
     
     [Required]
     [Precision(18, 2)]
-    public required decimal NewAverageCost { get; init; }
+    public decimal NewAverageCost { get; init; }
     
     // Navigation property
-    public virtual PortfolioModel Portfolio { get; init; }
+    public virtual PortfolioModel? Portfolio { get; init; }
 }

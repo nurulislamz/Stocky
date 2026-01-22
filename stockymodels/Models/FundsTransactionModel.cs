@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
 
 namespace stockymodels.models;
 
@@ -12,7 +11,6 @@ public class FundsTransactionModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("PortfolioId")]
     public Guid PortfolioId { get; set; }
 
     [Required]
@@ -23,5 +21,5 @@ public class FundsTransactionModel : BaseModel
     public decimal CashAmount { get; set; }
 
     // Navigation property
-    public virtual PortfolioModel Portfolio { get; set; }
+    public virtual PortfolioModel? Portfolio { get; set; }
 }

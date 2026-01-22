@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.Cryptography;
-using Microsoft.EntityFrameworkCore;
 
 namespace stockymodels.models;
 
@@ -11,14 +9,12 @@ public class UserModel : BaseModel
   [Required]
   [Column("UserId")]
   public override Guid Id { get; set; }
-  
+
   [Required]
-  [MinLength(8)]
   [MaxLength(50)]
   public required string FirstName { get; set; }
 
   [Required]
-  [MinLength(8)]
   [MaxLength(50)]
   public required string Surname { get; set; }
 
@@ -39,12 +35,12 @@ public class UserModel : BaseModel
   public bool IsActive { get; set; } = true;
 
   public DateTime? LastLogin { get; set; }
-  
+
   // One-to-One Properties
-  public virtual PortfolioModel Portfolio { get; set; }
-  public virtual UserPreferencesModel Preferences { get; set; }
+  public virtual PortfolioModel? Portfolio { get; set; }
+  public virtual UserPreferencesModel? Preferences { get; set; }
 
   // One-to-Many Properties
-  public virtual ICollection<WatchlistModel> Watchlist { get; set; }
-  public virtual ICollection<PriceAlertModel> PriceAlerts { get; set; }
+  public virtual ICollection<WatchlistModel> Watchlist { get; set; } = new List<WatchlistModel>();
+  public virtual ICollection<PriceAlertModel> PriceAlerts { get; set; } = new List<PriceAlertModel>();
 }

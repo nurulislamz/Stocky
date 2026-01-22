@@ -1,8 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using stockymodels.models;
 
 namespace stockymodels.models;
 
@@ -13,7 +11,6 @@ public class PortfolioModel : BaseModel
     public override Guid Id { get; set; }
 
     [Required]
-    [ForeignKey("UserId")]
     public Guid UserId { get; set; }
 
     [Required]
@@ -29,10 +26,10 @@ public class PortfolioModel : BaseModel
     public decimal InvestedAmount { get; set; }
 
     // Navigation properties
-    public virtual required UserModel User { get; set; }
+    public virtual UserModel User { get; set; } = null!;
 
-    public virtual required ICollection<StockHoldingModel> StockHoldings { get; set; }
+    public virtual ICollection<StockHoldingModel> StockHoldings { get; set; } = new List<StockHoldingModel>();
 
-    public virtual required ICollection<AssetTransactionModel> Transactions { get; set; }
-    public virtual required ICollection<FundsTransactionModel> Funds { get; set; }
+    public virtual ICollection<AssetTransactionModel> Transactions { get; set; } = new List<AssetTransactionModel>();
+    public virtual ICollection<FundsTransactionModel> Funds { get; set; } = new List<FundsTransactionModel>();
 }
