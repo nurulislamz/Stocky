@@ -22,5 +22,10 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<PortfolioModel>
             .WithOne(t => t.Portfolio)
             .HasForeignKey(t => t.PortfolioId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(p => p.Funds)
+            .WithOne(f => f.Portfolio)
+            .HasForeignKey(f => f.PortfolioId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

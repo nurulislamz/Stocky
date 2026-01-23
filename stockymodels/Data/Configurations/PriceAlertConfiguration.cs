@@ -10,6 +10,9 @@ public class PriceAlertConfiguration : IEntityTypeConfiguration<PriceAlertModel>
     {
         builder.ToTable("PriceAlerts");
 
+        builder.Property(p => p.Condition)
+            .HasMaxLength(10);
+
         builder.HasIndex(e => new { e.Symbol, e.IsTriggered });
         builder.HasIndex(e => new { e.UserId, e.Symbol })
             .IsUnique();

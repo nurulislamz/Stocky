@@ -10,6 +10,9 @@ public class WatchlistConfiguration : IEntityTypeConfiguration<WatchlistModel>
     {
         builder.ToTable("Watchlist");
 
+        builder.Property(w => w.Notes)
+            .HasMaxLength(500);
+
         builder.HasIndex(e => new { e.UserId, e.Symbol })
             .IsUnique();
     }

@@ -10,6 +10,9 @@ public class StockHoldingConfiguration : IEntityTypeConfiguration<StockHoldingMo
     {
         builder.ToTable("StockHoldings");
 
+        builder.Property(e => e.Ticker)
+            .HasMaxLength(20);
+
         builder.HasIndex(e => e.Ticker);
         builder.HasIndex(e => new { e.PortfolioId, Symbol = e.Ticker })
             .IsUnique();

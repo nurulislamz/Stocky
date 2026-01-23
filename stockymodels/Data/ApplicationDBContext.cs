@@ -1,27 +1,59 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
-using stockymodels.Data.Configurations;
+
 
 namespace stockymodels.Data;
 
 public class ApplicationDbContext : DbContext
 {
-  public DbSet<UserModel> Users { get; set; }
-  public DbSet<PortfolioModel> Portfolios { get; set; }
-  public DbSet<StockHoldingModel> StockHoldings { get; set; }
-  public DbSet<AssetTransactionModel> AssetTransactions { get; set; }
-  public DbSet<FundsTransactionModel> FundsTransactions { get; set; }
-  public DbSet<WatchlistModel> Watchlist { get; set; }
-  public DbSet<UserPreferencesModel> UserPreferences { get; set; }
-  public DbSet<PriceAlertModel> PriceAlerts { get; set; }
+  public DbSet<UserModel> Users { get; set; } = null!;
+  public DbSet<PortfolioModel> Portfolios { get; set; } = null!;
+  public DbSet<StockHoldingModel> StockHoldings { get; set; } = null!;
+  public DbSet<AssetTransactionModel> AssetTransactions { get; set; } = null!;
+  public DbSet<FundsTransactionModel> FundsTransactions { get; set; } = null!;
+  public DbSet<WatchlistModel> Watchlist { get; set; } = null!;
+  public DbSet<UserPreferencesModel> UserPreferences { get; set; } = null!;
+  public DbSet<PriceAlertModel> PriceAlerts { get; set; } = null!;
 
   public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
   {
   }
 
+  public override int SaveChanges()
+  {
+    ApplyTimestamps();
+    return base.SaveChanges();
+  }
+
+  public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+  {
+    ApplyTimestamps();
+    return base.SaveChangesAsync(cancellationToken);
+  }
+
+  private void ApplyTimestamps()
+  {
+    var utcNow = DateTime.UtcNow;
+
+    foreach (var entry in ChangeTracker.Entries<BaseModel>())
+    {
+      if (entry.State == EntityState.Added)
+      {
+        entry.Entity.CreatedAt = utcNow;
+        entry.Entity.UpdatedAt = utcNow;
+      }
+      else if (entry.State == EntityState.Modified)
+      {
+        entry.Entity.UpdatedAt = utcNow;
+      }
+    }
+  }
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
+
+    modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
     // Configure all entities that inherit from BaseModel
     foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -34,8 +66,7 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity(entityType.ClrType)
           .Property("UpdatedAt")
-          .HasDefaultValueSql("CURRENT_TIMESTAMP")
-          .ValueGeneratedOnAddOrUpdate();
+          .HasDefaultValueSql("CURRENT_TIMESTAMP");
       }
     }
   }
