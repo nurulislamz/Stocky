@@ -15,21 +15,16 @@ using stockyapi.Repository.YahooFinance;
 using Polly;
 using stockyapi.Services.YahooFinance;
 
-class Program
+internal class Program
 {
+    private static readonly ILogger Logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
+    
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        // Add services to the container
-        var logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
-        var cs = builder.Configuration.GetConnectionString("DefaultConnection");
-        logger.LogInformation("ConnectionString={cs}", cs);
-
         ConfigureServices(builder.Services, builder.Configuration);
 
         var app = builder.Build();
-
         // Configure the HTTP request pipeline
         ConfigureMiddleware(app, app.Environment);
 
@@ -63,9 +58,21 @@ class Program
 
         // TODO: Add SqlLite 
         
-        // Configure PostgreSQL with retry policy
+        // Configure database provider (PostgreSQL in production, SQLite when Dev flag is set)
         services.AddDbContext<ApplicationDbContext>(options =>
         {
+            var providerConnection = configuration.GetValue<bool>("Dev")
+                ? configuration.GetConnectionString("SqliteConnection")
+                : configuration.GetConnectionString("DefaultConnection");
+
+            if (configuration.GetValue<bool>("Dev"))
+            {
+                Logger.LogInformation("Using SQLite connection string {Connection}", providerConnection);
+                options.UseSqlite(providerConnection);
+                return;
+            }
+
+            Logger.LogInformation("Using Postgres connection string {Connection}", providerConnection);
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), npgsqlOptions =>
             {
                 npgsqlOptions.CommandTimeout(30);

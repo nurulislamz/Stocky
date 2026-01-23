@@ -4,8 +4,9 @@ namespace stockyapi.Failures;
 /// <summary>
 /// Represents a failure that can be returned from an HTTP request.
 /// </summary>
-/// <param name="Code">The HTTP status code associated with the failure.</param>
-/// <param name="Message">A human-readable description of the failure.</param>
+/// <param name="StatusCode">The HTTP status code associated with the failure.</param>
+/// <param name="Title">A human-readable brief description of the failure.</param>
+/// <param name="Detail">A human-readable description of the failure.</param>
 public abstract record Failure(HttpStatusCode StatusCode, string Title, string Detail);
 
 // CLIENT ERRORS - 4xx
