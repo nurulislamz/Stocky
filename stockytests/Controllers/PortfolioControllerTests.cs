@@ -232,8 +232,8 @@ public class PortfolioControllerTests
         var id2 = Guid.NewGuid();
         var response = new DeleteHoldingsResponse(new[]
         {
-            new DeleteConfirmationDto(id1, "ABC"),
-            new DeleteConfirmationDto(id2, "XYZ")
+            new DeleteConfirmationDto(id1, "ABC", DateTimeOffset.Now),
+            new DeleteConfirmationDto(id2, "XYZ", DateTimeOffset.Now)
         });
         _portfolioApi.Setup(api => api.DeleteHoldingsById(
                 It.Is<Guid[]>(ids => ids.SequenceEqual(new[] { id1, id2 })), Token))
@@ -268,7 +268,7 @@ public class PortfolioControllerTests
     public async Task DeleteHoldingsByTicker_WhenSuccess_ReturnsOk()
     {
         var id = Guid.NewGuid();
-        var response = new DeleteHoldingsResponse(new[] { new DeleteConfirmationDto(id, "ABC") });
+        var response = new DeleteHoldingsResponse(new[] { new DeleteConfirmationDto(id, "ABC", DateTimeOffset.Now) });
         _portfolioApi.Setup(api => api.DeleteHoldingsById(
                 It.Is<Guid[]>(ids => ids.SequenceEqual(new[] { id })), Token))
             .ReturnsAsync(Result<DeleteHoldingsResponse>.Success(response));

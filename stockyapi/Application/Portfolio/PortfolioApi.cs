@@ -165,6 +165,6 @@ public sealed class PortfolioApi : IPortfolioApi
 
     private IEnumerable<DeleteConfirmationDto> ProcessHoldingsModelsToDeleteConfirmationDto(IEnumerable<StockHoldingModel> holdings)
     {
-        return holdings.Select(h => new DeleteConfirmationDto(h.Id, h.Ticker));
+        return holdings.Select(h => new DeleteConfirmationDto(h.Id, h.Ticker, DateTimeOffset.UtcNow));
     }
 }

@@ -9,12 +9,6 @@ using stockymodels.models;
 
 namespace stockyapi.Application.Auth;
 
-public interface IAuthenticationApi
-{
-    public Task<Result<LoginResponse>> Login(LoginRequest request, CancellationToken cancellationToken);
-    public Task<Result<RegisterResponse>> Register(RegisterRequest request, CancellationToken cancellationToken);
-}
-
 public class AuthenticationApi : IAuthenticationApi
 {
     private readonly ITokenService _tokenService;

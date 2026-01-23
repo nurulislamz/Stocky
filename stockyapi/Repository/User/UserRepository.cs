@@ -3,6 +3,7 @@ using stockyapi.Failures;
 using stockyapi.Middleware;
 using stockymodels.Data;
 using stockymodels.models;
+using stockymodels.models.eums;
 
 namespace stockyapi.Repository.User;
 
@@ -18,8 +19,6 @@ public class UserRepository : IUserRepository
     public async Task<Result<UserModel>> GetUserByIdAsync(Guid id)
     {
         var user =  await _context.Users
-            .Include(u => u.Preferences)
-            .Include(u => u.Portfolio)
             .SingleOrDefaultAsync(u => u.Id == id);
 
         return user != null
@@ -42,8 +41,6 @@ public class UserRepository : IUserRepository
     public async Task<Result<UserModel>> GetUserByEmailAsync(string email)
     {
         var user = await _context.Users
-            .Include(u => u.Preferences)
-            .Include(u => u.Portfolio)
             .SingleOrDefaultAsync(u => u.Email == email);
         
         return user == null ? Result<UserModel>.Fail(new NotFoundFailure404("User not found")) : Result<UserModel>.Success(user);
@@ -71,14 +68,13 @@ public class UserRepository : IUserRepository
         {
             Id = user.Id,
             UserId = user.Id,
-            Theme = "light",
-            Currency = "USD",
-            Language = "en",
+            Theme = Theme.Light,
+            Currency = DefaultCurrency.GDP,
+            Language = Language.English,
             EmailNotifications = true,
             PushNotifications = true,
             PriceAlerts = true,
             NewsAlerts = true,
-            DefaultCurrency = "USD",
             Timezone = "UTC",
             User = user,
             CreatedAt = DateTime.UtcNow,
