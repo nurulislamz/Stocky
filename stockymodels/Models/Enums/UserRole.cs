@@ -1,4 +1,4 @@
-namespace stockymodels.models;
+namespace stockymodels.Models.Enums;
 
 public enum UserRole
 {

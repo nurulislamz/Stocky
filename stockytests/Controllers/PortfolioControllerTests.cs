@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using stockyapi.Application.Portfolio;
+using stockyapi.Application.Portfolio.BuyTicker;
+using stockyapi.Application.Portfolio.DeleteHolding;
+using stockyapi.Application.Portfolio.GetHoldings;
+using stockyapi.Application.Portfolio.ListHoldings;
+using stockyapi.Application.Portfolio.SellTicker;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Controllers;
-using stockyapi.Failures;
 using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
 using stockyunittests.Helpers;
 
 namespace stockyunittests.Controllers;

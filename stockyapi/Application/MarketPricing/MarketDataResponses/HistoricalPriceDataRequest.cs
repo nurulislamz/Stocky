@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace stockyapi.Requests;
+namespace stockyapi.Application.MarketPricing.MarketDataResponses;
 
 public class HistoricalPriceDataRequest
 {

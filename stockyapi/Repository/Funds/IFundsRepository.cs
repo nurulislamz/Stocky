@@ -1,8 +1,8 @@
-﻿using stockyapi.Application.Portfolio;
+﻿using stockyapi.Application.Funds.CommandAndQueries;
 using stockyapi.Middleware;
-using stockymodels.models;
+using stockyapi.Repository.Funds.Types;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.Repository.Funds;
 
 public interface IFundsRepository
 {

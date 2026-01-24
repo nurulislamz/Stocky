@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using stockyapi.Application.Auth;
-using stockyapi.Requests;
-using stockyapi.Responses;
+using stockyapi.Application.Auth.Login;
+using stockyapi.Application.Auth.Register;
+using stockyapi.Controllers.Helpers;
 
 namespace stockyapi.Controllers;
 

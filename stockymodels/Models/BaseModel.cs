@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace stockymodels.models;
 
@@ -13,6 +12,4 @@ public abstract class BaseModel
 
     [Required]
     public DateTime UpdatedAt { get; set; }
-
-    protected BaseModel() { }
 }

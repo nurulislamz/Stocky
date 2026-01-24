@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace stockyapi.Requests;
+namespace stockyapi.Application.Funds.AddFunds;
 
 public class DepositFundsRequest
 {

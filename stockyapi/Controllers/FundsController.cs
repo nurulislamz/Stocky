@@ -1,10 +1,11 @@
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using stockyapi.Application.Portfolio;
-using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
+using stockyapi.Application.Funds;
+using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Funds.Response;
+using stockyapi.Application.Funds.SubtractFunds;
+using stockyapi.Controllers.Helpers;
 
 namespace stockyapi.Controllers;
 

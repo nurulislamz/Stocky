@@ -1,4 +1,4 @@
-﻿namespace stockyapi.Responses;
+﻿namespace stockyapi.Application.MarketPricing.MarketDataResponses;
 
 public class HistoricalPriceDataResponse;
 

@@ -1,9 +1,9 @@
 ﻿using stockyapi.Middleware;
-using stockyapi.Repository.YahooFinance.Helper;
-using stockyapi.Services.YahooFinance;
+using stockyapi.Services.YahooFinance.EndpointBuilder;
+using stockyapi.Services.YahooFinance.Helper;
 using stockyapi.Services.YahooFinance.Types;
 
-namespace stockyapi.Repository.YahooFinance;
+namespace stockyapi.Services.YahooFinance;
 
 /// <summary>
 /// Provides access to Yahoo Finance endpoints such as charts, quotes,

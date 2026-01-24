@@ -1,3 +1,3 @@
-﻿namespace stockyapi.Application.Portfolio;
+﻿namespace stockyapi.Application.Portfolio.ZHelperTypes;
 
-public class DeleteConfirmationDto(Guid Id, string Ticker, DateTimeOffset deletedAt);
+public record DeleteConfirmationDto(Guid Id, string Ticker, DateTimeOffset DeletedAt);

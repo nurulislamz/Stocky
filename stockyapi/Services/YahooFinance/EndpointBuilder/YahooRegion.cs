@@ -1,4 +1,4 @@
-﻿namespace stockyapi.Services.YahooFinance.Types;
+﻿namespace stockyapi.Services.YahooFinance.EndpointBuilder;
 
 public enum YahooRegion
 {

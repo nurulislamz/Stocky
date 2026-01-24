@@ -1,11 +1,10 @@
-using System.Diagnostics;
-using stockyapi.Failures;
+using stockyapi.Application.Auth.Login;
+using stockyapi.Application.Auth.Register;
 using stockyapi.Middleware;
 using stockyapi.Repository.User;
-using stockyapi.Requests;
-using stockyapi.Responses;
 using stockyapi.Services;
 using stockymodels.models;
+using stockymodels.Models.Enums;
 
 namespace stockyapi.Application.Auth;
 

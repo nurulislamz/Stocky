@@ -3,10 +3,12 @@ using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using stockyapi.Application.Portfolio;
-using stockyapi.Failures;
-using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
+using stockyapi.Application.Portfolio.BuyTicker;
+using stockyapi.Application.Portfolio.DeleteHolding;
+using stockyapi.Application.Portfolio.GetHoldings;
+using stockyapi.Application.Portfolio.ListHoldings;
+using stockyapi.Application.Portfolio.SellTicker;
+using stockyapi.Controllers.Helpers;
 
 namespace stockyapi.Controllers;
 

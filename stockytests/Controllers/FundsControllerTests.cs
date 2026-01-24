@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using stockyapi.Application.Portfolio;
+using stockyapi.Application.Funds;
+using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Funds.Response;
+using stockyapi.Application.Funds.SubtractFunds;
 using stockyapi.Controllers;
-using stockyapi.Failures;
 using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
 using stockyunittests.Helpers;
 
 namespace stockyunittests.Controllers;

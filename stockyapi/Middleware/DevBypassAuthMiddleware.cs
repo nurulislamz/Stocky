@@ -35,6 +35,7 @@ public class DevBypassAuthMiddleware
             var principal = new ClaimsPrincipal(identity);
 
             // Create token
+            _logger.LogInformation("new login");
             var token = _tokenService.CreateDevelopmentToken(claims);
 
             context.User = principal;

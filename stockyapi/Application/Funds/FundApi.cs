@@ -1,13 +1,13 @@
-﻿using stockyapi.Failures;
+﻿using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Funds.CommandAndQueries;
+using stockyapi.Application.Funds.Response;
+using stockyapi.Application.Funds.SubtractFunds;
 using stockyapi.Middleware;
-using stockyapi.Repository.Portfolio;
-using stockyapi.Repository.User;
-using stockyapi.Requests;
-using stockyapi.Responses;
-using stockyapi.Services;
-using stockymodels.models;
+using stockyapi.Repository.Funds;
+using stockyapi.Repository.PortfolioRepository;
+using stockymodels.Models.Enums;
 
-namespace stockyapi.Application.Portfolio;
+namespace stockyapi.Application.Funds;
 
 public sealed class FundsApi : IFundsApi
 {

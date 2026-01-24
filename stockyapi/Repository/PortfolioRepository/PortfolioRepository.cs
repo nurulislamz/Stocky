@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using stockyapi.Application.Portfolio;
-using stockyapi.Failures;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Middleware;
+using stockyapi.Repository.Funds.Types;
 using stockymodels.Data;
 using stockymodels.models;
+using stockymodels.Models.Enums;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.Repository.PortfolioRepository;
 
 public class PortfolioRepository : IPortfolioRepository
 {
@@ -132,7 +134,7 @@ public class PortfolioRepository : IPortfolioRepository
         await _dbContext.AssetTransactions.AddAsync(transaction, ct);
         await _dbContext.SaveChangesAsync(ct);
 
-        return (transaction, portfolio);;
+        return (transaction, portfolio);
     }
 
     public async Task<Result<(AssetTransactionModel, PortfolioModel)>> SellHoldingAsync(Guid userId, SellOrderCommand command,

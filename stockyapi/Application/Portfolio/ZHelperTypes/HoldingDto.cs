@@ -1,4 +1,4 @@
-﻿namespace stockyapi.Application.Portfolio;
+﻿namespace stockyapi.Application.Portfolio.ZHelperTypes;
 
 public class HoldingDto
 {

@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using stockyapi.Application.Portfolio;
-using stockyapi.Failures;
+using stockyapi.Application.Funds.CommandAndQueries;
 using stockyapi.Middleware;
+using stockyapi.Repository.Funds.Types;
 using stockymodels.Data;
 using stockymodels.models;
+using stockymodels.Models.Enums;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.Repository.Funds;
 
 public class FundsRepository : IFundsRepository
 {

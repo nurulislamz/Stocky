@@ -1,6 +1,6 @@
-using stockymodels.models;
+using stockymodels.Models.Enums;
 
-namespace stockyapi.Application.Portfolio;
+namespace stockyapi.Application.Portfolio.ZHelperTypes;
 // TODO: Fix namespacing everywhere
 
 public abstract record BaseOrderCommand(

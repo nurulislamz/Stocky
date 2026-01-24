@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace stockyapi.Requests;
+namespace stockyapi.Application.Portfolio.BuyTicker;
 
 public class BuyTickerRequest
 {

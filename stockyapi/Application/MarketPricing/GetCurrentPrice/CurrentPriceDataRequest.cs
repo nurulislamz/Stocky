@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using stockyapi.Responses;
 
-namespace stockyapi.Requests;
+namespace stockyapi.Application.MarketPricing.GetCurrentPrice;
 
 public class CurrentPriceDataRequest
 {

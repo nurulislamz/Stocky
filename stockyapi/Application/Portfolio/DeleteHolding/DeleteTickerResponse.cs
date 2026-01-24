@@ -1,6 +1,5 @@
-using System.Collections.Immutable;
-using stockyapi.Application.Portfolio;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 
-namespace stockyapi.Responses;
+namespace stockyapi.Application.Portfolio.DeleteHolding;
 
-public class DeleteHoldingsResponse(IEnumerable<DeleteConfirmationDto> deletedHoldings);
+public record DeleteHoldingsResponse(IEnumerable<DeleteConfirmationDto> DeletedHoldings);

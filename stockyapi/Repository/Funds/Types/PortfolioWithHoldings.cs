@@ -1,6 +1,6 @@
 ﻿using stockymodels.models;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.Repository.Funds.Types;
 
 public record PortfolioWithHoldings(
     decimal CashBalance,

@@ -1,5 +1,5 @@
-using stockyapi.Application.Portfolio;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 
-namespace stockyapi.Responses;
+namespace stockyapi.Application.Portfolio.SellTicker;
 
 public record SellTickerResponse(TradeConfirmationDto SoldTickers);

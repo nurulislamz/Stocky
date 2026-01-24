@@ -1,7 +1,8 @@
-﻿using stockyapi.Requests;
-using stockyapi.Responses;
+﻿using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Funds.Response;
+using stockyapi.Application.Funds.SubtractFunds;
 
-namespace stockyapi.Application.Portfolio;
+namespace stockyapi.Application.MarketPricing;
 
 public interface IMarketDataApi
 {

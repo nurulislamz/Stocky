@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace stockyapi.Requests;
+namespace stockyapi.Application.Auth.Register;
 
 public class RegisterRequest
 {

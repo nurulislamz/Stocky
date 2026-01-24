@@ -1,4 +1,5 @@
 ﻿using stockyapi.Middleware;
+using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Types;
 
 namespace stockyapi.Services.YahooFinance;

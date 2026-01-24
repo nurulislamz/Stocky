@@ -1,19 +1,19 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using stockyapi.Services;
-using stockyapi.Options;
-using stockyapi.Extensions;
-using stockymodels.Data;
-using System.Text.Json.Serialization;
-using stockyapi.Controllers;
-using stockyapi.Middleware;
-using stockyapi.Repository.Portfolio;
-using stockyapi.Repository.User;
-using stockyapi.Repository.YahooFinance;
 using Polly;
+using stockyapi.Extensions;
+using stockyapi.Middleware;
+using stockyapi.Options;
+using stockyapi.Repository.Funds;
+using stockyapi.Repository.User;
+using stockyapi.Services;
 using stockyapi.Services.YahooFinance;
+using stockymodels.Data;
+
+namespace stockyapi;
 
 internal class Program
 {
@@ -115,7 +115,7 @@ internal class Program
                 ValidateAudience = true,
                 ValidAudience = configuration["Jwt:Audience"],
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"] ?? throw new InvalidOperationException()))
             };
         });
 

@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using stockyapi.Application.Auth;
+using stockyapi.Application.Auth.Login;
+using stockyapi.Application.Auth.Register;
 using stockyapi.Controllers;
-using stockyapi.Failures;
 using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
 using stockyunittests.Helpers;
 
 namespace stockyunittests.Controllers;

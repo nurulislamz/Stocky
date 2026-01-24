@@ -1,9 +1,8 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Mvc;
-using stockyapi.Failures;
 using stockyapi.Middleware;
 
-namespace stockyapi.Controllers;
+namespace stockyapi.Controllers.Helpers;
 
 public abstract class BaseController : ControllerBase
 {
@@ -16,14 +15,13 @@ public abstract class BaseController : ControllerBase
     protected ActionResult ProcessFailure(Failure failure)
     {
         {
-            var instance = HttpContext.Request.Path.Value!;
             //var type  create a list of problems which links to the type of problem faced. 
             var problemDetails = ProblemDetailsFactory.CreateProblemDetails(
                 HttpContext,
                 statusCode: (int)failure.StatusCode,
                 title: failure.Title,
                 detail: failure.Detail,
-                instance: instance
+                instance: HttpContext.Request.Path.Value
                 // TODO: implement type endpoint and types here
             );
 

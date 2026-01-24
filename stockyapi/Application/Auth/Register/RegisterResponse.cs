@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace stockyapi.Responses;
+namespace stockyapi.Application.Auth.Register;
 
 public class RegisterResponse(string token, string email, string userId)
 {

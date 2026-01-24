@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
-using stockymodels.models.eums;
+using stockymodels.Models.Enums;
 
 namespace stockymodels.models;
 
@@ -20,7 +19,7 @@ public class UserPreferencesModel : BaseModel
 
     [Required]
     [MaxLength(10)]
-    public DefaultCurrency Currency { get; set; } = eums.DefaultCurrency.GDP;
+    public DefaultCurrency Currency { get; set; } = DefaultCurrency.GDP;
 
     [Required]
     [MaxLength(10)]

@@ -1,8 +1,9 @@
-﻿using stockyapi.Middleware;
-using stockyapi.Requests;
-using stockyapi.Responses;
+﻿using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Funds.Response;
+using stockyapi.Application.Funds.SubtractFunds;
+using stockyapi.Middleware;
 
-namespace stockyapi.Application.Portfolio;
+namespace stockyapi.Application.Funds;
 
 public interface IFundsApi
 {

@@ -1,6 +1,4 @@
-﻿using stockyapi.Failures;
-
-namespace stockyapi.Middleware;
+﻿namespace stockyapi.Middleware;
 
 public sealed class Result<T>
 {

@@ -1,8 +1,10 @@
 ﻿using stockyapi.Application.Portfolio;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Middleware;
+using stockyapi.Repository.Funds.Types;
 using stockymodels.models;
 
-namespace stockyapi.Repository.Portfolio;
+namespace stockyapi.Repository.PortfolioRepository;
 
 public interface IPortfolioRepository
 {

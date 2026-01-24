@@ -1,4 +1,4 @@
-namespace stockyapi.Responses;
+namespace stockyapi.Application.Funds.Response;
 
 public class FundsResponse(decimal updatedCashBalance, decimal updatedTotalValue, decimal updatedInvestedAmount)
 {

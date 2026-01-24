@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using stockyapi.Requests;
-using stockyapi.Responses;
 
 namespace stockyapi.Controllers;
 

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Immutable;
-using System.Reflection.Metadata;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using stockyapi.Failures;
+using stockyapi.Application.Portfolio.BuyTicker;
+using stockyapi.Application.Portfolio.DeleteHolding;
+using stockyapi.Application.Portfolio.GetHoldings;
+using stockyapi.Application.Portfolio.ListHoldings;
+using stockyapi.Application.Portfolio.SellTicker;
+using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Middleware;
-using stockyapi.Repository.Portfolio;
-using stockyapi.Requests;
-using stockyapi.Responses;
-using stockyapi.Types;
+using stockyapi.Repository.PortfolioRepository;
 using stockymodels.models;
 
 namespace stockyapi.Application.Portfolio;

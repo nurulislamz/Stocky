@@ -1,7 +1,5 @@
-﻿using stockyapi.Requests;
-using Microsoft.AspNetCore.Mvc;
-using stockyapi.Application.Portfolio;
-using stockyapi.Responses;
+﻿using Microsoft.AspNetCore.Mvc;
+using stockyapi.Application.MarketPricing;
 
 namespace stockyapi.Controllers;
 

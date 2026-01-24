@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Extensions.Http;
-using stockyapi.Failures;
 using stockyapi.Middleware;
 
-namespace stockyapi.Repository.YahooFinance.Helper;
+namespace stockyapi.Services.YahooFinance.Helper;
 
 public sealed class YahooExecutionHelper
 {

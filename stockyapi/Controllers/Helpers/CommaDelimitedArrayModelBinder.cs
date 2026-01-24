@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace stockyapi.Controllers;
+namespace stockyapi.Controllers.Helpers;
 
 [AttributeUsage(AttributeTargets.Parameter)]
 public class CommaSeparatedAttribute : ModelBinderAttribute

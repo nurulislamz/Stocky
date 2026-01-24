@@ -1,7 +1,6 @@
 ﻿using System.Text;
-using stockyapi.Middleware;
 
-namespace stockyapi.Services.YahooFinance.Types;
+namespace stockyapi.Services.YahooFinance.EndpointBuilder;
 
 public static class YahooEndpointBuilder
 {
@@ -224,7 +223,7 @@ public static class YahooEndpointBuilder
         }
 
         var trimmed = values
-            .Select(value => value?.Trim())
+            .Select(value => value.Trim())
             .Where(value => !string.IsNullOrWhiteSpace(value))
             .ToList();
 

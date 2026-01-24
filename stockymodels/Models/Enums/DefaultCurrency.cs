@@ -1,4 +1,5 @@
-namespace stockymodels.models.eums;
+// ReSharper disable InconsistentNaming
+namespace stockymodels.Models.Enums;
 
 public enum DefaultCurrency
 {

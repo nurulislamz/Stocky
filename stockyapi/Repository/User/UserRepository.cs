@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using stockyapi.Failures;
 using stockyapi.Middleware;
 using stockymodels.Data;
 using stockymodels.models;
-using stockymodels.models.eums;
+using stockymodels.Models.Enums;
 
 namespace stockyapi.Repository.User;
 

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace stockyapi.Failures;
+namespace stockyapi.Middleware;
 /// <summary>
 /// Represents a failure that can be returned from an HTTP request.
 /// </summary>
