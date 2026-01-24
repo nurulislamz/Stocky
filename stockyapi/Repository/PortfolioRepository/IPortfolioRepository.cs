@@ -9,12 +9,11 @@ namespace stockyapi.Repository.PortfolioRepository;
 public interface IPortfolioRepository
 {
     // Portfolio Operations
-    Task<Result<PortfolioModel>> GetPortfolioModelFromUserIdAsync(Guid userId, CancellationToken cancellationToken);
-    Task<Result<PortfolioWithHoldings>> ListAllHoldingsAsync(Guid userId, CancellationToken cancellationToken);
-    Task<Result<List<StockHoldingModel>>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedHoldingsIds, CancellationToken cancellationToken);
-    Task<Result<List<StockHoldingModel>>> GetHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken cancellationToken);
-    Task<Result<(AssetTransactionModel, PortfolioModel)>> BuyHoldingAsync(Guid userId, BuyOrderCommand command, CancellationToken cancellationToken);
-    Task<Result<(AssetTransactionModel, PortfolioModel)>> SellHoldingAsync(Guid userId, SellOrderCommand command, CancellationToken cancellationToken);
-    Task<Result<IEnumerable<StockHoldingModel>>> DeleteHoldingsByIdAsync(Guid userId, Guid[] requestedHoldingsIds, CancellationToken cancellationToken);
-    Task<Result<List<StockHoldingModel>>> DeleteHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken cancellationToken);
+    Task<PortfolioModel> GetPortfolioFromUserIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<PortfolioWithHoldings> ListAllHoldingsAsync(Guid userId, CancellationToken cancellationToken);
+    Task<HoldingsValidationResult<Guid>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedHoldingsIds, CancellationToken cancellationToken);
+    Task<HoldingsValidationResult<string>> GetHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken cancellationToken);
+    Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> BuyHoldingAsync(Guid userId, BuyOrderCommand command, CancellationToken cancellationToken);
+    Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> SellHoldingAsync(Guid userId, SellOrderCommand command, CancellationToken cancellationToken);
+    Task<List<AssetTransactionModel>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken cancellationToken);
 }

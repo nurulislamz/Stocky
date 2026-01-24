@@ -25,44 +25,36 @@ public sealed class PortfolioApi : IPortfolioApi
 
     public async Task<Result<ListHoldingsResponse>> ListHoldings(CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.ListAllHoldingsAsync(_userContext.UserId, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return Result<ListHoldingsResponse>.Fail(portfolioResult.Failure);
-        var portfolio = portfolioResult.Value;
-        var allHoldings = portfolioResult.Value.Holdings;
-
+        var portfolio = await _portfolioRepository.ListAllHoldingsAsync(_userContext.UserId, cancellationToken);
+        
+        var allHoldings = portfolio.Holdings;
         var processedHoldings = allHoldings.Select(ProcessHoldingModelsToHoldings).ToImmutableArray();
         return new ListHoldingsResponse(portfolio.TotalValue, portfolio.CashBalance, portfolio.InvestedAmount, processedHoldings);
     }
 
     public async Task<Result<GetHoldingsResponse>> GetHoldingsById(Guid[] requestedHoldingIds, CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.GetHoldingsByIdAsync(_userContext.UserId, requestedHoldingIds, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return portfolioResult.Failure;
+        var portfolio = await _portfolioRepository.GetHoldingsByIdAsync(_userContext.UserId, requestedHoldingIds, cancellationToken);
+        if (portfolio.MissingIdsOrTickers.Any())
+            return new ValidationFailure422($"These tickers were not found in your portfolio: {portfolio.MissingIdsOrTickers}");
         
-        var allHoldings = portfolioResult.Value;
-        var processedHoldings = allHoldings.Select(ProcessHoldingModelsToHoldings).ToImmutableArray();
+        var processedHoldings = portfolio.Holdings.Select(ProcessHoldingModelsToHoldings).ToImmutableArray();
         return new GetHoldingsResponse(processedHoldings);
     }
     
     public async Task<Result<GetHoldingsResponse>> GetHoldingsByTicker(string[] requestedTickers, CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.GetHoldingsByTickerAsync(_userContext.UserId, requestedTickers, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return portfolioResult.Failure;
+        var portfolio = await _portfolioRepository.GetHoldingsByTickerAsync(_userContext.UserId, requestedTickers, cancellationToken);
+        if (portfolio.MissingIdsOrTickers.Any())
+            return new ValidationFailure422($"These tickers were not found in your portfolio: {portfolio.MissingIdsOrTickers}");
         
-        var allHoldings = portfolioResult.Value;
-        var processedHoldings = allHoldings.Select(ProcessHoldingModelsToHoldings).ToImmutableArray();
+        var processedHoldings = portfolio.Holdings.Select(ProcessHoldingModelsToHoldings).ToImmutableArray();
         return new GetHoldingsResponse(processedHoldings);
     }
 
     public async Task<Result<BuyTickerResponse>> BuyTicker(BuyTickerRequest request, CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.GetPortfolioModelFromUserIdAsync(_userContext.UserId, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return portfolioResult.Failure;
-        var portfolio = portfolioResult.Value;
+        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
         
         // Validate purchase
         var totalCost = request.Price * request.Quantity;
@@ -74,27 +66,19 @@ public sealed class PortfolioApi : IPortfolioApi
         var command = new BuyOrderCommand(portfolio.Id, request.Symbol, request.Quantity, request.Price);
         var buyResult = await _portfolioRepository.BuyHoldingAsync(_userContext.UserId, command, cancellationToken);
         
-        if (buyResult.IsFailure)
-            return buyResult.Failure;
-        var transaction = buyResult.Value.Item1;
-        var updatedPortfolio = buyResult.Value.Item2;
-        
-        return new BuyTickerResponse(ProcessAssetTransactionModelsToHoldings(transaction, updatedPortfolio));
+        return new BuyTickerResponse(ProcessAssetTransactionModelsToHoldings(buyResult.transaction, buyResult.updatedPortfolio));
     }
     
     public async Task<Result<SellTickerResponse>> SellTicker(SellTickerRequest request, CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.GetPortfolioModelFromUserIdAsync(_userContext.UserId, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return portfolioResult.Failure;
+        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
         
-        var portfolio = portfolioResult.Value;
         // Validate User has a holding in that Ticker
-        var holdingExist = await _portfolioRepository.GetHoldingsByTickerAsync(_userContext.UserId, [request.Symbol], cancellationToken);
-        if (holdingExist.IsFailure)
-            return holdingExist.Failure;
+        var holdingResponse = await _portfolioRepository.GetHoldingsByTickerAsync(_userContext.UserId, [request.Symbol], cancellationToken);
+        if (holdingResponse.MissingIdsOrTickers.Any())
+            return new ValidationFailure422($"These tickers were not found in your portfolio: {holdingResponse.MissingIdsOrTickers}");
 
-        var holding = holdingExist.Value.First();
+        var holding = holdingResponse.Holdings.Single();
         if (holding.Shares < request.Quantity)
             return new ConflictFailure409(
                 $"Insufficient Position: You are attempting to sell {request.Quantity} shares of {request.Symbol}, " +
@@ -102,34 +86,31 @@ public sealed class PortfolioApi : IPortfolioApi
         
         // Create sellOrderCommand
         var command = new SellOrderCommand(portfolio.Id, request.Symbol, request.Quantity, request.Price);
-        
         var sellResult = await _portfolioRepository.SellHoldingAsync(_userContext.UserId, command, cancellationToken);
-        if (sellResult.IsFailure)
-            return sellResult.Failure;
         
-        var transaction = sellResult.Value.Item1;
-        var updatedPortfolio = sellResult.Value.Item2;
-        
-        return new SellTickerResponse(ProcessAssetTransactionModelsToHoldings(transaction, updatedPortfolio));
+        return new SellTickerResponse(ProcessAssetTransactionModelsToHoldings(sellResult.transaction, sellResult.updatedPortfolio));
     }
 
     public async Task<Result<DeleteHoldingsResponse>> DeleteHoldingsById(Guid[] requestedHoldingIds, CancellationToken cancellationToken)
     {
-        var deletedHoldingsResponse = await _portfolioRepository.DeleteHoldingsByIdAsync(_userContext.UserId, requestedHoldingIds, cancellationToken);
-        if (deletedHoldingsResponse.IsFailure)
-            return deletedHoldingsResponse.Failure;
+        var validateHoldings = await _portfolioRepository.GetHoldingsByIdAsync(_userContext.UserId, requestedHoldingIds, cancellationToken);
+        if (validateHoldings.MissingIdsOrTickers.Any())
+        {
+            return new ValidationFailure422($"These tickers were not found in your portfolio: {validateHoldings.MissingIdsOrTickers}");
+        }
 
-        var deletedHoldings = deletedHoldingsResponse.Value;
+        var holdings = validateHoldings.Holdings;
+        var deletedHoldings = await _portfolioRepository.DeleteHoldingsAsync(_userContext.UserId, holdings, cancellationToken);
         return new DeleteHoldingsResponse(ProcessHoldingsModelsToDeleteConfirmationDto(deletedHoldings));
     }
     
-    public async Task<Result<DeleteHoldingsResponse>> DeleteHoldingsByTicker(string[] requestedTickerIds, CancellationToken cancellationToken)
+    public async Task<Result<DeleteHoldingsResponse>> DeleteHoldingsByTicker(string[] requestedTickers, CancellationToken cancellationToken)
     {
-        var deletedHoldingsResponse = await _portfolioRepository.DeleteHoldingsByTickerAsync(_userContext.UserId, requestedTickerIds, cancellationToken);
-        if (deletedHoldingsResponse.IsFailure)
-            return deletedHoldingsResponse.Failure;
-
-        var deletedHoldings = deletedHoldingsResponse.Value;
+        var holdings = await _portfolioRepository.GetHoldingsByTickerAsync(_userContext.UserId, requestedTickers, cancellationToken);
+        if (holdings.MissingIdsOrTickers.Any())
+            return new ValidationFailure422($"These tickers were not found in your portfolio: {holdings.MissingIdsOrTickers}");
+        
+        var deletedHoldings = await _portfolioRepository.DeleteHoldingsAsync(_userContext.UserId, holdings.Holdings, cancellationToken);
         return new DeleteHoldingsResponse(ProcessHoldingsModelsToDeleteConfirmationDto(deletedHoldings));
     }
 
@@ -152,7 +133,7 @@ public sealed class PortfolioApi : IPortfolioApi
         => new TradeConfirmationDto
         {
             Ticker = transactionModel.Ticker,
-            QuantityBought = transactionModel.Quantity,
+            QuantityBought = transactionModel.Quantity ,
             ExecutionPrice = transactionModel.Price,
             NewAveragePrice = transactionModel.NewAverageCost,
             TotalCost = transactionModel.Quantity * transactionModel.Price,
@@ -163,7 +144,7 @@ public sealed class PortfolioApi : IPortfolioApi
             Timestamp = transactionModel.UpdatedAt
         };
 
-    private IEnumerable<DeleteConfirmationDto> ProcessHoldingsModelsToDeleteConfirmationDto(IEnumerable<StockHoldingModel> holdings)
+    private IEnumerable<DeleteConfirmationDto> ProcessHoldingsModelsToDeleteConfirmationDto(IEnumerable<AssetTransactionModel> holdings)
     {
         return holdings.Select(h => new DeleteConfirmationDto(h.Id, h.Ticker, DateTimeOffset.UtcNow));
     }

@@ -43,10 +43,7 @@ public sealed class FundsApi : IFundsApi
 
     private async Task<Result<FundsResponse>> ProcessTransaction(decimal amount, FundOperationType transactionType, CancellationToken cancellationToken)
     {
-        var portfolioResult = await _portfolioRepository.GetPortfolioModelFromUserIdAsync(_userContext.UserId, cancellationToken);
-        if (portfolioResult.IsFailure)
-            return portfolioResult.Failure;
-        var portfolio = portfolioResult.Value;
+        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
         
         var cashDelta = transactionType == FundOperationType.Deposit ? amount : -amount;
         if (cashDelta < 0 && portfolio.CashBalance + cashDelta < 0)

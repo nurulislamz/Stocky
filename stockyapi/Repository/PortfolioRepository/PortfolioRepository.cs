@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.Serialization;
+using Microsoft.EntityFrameworkCore;
 using stockyapi.Application.Portfolio;
 using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Middleware;
@@ -12,38 +13,46 @@ namespace stockyapi.Repository.PortfolioRepository;
 public class PortfolioRepository : IPortfolioRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger _logger;
 
-    public PortfolioRepository(ApplicationDbContext dbContext)
+    public PortfolioRepository(ApplicationDbContext dbContext, ILogger logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
-    public async Task<Result<PortfolioModel>> GetPortfolioModelFromUserIdAsync(Guid userId, CancellationToken ct)
+    public async Task<PortfolioModel> GetPortfolioFromUserIdAsync(Guid userId, CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        if (portfolio == null)
-            return new NotFoundFailure404("Portfolio not found");
-        
-        return Result<PortfolioModel>.Success(portfolio);
+        if (portfolio is null)
+        {
+            var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
+        return portfolio;
     }
     
-    public async Task<Result<PortfolioWithHoldings>> ListAllHoldingsAsync(Guid userId, CancellationToken ct)
+    public async Task<PortfolioWithHoldings> ListAllHoldingsAsync(Guid userId, CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
             .SingleOrDefaultAsync(ct);
-        
-        if (portfolio == null)
-            return new NotFoundFailure404("Portfolio not found. UserId must be wrong.");
-        
+
+        if (portfolio is null)
+        {
+            var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
+            
         var allHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolio.Id).ToListAsync(ct);
-        return Result<PortfolioWithHoldings>.Success(new PortfolioWithHoldings(portfolio.CashBalance,
-            portfolio.TotalValue, portfolio.InvestedAmount, allHoldings));
+        return new PortfolioWithHoldings(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount, allHoldings);
     }
     
     // TODO: Turn the list<guid> requestedIds to a HashSet
-    public async Task<Result<List<StockHoldingModel>>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedIds, CancellationToken ct)
+    public async Task<HoldingsValidationResult<Guid>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedIds, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
@@ -51,16 +60,16 @@ public class PortfolioRepository : IPortfolioRepository
             .SingleOrDefaultAsync(ct);
 
         if (portfolioId == Guid.Empty)
-            return new NotFoundFailure404("Could not find the user portfolio. Something is wrong with your UserId");
+        {
+            var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
 
-        var holdingsResponse = await ValidateHoldingsExist(portfolioId, requestedIds, ct);
-        if (holdingsResponse.invalidIds.Any() )
-            return new ValidationFailure422($"These Ids were not valid: {string.Join(", ", holdingsResponse.invalidIds.ToString())}");
-        
-        return Result<List<StockHoldingModel>>.Success(holdingsResponse.validHoldings);
+        return await ValidateHoldingsExist(portfolioId, requestedIds, ct);
     }
 
-    public async Task<Result<List<StockHoldingModel>>> GetHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken ct)
+    public async Task<HoldingsValidationResult<string>> GetHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
@@ -68,21 +77,25 @@ public class PortfolioRepository : IPortfolioRepository
             .SingleOrDefaultAsync(ct);
 
         if (portfolioId == Guid.Empty)
-            return new NotFoundFailure404("Could not find the user portfolio. Something is wrong with your UserId");
-
-        var holdingsResponse = await ValidateHoldingsExist(portfolioId, requestedTickers, ct);
-        if (holdingsResponse.invalidIds.Any() )
-            return new ValidationFailure422($"These Ids were not valid: {string.Join(", ", holdingsResponse.invalidIds.ToString())}");
+        {
+            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
         
-        return Result<List<StockHoldingModel>>.Success(holdingsResponse.validHoldings);
+        return await ValidateHoldingsExist(portfolioId, requestedTickers, ct);
     }
 
-    public async Task<Result<(AssetTransactionModel, PortfolioModel)>> BuyHoldingAsync(Guid userId, BuyOrderCommand command,
+    public async Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> BuyHoldingAsync(Guid userId, BuyOrderCommand command,
         CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        if (portfolio == null)
-            return new NotFoundFailure404("Portfolio not found");
+        if (portfolio is null)
+        {
+            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
         
         var totalCost = command.Quantity * command.Price;
 
@@ -125,9 +138,6 @@ public class PortfolioRepository : IPortfolioRepository
             Price = command.Price,
         };
 
-        if (portfolio.CashBalance - totalCost < 0)
-            return new ValidationFailure422("The buy Transaction would have reduced the cashBalance below 0.");
-        
         portfolio.CashBalance -= totalCost;
         portfolio.InvestedAmount += totalCost;
         
@@ -137,12 +147,16 @@ public class PortfolioRepository : IPortfolioRepository
         return (transaction, portfolio);
     }
 
-    public async Task<Result<(AssetTransactionModel, PortfolioModel)>> SellHoldingAsync(Guid userId, SellOrderCommand command,
+    public async Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> SellHoldingAsync(Guid userId, SellOrderCommand command,
         CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        if (portfolio == null)
-            return new NotFoundFailure404("Portfolio not found");
+        if (portfolio is null)
+        {
+            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
         
         var totalCost = command.Quantity * command.Price;
 
@@ -151,23 +165,21 @@ public class PortfolioRepository : IPortfolioRepository
         portfolio.InvestedAmount += totalCost;
 
         // Update or create stock holding
-        var existingHolding = _dbContext.StockHoldings.SingleOrDefault(holding => holding.PortfolioId == portfolio.Id);
-        if (existingHolding == null)
-            return new BadRequestFailure400("Stock is not owned. Error in repo should not occur");
+        var holding = await _dbContext.StockHoldings.SingleAsync(holding => holding.PortfolioId == portfolio.Id & holding.Ticker == command.Ticker, ct);
         
         // Update holding
-        var newTotalShares = existingHolding.Shares - command.Quantity;
-        var newTotalCost = (existingHolding.AverageCost * existingHolding.Shares);
+        var newTotalShares =  holding.Shares - command.Quantity;
+        var newTotalCost = ( holding.AverageCost *  holding.Shares);
         var newAverageCost = newTotalShares == 0 ? 0 : newTotalCost / newTotalShares;
         
         // Logic to delete holding if newTotalShares == 0
         if (newTotalShares == 0)
         {
-            _dbContext.StockHoldings.Remove(existingHolding);
+            _dbContext.StockHoldings.Remove( holding);
         }
         
-        existingHolding.Shares = newTotalShares;
-        existingHolding.AverageCost = newAverageCost;
+         holding.Shares = newTotalShares;
+         holding.AverageCost = newAverageCost;
 
         // Save transaction and update portfolio
         var transaction = new AssetTransactionModel
@@ -186,7 +198,8 @@ public class PortfolioRepository : IPortfolioRepository
         return (transaction, portfolio);
     }
 
-    public async Task<Result<IEnumerable<StockHoldingModel>>> DeleteHoldingsByIdAsync(Guid userId, Guid[] requestedHoldingsIds, CancellationToken ct)
+    // TODO: Create a parameter and system to allow one to be reimbursed the total funds of the deleted assets
+    public async Task<List<AssetTransactionModel>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
@@ -194,41 +207,32 @@ public class PortfolioRepository : IPortfolioRepository
             .SingleOrDefaultAsync(ct);
 
         if (portfolioId == Guid.Empty)
-            return new NotFoundFailure404("Could not find the user portfolio. Something is wrong with your UserId");
-
-        var holdingsResponse = await ValidateHoldingsExist(portfolioId, requestedHoldingsIds, ct);
-        if (holdingsResponse.invalidIds.Any() )
-            return new ValidationFailure422($"These Ids were not valid: {string.Join(", ", holdingsResponse.invalidIds.ToString())}");
-
-        _dbContext.StockHoldings.RemoveRange(holdingsResponse.validHoldings);
-
+        {
+            var exception = new Exception($"PortfolioId not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            throw exception;
+        }
+        
+        
+        var deletedTransaction = holdings.Select(h => new AssetTransactionModel
+        {
+            PortfolioId = portfolioId,
+            Ticker = h.Ticker,
+            Type = TransactionType.Delete,
+            Quantity = null,
+            NewAverageCost = null,
+            Price = null,
+        }).ToList();
+        
+        _dbContext.StockHoldings.RemoveRange(holdings);
+        await _dbContext.AssetTransactions.AddRangeAsync(deletedTransaction, ct);
+        
         await _dbContext.SaveChangesAsync(ct);
-
-        return holdingsResponse.validHoldings;
-    }
-
-    public async Task<Result<List<StockHoldingModel>>> DeleteHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken ct)
-    {
-        var portfolioId = await _dbContext.Portfolios
-            .Where(p => p.UserId == userId)
-            .Select(p => p.Id)
-            .SingleOrDefaultAsync(ct);
-
-        if (portfolioId == Guid.Empty)
-            return new NotFoundFailure404("Could not find the user portfolio. Something is wrong with your UserId");
-
-        var holdingsResponse = await ValidateHoldingsExist(portfolioId, requestedTickers, ct);
-        if (holdingsResponse.invalidIds.Any() )
-            return new ValidationFailure422($"These Ids were not valid: {string.Join(", ", holdingsResponse.invalidIds.ToString())}");
-
-        _dbContext.StockHoldings.RemoveRange(holdingsResponse.validHoldings);
-        await _dbContext.SaveChangesAsync(ct);
-
-        return holdingsResponse.validHoldings;
+        return deletedTransaction;
     }
 
     // helper function, returns a list of ids found and not found, same for tickers
-    private async Task<(List<StockHoldingModel> validHoldings, IEnumerable<Guid> invalidIds)> ValidateHoldingsExist(Guid portfolioId, Guid[] requestedIds, CancellationToken ct)
+    private async Task<HoldingsValidationResult<Guid>> ValidateHoldingsExist(Guid portfolioId, Guid[] requestedIds, CancellationToken ct)
     {
         var foundHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolioId)
@@ -236,12 +240,12 @@ public class PortfolioRepository : IPortfolioRepository
             .ToListAsync(ct);
 
         var foundHoldingIds = foundHoldings.Select(g => g.Id);
-        var invalidIds = requestedIds.Where(s => foundHoldingIds.Contains(s));
+        var invalidIds = requestedIds.Where(s => foundHoldingIds.Contains(s)).ToList();
 
-        return (foundHoldings, invalidIds);
+        return new HoldingsValidationResult<Guid>(foundHoldings, invalidIds);
     }
 
-    private async Task<(List<StockHoldingModel> validHoldings, IEnumerable<string> invalidIds)> ValidateHoldingsExist(Guid portfolioId, string[] requestedTickers, CancellationToken ct)
+    private async Task<HoldingsValidationResult<string>> ValidateHoldingsExist(Guid portfolioId, string[] requestedTickers, CancellationToken ct)
     {
         var foundHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolioId)
@@ -249,8 +253,8 @@ public class PortfolioRepository : IPortfolioRepository
             .ToListAsync(ct);
 
         var foundTickers = foundHoldings.Select(g => g.Ticker);
-        var invalidTickers = requestedTickers.Where(s => foundTickers.Contains(s));
+        var invalidTickers = requestedTickers.Where(s => foundTickers.Contains(s)).ToList();
 
-        return (foundHoldings, invalidTickers);
+        return new HoldingsValidationResult<string>(foundHoldings, invalidTickers);
     }
 }

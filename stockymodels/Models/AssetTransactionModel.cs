@@ -21,17 +21,14 @@ public class AssetTransactionModel : BaseModel
     [Required]
     public TransactionType Type { get; init; }
 
-    [Required]
     [Precision(18, 2)]
-    public decimal Quantity { get; init; }
+    public decimal? Quantity { get; init; }
 
-    [Required]
     [Precision(18, 2)]
-    public decimal Price { get; init; }
+    public decimal? Price { get; init; }
     
-    [Required]
     [Precision(18, 2)]
-    public decimal NewAverageCost { get; init; }
+    public decimal? NewAverageCost { get; init; }
     
     // Navigation property
     public virtual PortfolioModel? Portfolio { get; init; }
