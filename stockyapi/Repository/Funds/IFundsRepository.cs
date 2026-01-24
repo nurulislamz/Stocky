@@ -1,13 +1,11 @@
-﻿using stockyapi.Application.Funds.CommandAndQueries;
-using stockyapi.Middleware;
-using stockyapi.Repository.Funds.Types;
+﻿using stockyapi.Repository.Funds.Types;
 
 namespace stockyapi.Repository.Funds;
 
 public interface IFundsRepository
 {
     // Fund Operations
-    Task<Result<PortfolioBalances>> GetFundsAsync(Guid userId, CancellationToken cancellationToken);
-
-    Task<Result<PortfolioBalances>> ApplyFundTransactionAsync(BaseFundCommand command, CancellationToken cancellationToken);
+    Task<PortfolioBalances> GetFundsAsync(Guid userId, CancellationToken cancellationToken);
+    Task<PortfolioBalances> DepositFundsAsync(Guid userId, Guid portfolioId, decimal cashDelta,  CancellationToken cancellationToken);
+    Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, Guid portfolioId, decimal cashDelta, CancellationToken cancellationToken);
 }

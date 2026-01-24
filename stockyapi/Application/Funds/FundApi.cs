@@ -1,5 +1,4 @@
 ﻿using stockyapi.Application.Funds.AddFunds;
-using stockyapi.Application.Funds.CommandAndQueries;
 using stockyapi.Application.Funds.Response;
 using stockyapi.Application.Funds.SubtractFunds;
 using stockyapi.Middleware;
@@ -25,42 +24,27 @@ public sealed class FundsApi : IFundsApi
     public async Task<Result<FundsResponse>> GetFunds(CancellationToken cancellationToken)
     {
         var fundResponse = await _fundsRepository.GetFundsAsync(_userContext.UserId, cancellationToken);
-        if (fundResponse.IsFailure)
-            return fundResponse.Failure;
         
-        return Result<FundsResponse>.Success(new FundsResponse(fundResponse.Value.CashBalance, fundResponse.Value.TotalValue, fundResponse.Value.InvestedAmount));
+        return Result<FundsResponse>.Success(new FundsResponse(fundResponse.CashBalance, fundResponse.TotalValue, fundResponse.InvestedAmount));
     }
 
     public async Task<Result<FundsResponse>> DepositFunds(DepositFundsRequest request, CancellationToken cancellationToken)
     {
-        return await ProcessTransaction(request.Amount, FundOperationType.Deposit, cancellationToken);
+        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
+        
+        var cashDelta = request.Amount;
+        
+        var updateFunds = await _fundsRepository.DepositFundsAsync(portfolio.UserId, portfolio.Id, cashDelta, cancellationToken);
+        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
     }
     
     public async Task<Result<FundsResponse>> WithdrawFunds(WithdrawFundsRequest request, CancellationToken cancellationToken)
     {
-        return await ProcessTransaction(request.Amount, FundOperationType.Withdrawal, cancellationToken);
-    }
-
-    private async Task<Result<FundsResponse>> ProcessTransaction(decimal amount, FundOperationType transactionType, CancellationToken cancellationToken)
-    {
         var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
         
-        var cashDelta = transactionType == FundOperationType.Deposit ? amount : -amount;
-        if (cashDelta < 0 && portfolio.CashBalance + cashDelta < 0)
-            return new ConflictFailure409("Insufficient funds to withdraw.");
+        var cashDelta = -request.Amount;
         
-        // Add a record to the funds transaction table
-        BaseFundCommand command = transactionType switch
-        {
-            FundOperationType.Deposit => new DepositFundCommands(portfolio.UserId, portfolio.Id, cashDelta),
-            FundOperationType.Withdrawal => new WithdrawOrderCommand(portfolio.UserId, portfolio.Id, cashDelta),
-            _ => throw new ArgumentOutOfRangeException(nameof(transactionType), transactionType, null)
-        };
-        
-        var updateFunds = await _fundsRepository.ApplyFundTransactionAsync(command, cancellationToken);
-        if (updateFunds.IsFailure)
-            return updateFunds.Failure;
-        
-        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.Value.CashBalance, updateFunds.Value.TotalValue, updateFunds.Value.InvestedAmount));
+        var updateFunds = await _fundsRepository.WithdrawFundsAsync(portfolio.UserId, portfolio.Id, cashDelta, cancellationToken);
+        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
     }
 }
