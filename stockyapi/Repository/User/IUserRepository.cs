@@ -6,12 +6,11 @@ namespace stockyapi.Repository.User;
 public interface IUserRepository
 {
     // Basic CRUD operations
-    Task<Result<UserModel>> GetUserByIdAsync(Guid id);
+    Task<UserModel?> GetUserByIdAsync(Guid id);
     Task<bool> UserExistsByEmailAsync(string email);
-    Task<Result<UserModel>> GetUserByEmailAsync(string email);
+    Task<UserModel?> GetUserByEmailAsync(string email);
     Task CreateUserAsync(UserModel user);
-    Task<Result<UserModel>> UpdateUserAsync(UserModel user);
-    Task DeleteUserAsync(Guid id);
+    Task DeleteUserAsync(UserModel user);
 
     // // User preferences operations
     // Task<UserPreferencesModel?> GetUserPreferencesAsync(Guid userId);

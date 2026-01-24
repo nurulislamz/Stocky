@@ -26,17 +26,15 @@ public class AuthenticationApi : IAuthenticationApi
         string password = request.Password;
         
         var user = await _userRepository.GetUserByEmailAsync(email);
-        if (user.IsFailure)
-        {
-            return user.Failure;
-        }
+        if (user is null)
+            return new NotFoundFailure404("User was not found");
 
         // Verify Password
-        if (!BCrypt.Net.BCrypt.Verify(password, user.Value.Password))
+        if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
             return new UnauthorizedFailure401("Invalid password");
         
         // Create Token
-        var token = _tokenService.CreateToken(user.Value);
+        var token = _tokenService.CreateToken(user);
         return Result<LoginResponse>.Success(new LoginResponse(token));
     }
 
