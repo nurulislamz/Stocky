@@ -11,8 +11,8 @@ using stockyapi.Controllers;
 using stockyapi.Middleware;
 using stockyapi.Repository.Portfolio;
 using stockyapi.Repository.User;
-using stockyapi.Repository.AI;
 using stockyapi.Repository.YahooFinance;
+using Polly;
 
 class Program
 {
@@ -84,11 +84,11 @@ class Program
 
         // Service DIs
         services.AddScoped<ITokenService, TokenService>();
-        services.AddHttpClient<IYahooFinanceRepository, YahooFinanceRepository>(client =>
+        services.AddHttpClient<IYahooFinanceService, YahooFinanceService>(client =>
         {
-            client.BaseAddress = new Uri("https://query1.finance.yahoo.com/v8/finance/");
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
-        });
+            client.Timeout = TimeSpan.FromSeconds(10);
+        }).AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
 
         // Repository DIs
         services.AddScoped<IFundsRepository, FundsRepository>();
