@@ -31,15 +31,15 @@ public class FundsRepository : IFundsRepository
         return portfolio;
     }
 
-    public async Task<PortfolioBalances> DepositFundsAsync(Guid userId, Guid portfolioId, decimal cashDelta, CancellationToken ct)
+    public async Task<PortfolioBalances> DepositFundsAsync(Guid userId, decimal cashDelta, CancellationToken ct)
     {
-        var fundTransaction = CreateFundsTransactionModel(userId, portfolioId, cashDelta, FundOperationType.Deposit);
-        
         var portfolio = await _dbContext.Portfolios
-            .SingleOrDefaultAsync(p => p.Id == fundTransaction.PortfolioId, ct);
+            .SingleOrDefaultAsync(p => p.UserId == userId, ct);
         
         if (portfolio == null)
             throw new Exception("portfolio not found.");
+        
+        var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Deposit);
         
         var updatedCashBalance = portfolio.CashBalance + cashDelta;
         var updatedTotalValue = portfolio.TotalValue + cashDelta;
@@ -59,15 +59,15 @@ public class FundsRepository : IFundsRepository
         return new PortfolioBalances(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount);
     }
 
-    public async Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, Guid portfolioId, decimal cashDelta, CancellationToken ct)
+    public async Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, decimal cashDelta, CancellationToken ct)
     {
-        var fundTransaction = CreateFundsTransactionModel(userId, portfolioId, cashDelta, FundOperationType.Withdrawal);
-        
         var portfolio = await _dbContext.Portfolios
-            .SingleOrDefaultAsync(p => p.Id == fundTransaction.PortfolioId, ct);
+            .SingleOrDefaultAsync(p => p.UserId == userId, ct);
         
         if (portfolio == null)
             throw new Exception("portfolio not found.");
+        
+        var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Withdrawal);
         
         var updatedCashBalance = portfolio.CashBalance - cashDelta;
         var updatedTotalValue = portfolio.TotalValue - cashDelta;

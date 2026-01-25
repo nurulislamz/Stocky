@@ -12,13 +12,11 @@ public sealed class FundsApi : IFundsApi
 {
     private readonly IUserContext _userContext;
     private readonly IFundsRepository _fundsRepository;
-    private readonly IPortfolioRepository _portfolioRepository;
     
-    public FundsApi(IUserContext userContext, IFundsRepository fundsRepository, IPortfolioRepository portfolioRepository)
+    public FundsApi(IUserContext userContext, IFundsRepository fundsRepository)
     {
         _userContext = userContext;
         _fundsRepository = fundsRepository;
-        _portfolioRepository = portfolioRepository;
     }
     
     public async Task<Result<FundsResponse>> GetFunds(CancellationToken cancellationToken)
@@ -30,21 +28,13 @@ public sealed class FundsApi : IFundsApi
 
     public async Task<Result<FundsResponse>> DepositFunds(DepositFundsRequest request, CancellationToken cancellationToken)
     {
-        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
-        
-        var cashDelta = request.Amount;
-        
-        var updateFunds = await _fundsRepository.DepositFundsAsync(portfolio.UserId, portfolio.Id, cashDelta, cancellationToken);
-        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
+        var updateFunds = await _fundsRepository.DepositFundsAsync(_userContext.UserId, request.Amount, cancellationToken);
+        return new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount);
     }
     
     public async Task<Result<FundsResponse>> WithdrawFunds(WithdrawFundsRequest request, CancellationToken cancellationToken)
     {
-        var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
-        
-        var cashDelta = request.Amount;
-        
-        var updateFunds = await _fundsRepository.WithdrawFundsAsync(portfolio.UserId, portfolio.Id, cashDelta, cancellationToken);
-        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
+        var updateFunds = await _fundsRepository.WithdrawFundsAsync(_userContext.UserId, request.Amount, cancellationToken);
+        return new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount);
     }
 }

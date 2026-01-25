@@ -29,10 +29,8 @@ public class FundsIntegrationTests
         await _session.SetupUser(cash, invested);
         _userContext = new TestUserContext(_session.UserId, _session.UserEmail);
 
-        // 3. Re-instantiate the API with the fresh context
         var fundsRepo = new FundsRepository(_session.Context);
-        var portfolioRepo = new PortfolioRepository(_session.Context, NullLogger<PortfolioRepository>.Instance);
-        _fundsApi = new FundsApi(_userContext, fundsRepo, portfolioRepo);
+        _fundsApi = new FundsApi(_userContext, fundsRepo);
     }
 
     [TearDown]
@@ -83,7 +81,7 @@ public class FundsIntegrationTests
     public async Task WithdrawFunds_ValidAmount_DecreasesCashBalance()
     {
         // Arrange
-        await InitialiseTestAsync(150, 50);
+        await InitialiseTestAsync(100, 50);
         var request = new WithdrawFundsRequest { Amount = 40m };
 
         // Act
@@ -108,6 +106,7 @@ public class FundsIntegrationTests
         // Re-setup user with low balance for this specific test if needed,
         // or just use a large withdrawal amount.
         // Current balance is 100m.
+        await InitialiseTestAsync(100, 50);
         var request = new WithdrawFundsRequest { Amount = 200m };
 
         // Act

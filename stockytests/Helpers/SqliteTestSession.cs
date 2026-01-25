@@ -21,7 +21,7 @@ internal sealed class SqliteTestSession : IAsyncDisposable
         _connection = connection;
     }
 
-    public static async Task<SqliteTestSession> CreateAsync(decimal cashBalance = 100m, decimal investedAmount = 50m)
+    public static async Task<SqliteTestSession> CreateAsync()
     {
         SqliteConnection connection = new SqliteConnection("Data Source=:memory:");
         await connection.OpenAsync();
