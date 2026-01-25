@@ -68,4 +68,7 @@
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1179648</s:Int64>
 	
 	
+	
+	
+	
 	</wpf:ResourceDictionary>

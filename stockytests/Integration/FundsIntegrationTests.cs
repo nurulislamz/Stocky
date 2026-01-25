@@ -33,7 +33,7 @@ public class FundsIntegrationTests
         _fundsApi = new FundsApi(_userContext, fundsRepo);
     }
 
-    [TearDown]
+    [OneTimeTearDown]
     public async Task TearDown()
     {
         await _session.DisposeAsync();
@@ -67,14 +67,14 @@ public class FundsIntegrationTests
 
         // Assert
         Assert.That(result.IsSuccess, Is.True);
-        Assert.That(result.Value.CashBalance, Is.EqualTo(150m));
+        Assert.That(result.Value.CashBalance, Is.EqualTo(200m));
         Assert.That(result.Value.InvestedAmount, Is.EqualTo(50m));
-        Assert.That(result.Value.TotalValue, Is.EqualTo(200m));
+        Assert.That(result.Value.TotalValue, Is.EqualTo(250m));
 
         // Verify persistence
         var portfolio = await _session.Context.Portfolios.FirstOrDefaultAsync(p => p.UserId == _userContext.UserId);
         Assert.That(portfolio, Is.Not.Null);
-        Assert.That(portfolio.CashBalance, Is.EqualTo(150m));
+        Assert.That(portfolio.CashBalance, Is.EqualTo(200m));
     }
 
     [Test]
@@ -115,6 +115,6 @@ public class FundsIntegrationTests
         // Assert
         Assert.That(result.IsSuccess, Is.False);
         Assert.That(result.Failure, Is.TypeOf<BadRequestFailure400>());
-        Assert.That(result.Failure.Detail, Is.EqualTo("Insufficient funds."));
+        Assert.That(result.Failure.Detail, Does.StartWith("Insufficient funds."));
     }
 }

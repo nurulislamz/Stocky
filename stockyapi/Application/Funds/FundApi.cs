@@ -34,6 +34,10 @@ public sealed class FundsApi : IFundsApi
     
     public async Task<Result<FundsResponse>> WithdrawFunds(WithdrawFundsRequest request, CancellationToken cancellationToken)
     {
+        var userFunds =  await _fundsRepository.GetFundsAsync(_userContext.UserId, cancellationToken);
+        if (userFunds.CashBalance < request.Amount)
+            return new BadRequestFailure400($"Insufficient funds. Withdraw amount {request.Amount} is greater than user balance {request.Amount}");
+        
         var updateFunds = await _fundsRepository.WithdrawFundsAsync(_userContext.UserId, request.Amount, cancellationToken);
         return new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount);
     }

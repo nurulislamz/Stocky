@@ -56,7 +56,7 @@ public class FundsRepository : IFundsRepository
         await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
         await _dbContext.SaveChangesAsync(ct);
         
-        return new PortfolioBalances(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount);
+        return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
 
     public async Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, decimal cashDelta, CancellationToken ct)
@@ -84,7 +84,7 @@ public class FundsRepository : IFundsRepository
         await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
         await _dbContext.SaveChangesAsync(ct);
         
-        return new PortfolioBalances(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount);
+        return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
 
     private static FundsTransactionModel CreateFundsTransactionModel(Guid userId, Guid portfolioId, decimal cashDelta,
