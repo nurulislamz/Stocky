@@ -47,7 +47,7 @@ public class FundsController : BaseController
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The updated funds details.</returns>
     [HttpPut("add")]
-    public async Task<ActionResult<FundsResponse>> AddFunds([FromBody] DepositFundsRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<FundsResponse>> DepositFunds([FromBody] DepositFundsRequest request, CancellationToken cancellationToken)
     {
         var response = await _fundsApi.DepositFunds(request, cancellationToken);
         return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
@@ -60,7 +60,7 @@ public class FundsController : BaseController
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The updated funds details.</returns>
     [HttpPut("subtract")]
-    public async Task<ActionResult<FundsResponse>> SubtractFunds([FromBody] WithdrawFundsRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<FundsResponse>> WithdrawFunds([FromBody] WithdrawFundsRequest request, CancellationToken cancellationToken)
     {
         var response = await _fundsApi.WithdrawFunds(request, cancellationToken);
         return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);

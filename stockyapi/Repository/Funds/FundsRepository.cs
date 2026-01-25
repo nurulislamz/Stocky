@@ -20,7 +20,7 @@ public class FundsRepository : IFundsRepository
     {
         var portfolio = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
-            .Select(p => new PortfolioBalances(p.CashBalance, p.InvestedAmount, p.InvestedAmount))
+            .Select(p => new PortfolioBalances(p.CashBalance, p.InvestedAmount, p.TotalValue))
             .SingleOrDefaultAsync(cancellationToken);
 
         // TODO: Fix all the exception handling code to also log and do other stuff.
@@ -44,10 +44,10 @@ public class FundsRepository : IFundsRepository
         var updatedCashBalance = portfolio.CashBalance + cashDelta;
         var updatedTotalValue = portfolio.TotalValue + cashDelta;
 
-        if (portfolio.CashBalance < updatedCashBalance)
+        if (portfolio.CashBalance > updatedCashBalance)
             throw new Exception($"Deposit somehow resulted in cashBalance decreasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
         
-        if (portfolio.TotalValue < updatedTotalValue)
+        if (portfolio.TotalValue > updatedTotalValue)
             throw new Exception($"Deposit somehow resulted in totalValue decreasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
 
         portfolio.CashBalance = updatedCashBalance;
@@ -72,10 +72,10 @@ public class FundsRepository : IFundsRepository
         var updatedCashBalance = portfolio.CashBalance - cashDelta;
         var updatedTotalValue = portfolio.TotalValue - cashDelta;
 
-        if (portfolio.CashBalance > updatedCashBalance)
+        if (portfolio.CashBalance < updatedCashBalance)
             throw new Exception($"Withdraw somehow resulted in cashBalance increasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
         
-        if (portfolio.TotalValue > updatedTotalValue)
+        if (portfolio.TotalValue < updatedTotalValue)
             throw new Exception($"Withdraw somehow resulted in totalValue increasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
 
         portfolio.CashBalance = updatedCashBalance;

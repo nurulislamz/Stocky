@@ -270,13 +270,12 @@ public class PortfolioControllerTests
     [Test]
     public async Task DeleteHoldingsByTicker_WhenSuccess_ReturnsOk()
     {
-        var id = Guid.NewGuid();
-        var response = new DeleteHoldingsResponse(new[] { new DeleteConfirmationDto(id, "ABC", DateTimeOffset.Now) });
-        _portfolioApi.Setup(api => api.DeleteHoldingsById(
-                It.Is<Guid[]>(ids => ids.SequenceEqual(new[] { id })), Token))
+        var response = new DeleteHoldingsResponse(new[] { new DeleteConfirmationDto(Guid.NewGuid(), "ABC", DateTimeOffset.Now) });
+        _portfolioApi.Setup(api => api.DeleteHoldingsByTicker(
+                It.Is<string[]>(symbols => symbols.SequenceEqual(new[] { "ABC" })), Token))
             .ReturnsAsync(Result<DeleteHoldingsResponse>.Success(response));
 
-        var result = await _controller.DeleteHoldingsByTicker(new[] { id.ToString() }, Token);
+        var result = await _controller.DeleteHoldingsByTicker(new[] { "ABC" }, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
@@ -287,13 +286,12 @@ public class PortfolioControllerTests
     [Test]
     public async Task DeleteHoldingsByTicker_WhenFailure_ReturnsProblemDetails()
     {
-        var id = Guid.NewGuid();
         var failure = new BadRequestFailure400();
-        _portfolioApi.Setup(api => api.DeleteHoldingsById(
-                It.Is<Guid[]>(ids => ids.SequenceEqual(new[] { id })), Token))
+        _portfolioApi.Setup(api => api.DeleteHoldingsByTicker(
+                It.Is<string[]>(symbols => symbols.SequenceEqual(new[] { "ABC" })), Token))
             .ReturnsAsync(Result<DeleteHoldingsResponse>.Fail(failure));
 
-        var result = await _controller.DeleteHoldingsByTicker(new[] { id.ToString() }, Token);
+        var result = await _controller.DeleteHoldingsByTicker(new[] { "ABC" }, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);

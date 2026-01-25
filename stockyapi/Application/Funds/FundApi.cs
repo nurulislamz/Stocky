@@ -42,7 +42,7 @@ public sealed class FundsApi : IFundsApi
     {
         var portfolio = await _portfolioRepository.GetPortfolioFromUserIdAsync(_userContext.UserId, cancellationToken);
         
-        var cashDelta = -request.Amount;
+        var cashDelta = request.Amount;
         
         var updateFunds = await _fundsRepository.WithdrawFundsAsync(portfolio.UserId, portfolio.Id, cashDelta, cancellationToken);
         return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));

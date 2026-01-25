@@ -66,7 +66,7 @@ public class FundsControllerTests
         _fundsApi.Setup(api => api.DepositFunds(request, Token))
             .ReturnsAsync(Result<FundsResponse>.Success(response));
 
-        var result = await _controller.AddFunds(request, Token);
+        var result = await _controller.DepositFunds(request, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
@@ -83,7 +83,7 @@ public class FundsControllerTests
         _fundsApi.Setup(api => api.DepositFunds(request, Token))
             .ReturnsAsync(Result<FundsResponse>.Fail(failure));
 
-        var result = await _controller.AddFunds(request, Token);
+        var result = await _controller.DepositFunds(request, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
@@ -99,7 +99,7 @@ public class FundsControllerTests
         _fundsApi.Setup(api => api.WithdrawFunds(request, Token))
             .ReturnsAsync(Result<FundsResponse>.Success(response));
 
-        var result = await _controller.SubtractFunds(request, Token);
+        var result = await _controller.WithdrawFunds(request, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
@@ -116,7 +116,7 @@ public class FundsControllerTests
         _fundsApi.Setup(api => api.WithdrawFunds(request, Token))
             .ReturnsAsync(Result<FundsResponse>.Fail(failure));
 
-        var result = await _controller.SubtractFunds(request, Token);
+        var result = await _controller.WithdrawFunds(request, Token);
 
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);

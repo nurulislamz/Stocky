@@ -41,44 +41,46 @@ public class UserRepository : IUserRepository
 
     public async Task CreateUserAsync(UserModel user)
     {
-        user.Portfolio = new PortfolioModel
-        {
-            Id = user.Id,
-            UserId = user.Id,
-            TotalValue = 0,
-            CashBalance = 0,
-            InvestedAmount = 0,
-            User = user,
-            Funds = new List<FundsTransactionModel>(),
-            StockHoldings = new List<StockHoldingModel>(),
-            Transactions = new List<AssetTransactionModel>(),
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-
-        // Create preferences using repository
-        user.Preferences = new UserPreferencesModel
-        {
-            Id = user.Id,
-            UserId = user.Id,
-            Theme = Theme.Light,
-            Currency = DefaultCurrency.GDP,
-            Language = Language.English,
-            EmailNotifications = true,
-            PushNotifications = true,
-            PriceAlerts = true,
-            NewsAlerts = true,
-            Timezone = "UTC",
-            User = user,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
+        // TODO: Modify this code to createUsers and then seperately have another repo to initiate preferences and a other things
+        // user.Portfolio = new PortfolioModel
+        // {
+        //     Id = user.Id,
+        //     UserId = user.Id,
+        //     TotalValue = 0,
+        //     CashBalance = 0,
+        //     InvestedAmount = 0,
+        //     User = user,
+        //     Funds = new List<FundsTransactionModel>(),
+        //     StockHoldings = new List<StockHoldingModel>(),
+        //     Transactions = new List<AssetTransactionModel>(),
+        //     CreatedAt = DateTime.UtcNow,
+        //     UpdatedAt = DateTime.UtcNow
+        // };
+        //
+        // // Create preferences using repository
+        // user.Preferences = new UserPreferencesModel
+        // {
+        //     Id = user.Id,
+        //     UserId = user.Id,
+        //     Theme = Theme.Light,
+        //     Currency = DefaultCurrency.GDP,
+        //     Language = Language.English,
+        //     EmailNotifications = true,
+        //     PushNotifications = true,
+        //     PriceAlerts = true,
+        //     NewsAlerts = true,
+        //     Timezone = "UTC",
+        //     User = user,
+        //     CreatedAt = DateTime.UtcNow,
+        //     UpdatedAt = DateTime.UtcNow
+        // };
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
     }
 
     public async Task UpdateUserAsync(UserModel user)
     {
+        // TODO: Need to modify this so it doesn't update everything, make it so it updates a specific parameter like email or password
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }

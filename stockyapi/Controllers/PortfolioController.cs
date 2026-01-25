@@ -84,7 +84,7 @@ public class PortfolioController : BaseController
         return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
     
-    [HttpDelete("holdings/ticker/{symbol}")]
+    [HttpDelete("holdings/ticker/{symbols}")]
     public async Task<ActionResult<DeleteHoldingsResponse>> DeleteHoldingsByTicker(
         [FromRoute]
         [RegularExpression(@"^[^,]+(,[^,]+)*$", ErrorMessage = "The request must be a comma-separated list with at least one item.")]
@@ -92,8 +92,7 @@ public class PortfolioController : BaseController
         string[] symbols, 
         CancellationToken cancellationToken)
     {
-        var requestedHoldingIds = symbols.Select(Guid.Parse);
-        var response = await _portfolioApi.DeleteHoldingsById(requestedHoldingIds.ToArray(), cancellationToken);
+        var response = await _portfolioApi.DeleteHoldingsByTicker(symbols, cancellationToken);
         return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);
     }
     

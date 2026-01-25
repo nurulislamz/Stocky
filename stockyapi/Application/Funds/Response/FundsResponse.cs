@@ -1,8 +1,8 @@
 namespace stockyapi.Application.Funds.Response;
 
-public class FundsResponse(decimal updatedCashBalance, decimal updatedTotalValue, decimal updatedInvestedAmount)
+public class FundsResponse(decimal cashBalance, decimal totalValue, decimal investedAmount)
 {
-    public decimal UpdatedCashBalance { get; init; } = updatedCashBalance;
-    public decimal UpdatedTotalValue { get; init; } = updatedTotalValue;
-    public decimal UpdatedInvestedAmount { get; init; } = updatedInvestedAmount;
+    public decimal CashBalance { get; init; } = cashBalance;
+    public decimal TotalValue { get; init; } = totalValue;
+    public decimal InvestedAmount { get; init; } = investedAmount;
 }

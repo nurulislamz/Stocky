@@ -4,6 +4,7 @@ using stockyapi.Application.Portfolio;
 using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Middleware;
 using stockyapi.Repository.Funds.Types;
+using stockyapi.Repository.PortfolioRepository.Types;
 using stockymodels.Data;
 using stockymodels.models;
 using stockymodels.Models.Enums;
@@ -32,7 +33,7 @@ public class PortfolioRepository : IPortfolioRepository
         }
         return portfolio;
     }
-    
+
     public async Task<PortfolioWithHoldings> ListAllHoldingsAsync(Guid userId, CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios
@@ -45,12 +46,12 @@ public class PortfolioRepository : IPortfolioRepository
             _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
             throw exception;
         }
-            
+
         var allHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolio.Id).ToListAsync(ct);
         return new PortfolioWithHoldings(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount, allHoldings);
     }
-    
+
     // TODO: Turn the list<guid> requestedIds to a HashSet
     public async Task<HoldingsValidationResult<Guid>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedIds, CancellationToken ct)
     {
@@ -82,7 +83,7 @@ public class PortfolioRepository : IPortfolioRepository
             _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
             throw exception;
         }
-        
+
         return await ValidateHoldingsExist(portfolioId, requestedTickers, ct);
     }
 
@@ -96,7 +97,7 @@ public class PortfolioRepository : IPortfolioRepository
             _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
             throw exception;
         }
-        
+
         var totalCost = command.Quantity * command.Price;
 
         // Update portfolio balance
@@ -104,8 +105,8 @@ public class PortfolioRepository : IPortfolioRepository
         portfolio.InvestedAmount += totalCost;
 
         // Update or create stock holding
-        var existingHolding = _dbContext.StockHoldings.SingleOrDefault(holding => holding.PortfolioId == portfolio.Id);
-        
+        var existingHolding = _dbContext.StockHoldings.SingleOrDefault(holding => holding.PortfolioId == portfolio.Id && holding.Ticker == command.Ticker);
+
         decimal newTotalShares = (existingHolding?.Shares ?? 0) + command.Quantity;
         decimal newTotalCost = ((existingHolding?.AverageCost ?? 0) * (existingHolding?.Shares ?? 0)) + totalCost;
         decimal newAverageCost = newTotalShares > 0 ? newTotalCost / newTotalShares : command.Price;
@@ -138,9 +139,6 @@ public class PortfolioRepository : IPortfolioRepository
             Price = command.Price,
         };
 
-        portfolio.CashBalance -= totalCost;
-        portfolio.InvestedAmount += totalCost;
-        
         await _dbContext.AssetTransactions.AddAsync(transaction, ct);
         await _dbContext.SaveChangesAsync(ct);
 
@@ -157,27 +155,27 @@ public class PortfolioRepository : IPortfolioRepository
             _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
             throw exception;
         }
-        
-        var totalCost = command.Quantity * command.Price;
+
+        var totalProceeds = command.Quantity * command.Price;
 
         // Update portfolio balance
-        portfolio.CashBalance -= totalCost;
-        portfolio.InvestedAmount += totalCost;
+        portfolio.CashBalance += totalProceeds;
+        portfolio.InvestedAmount -= totalProceeds;
 
         // Update or create stock holding
         var holding = await _dbContext.StockHoldings.SingleAsync(holding => holding.PortfolioId == portfolio.Id & holding.Ticker == command.Ticker, ct);
-        
+
         // Update holding
         var newTotalShares =  holding.Shares - command.Quantity;
         var newTotalCost = ( holding.AverageCost *  holding.Shares);
         var newAverageCost = newTotalShares == 0 ? 0 : newTotalCost / newTotalShares;
-        
+
         // Logic to delete holding if newTotalShares == 0
         if (newTotalShares == 0)
         {
             _dbContext.StockHoldings.Remove( holding);
         }
-        
+
          holding.Shares = newTotalShares;
          holding.AverageCost = newAverageCost;
 
@@ -186,7 +184,7 @@ public class PortfolioRepository : IPortfolioRepository
         {
             PortfolioId = command.PortfolioId,
             Ticker = command.Ticker,
-            Type = TransactionType.Buy,
+            Type = TransactionType.Sell,
             Quantity = command.Quantity,
             NewAverageCost = newAverageCost,
             Price = command.Price,
@@ -212,8 +210,8 @@ public class PortfolioRepository : IPortfolioRepository
             _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
             throw exception;
         }
-        
-        
+
+
         var deletedTransaction = holdings.Select(h => new AssetTransactionModel
         {
             PortfolioId = portfolioId,
@@ -223,10 +221,10 @@ public class PortfolioRepository : IPortfolioRepository
             NewAverageCost = null,
             Price = null,
         }).ToList();
-        
+
         _dbContext.StockHoldings.RemoveRange(holdings);
         await _dbContext.AssetTransactions.AddRangeAsync(deletedTransaction, ct);
-        
+
         await _dbContext.SaveChangesAsync(ct);
         return deletedTransaction;
     }
@@ -240,7 +238,7 @@ public class PortfolioRepository : IPortfolioRepository
             .ToListAsync(ct);
 
         var foundHoldingIds = foundHoldings.Select(g => g.Id);
-        var invalidIds = requestedIds.Where(s => foundHoldingIds.Contains(s)).ToList();
+        var invalidIds = requestedIds.Where(s => !foundHoldingIds.Contains(s)).ToList();
 
         return new HoldingsValidationResult<Guid>(foundHoldings, invalidIds);
     }
@@ -253,7 +251,7 @@ public class PortfolioRepository : IPortfolioRepository
             .ToListAsync(ct);
 
         var foundTickers = foundHoldings.Select(g => g.Ticker);
-        var invalidTickers = requestedTickers.Where(s => foundTickers.Contains(s)).ToList();
+        var invalidTickers = requestedTickers.Where(s => !foundTickers.Contains(s)).ToList();
 
         return new HoldingsValidationResult<string>(foundHoldings, invalidTickers);
     }
