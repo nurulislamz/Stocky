@@ -1,4 +1,7 @@
 ﻿// ReSharper disable InconsistentNaming
+
+using System.Text.Json.Serialization;
+
 namespace stockyapi.Services.YahooFinance.EndpointBuilder;
 
 public enum YahooFields

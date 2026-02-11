@@ -10,11 +10,11 @@ namespace stockyapi.Services.YahooFinance;
 /// fundamentals, options, and market data.
 /// 
 /// This service acts as a thin abstraction over Yahoo Finance APIs and
-/// applies caching and execution policies via <see cref="YahooExecutionHelper"/>.
+/// applies caching and execution policies via <see cref="BaseApiServiceClient"/>.
 /// </summary>
 public sealed class YahooFinanceService : IYahooFinanceService
 {
-    private readonly YahooExecutionHelper _executor;
+    private readonly BaseApiServiceClient _executor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="YahooFinanceService"/> class.
@@ -22,9 +22,19 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <param name="executor">
     /// Execution helper responsible for HTTP requests, caching, and error handling.
     /// </param>
-    public YahooFinanceService(YahooExecutionHelper executor)
+    public YahooFinanceService(BaseApiServiceClient executor)
     {
         _executor = executor;
+    }
+
+    public async Task<Result<string>> GetCrumb(CancellationToken ct)
+    {
+        return await _executor.ExecuteAsync<string>(
+            cacheKey: $"crumb",
+            cacheTtl: TimeSpan.FromMinutes(10),
+            uri: YahooEndpointBuilder.BuildCrumb(),
+            ct
+        );
     }
 
     /// <summary>
@@ -104,15 +114,15 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// </returns>
     public Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
         string symbol,
-        string period1,
-        string period2,
-        string interval,
+        DateTime period1,
+        DateTime period2,
+        YahooInterval interval,
         CancellationToken ct = default)
     {
         return _executor.ExecuteAsync<HistoricalHistoryResult>(
             cacheKey: $"historical:{symbol}:{period1}:{period2}:{interval}",
             cacheTtl: TimeSpan.FromHours(6),
-            uri: YahooEndpointBuilder.BuildHistoricalUri(symbol, period1, period2, interval),
+            uri: YahooEndpointBuilder.BuildHistoricalUri(symbol, period1, period2, interval.ToApiString()),
             ct
         );
     }

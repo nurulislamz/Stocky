@@ -6,6 +6,8 @@ namespace stockyapi.Services.YahooFinance;
 
 public interface IYahooFinanceService
 {
+    Task<Result<string>> GetCrumb(CancellationToken cancellationToken);
+    
     Task<Result<ChartResultArray>> GetChartAsync(
         string symbol,
         YahooRange range,
@@ -22,9 +24,9 @@ public interface IYahooFinanceService
 
     Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
         string symbol,
-        string period1,
-        string period2,
-        string interval,
+        DateTime period1,
+        DateTime period2,
+        YahooInterval interval,
         CancellationToken cancellationToken = default
     );
 
@@ -44,11 +46,13 @@ public interface IYahooFinanceService
         CancellationToken cancellationToken = default
     );
 
+    [Obsolete("Yahoo Finance no longer supports Quotes", true)]
     Task<Result<QuoteResponseArray>> GetQuoteAsync(
         CancellationToken cancellationToken = default,
         params string[] symbols
     );
 
+    [Obsolete("Yahoo Finance no longer supports Quotes", true)]
     Task<Result<QuoteSummaryResult>> GetQuoteSummaryAsync(
         string symbol,
         CancellationToken cancellationToken = default,

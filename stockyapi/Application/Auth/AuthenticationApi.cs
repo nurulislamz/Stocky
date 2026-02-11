@@ -13,7 +13,7 @@ public class AuthenticationApi : IAuthenticationApi
     private readonly ITokenService _tokenService;
     private readonly IUserRepository _userRepository;
 
-    public AuthenticationApi(TokenService tokenService, IUserRepository userRepository)
+    public AuthenticationApi(ITokenService tokenService, IUserRepository userRepository)
     {
         _tokenService = tokenService;
         _userRepository = userRepository;
