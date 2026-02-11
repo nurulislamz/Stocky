@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using stockyapi.Application.MarketPricing;
@@ -8,6 +9,7 @@ using stockyapi.Controllers;
 using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Types;
+using stockyunittests.Helpers;
 
 namespace stockytests.Controllers;
 
@@ -22,7 +24,8 @@ public class MarketPricingControllerTests
     public void Setup()
     {
         _marketPricingApi = new Mock<IMarketPricingApi>();
-        _controller = new MarketPricingController(_marketPricingApi.Object);
+        _controller = ControllerTestHelpers.SetupController(
+            new MarketPricingController(_marketPricingApi.Object));
     }
 
     [Test]
@@ -43,8 +46,8 @@ public class MarketPricingControllerTests
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
         Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(result.Result, Is.InstanceOf<ChartResultArray>());
-        Assert.That(result.Value, Is.EqualTo(expectedResponse));
+        Assert.That(objectResult.Value, Is.InstanceOf<ChartResultArray>());
+        Assert.That(objectResult.Value, Is.EqualTo(expectedResponse));
         _marketPricingApi.Verify(api => api.GetCurrentPrice(ticker, Token), Times.Once);
     }
 
@@ -62,9 +65,15 @@ public class MarketPricingControllerTests
         var result = await _controller.GetCurrentPrice(ticker, CancellationToken.None);
 
         // Assert
-        Assert.That(result.Result, Is.InstanceOf<Failure>());
-        var actionResult = (ObjectResult)result.Result;
-        Assert.That(actionResult.StatusCode, Is.EqualTo((int)HttpStatusCode.NotFound));
+        var objectResult = result.Result as ObjectResult;
+        Assert.That(objectResult, Is.Not.Null);
+        Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
+        Assert.That(objectResult.Value, Is.InstanceOf<ProblemDetails>());
+
+        var problemDetails = objectResult.Value as ProblemDetails;
+        Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
+        Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
+        _marketPricingApi.Verify(api => api.GetCurrentPrice(ticker, Token), Times.Once);
     }
 
     [Test]
