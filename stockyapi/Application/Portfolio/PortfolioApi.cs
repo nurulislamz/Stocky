@@ -13,7 +13,6 @@ namespace stockyapi.Application.Portfolio;
 
 public sealed class PortfolioApi : IPortfolioApi
 {
-
     private readonly IUserContext _userContext;
     private readonly IPortfolioRepository _portfolioRepository;
 

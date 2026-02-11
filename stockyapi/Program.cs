@@ -8,9 +8,15 @@ using stockyapi.Extensions;
 using stockyapi.Middleware;
 using stockyapi.Options;
 using stockyapi.Repository.Funds;
+using stockyapi.Repository.PortfolioRepository;
 using stockyapi.Repository.User;
 using stockyapi.Services;
 using stockyapi.Services.YahooFinance;
+using stockyapi.Application.Auth;
+using stockyapi.Application.Funds;
+using stockyapi.Application.MarketPricing;
+using stockyapi.Application.Portfolio;
+using stockyapi.Services.YahooFinance.Helper;
 using stockymodels.Data;
 
 namespace stockyapi;
@@ -51,6 +57,7 @@ internal class Program
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
 
         services.AddEndpointsApiExplorer();
@@ -94,15 +101,24 @@ internal class Program
 
         // Service DIs
         services.AddScoped<ITokenService, TokenService>();
-        services.AddHttpClient<IYahooFinanceService, YahooFinanceService>(client =>
+        services.AddScoped<IYahooFinanceService, YahooFinanceService>();
+        services.AddHttpClient<BaseApiServiceClient>(client =>
         {
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
             client.Timeout = TimeSpan.FromSeconds(10);
         }).AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+        
+        
+        // Application DIs
+        services.AddScoped<IAuthenticationApi, AuthenticationApi>();
+        services.AddScoped<IFundsApi, FundsApi>();
+        services.AddScoped<IMarketPricingApi, MarketPricingApi>();
+        services.AddScoped<IPortfolioApi, PortfolioApi>();
 
         // Repository DIs
         services.AddScoped<IFundsRepository, FundsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPortfolioRepository, PortfolioRepository>();
         services.AddMemoryCache();
 
         // Authentication Services

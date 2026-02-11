@@ -34,10 +34,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\HoldingDetails\" />
     <Folder Include="Services\AI\" />
     <Folder Include="Services\Crypto\" />
-    <Folder Include="Services\Finviz\" />
     <Folder Include="Services\Indicators\" />
     <Folder Include="Services\Real-Time Data\" />
     <Folder Include="Services\Stock Analysis\" />

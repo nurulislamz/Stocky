@@ -14,9 +14,9 @@ namespace stockyapi.Repository.PortfolioRepository;
 public class PortfolioRepository : IPortfolioRepository
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger _logger;
+    private readonly ILogger<PortfolioRepository> _logger;
 
-    public PortfolioRepository(ApplicationDbContext dbContext, ILogger logger)
+    public PortfolioRepository(ApplicationDbContext dbContext, ILogger<PortfolioRepository> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
