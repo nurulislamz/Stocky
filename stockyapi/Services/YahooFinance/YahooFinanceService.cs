@@ -10,11 +10,11 @@ namespace stockyapi.Services.YahooFinance;
 /// fundamentals, options, and market data.
 /// 
 /// This service acts as a thin abstraction over Yahoo Finance APIs and
-/// applies caching and execution policies via <see cref="BaseApiServiceClient"/>.
+/// applies caching and execution policies via <see cref="YahooApiServiceClient"/>.
 /// </summary>
 public sealed class YahooFinanceService : IYahooFinanceService
 {
-    private readonly BaseApiServiceClient _executor;
+    private readonly YahooApiServiceClient _executor;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="YahooFinanceService"/> class.
@@ -22,7 +22,7 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <param name="executor">
     /// Execution helper responsible for HTTP requests, caching, and error handling.
     /// </param>
-    public YahooFinanceService(BaseApiServiceClient executor)
+    public YahooFinanceService(YahooApiServiceClient executor)
     {
         _executor = executor;
     }

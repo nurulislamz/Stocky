@@ -1,29 +1,45 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Extensions.Http;
+using Polly.Wrap;
 using stockyapi.Middleware;
 
 namespace stockyapi.Services.YahooFinance.Helper;
 
-public sealed class YahooExecutionHelper
+public abstract class BaseApiServiceClient
 {
     private readonly HttpClient _httpClient;
     private readonly IMemoryCache _cache;
-    private readonly ILogger<YahooExecutionHelper> _logger;
+    private readonly ILogger<BaseApiServiceClient> _logger;
     private readonly SemaphoreSlim _rateLimiter;
-    private readonly IAsyncPolicy<HttpResponseMessage> _policy;
+    private readonly Lazy<AsyncPolicyWrap<HttpResponseMessage>> _policy;
 
-    public YahooExecutionHelper(
+    private int _maxConcurrencyRequests;
+    private readonly int _retryCount;
+    private readonly int _breakLimit;
+    private readonly int _breakDuration;
+
+    protected BaseApiServiceClient(
         HttpClient httpClient,
         IMemoryCache cache,
-        ILogger<YahooExecutionHelper> logger,
-        int maxConcurrentRequests = 50)
+        ILogger<BaseApiServiceClient> logger,
+        int maxConcurrentRequests = 50,
+        int retryCount = 3,
+        int breakLimit = 5,
+        int breakDuration = 30
+        )
     {
         _httpClient = httpClient;
         _cache = cache;
         _logger = logger;
         _rateLimiter = new SemaphoreSlim(maxConcurrentRequests);
-        _policy = Policy.WrapAsync(CreateRetryPolicy(_logger), CreateCircuitBreakerPolicy());
+        _maxConcurrencyRequests = maxConcurrentRequests;
+        _retryCount = retryCount;
+        _breakLimit = breakLimit;
+        _breakDuration = breakDuration;
+        
+        _policy = new Lazy<AsyncPolicyWrap<HttpResponseMessage>>(() => 
+            Policy.WrapAsync(CreateRetryPolicy(), CreateCircuitBreakerPolicy()));
     }
 
     public async Task<Result<T>> ExecuteAsync<T>(
@@ -40,7 +56,7 @@ public sealed class YahooExecutionHelper
 
         try
         {
-            var response = await _policy.ExecuteAsync(_ => _httpClient.GetAsync(uri, ct), ct);
+            var response = await _policy.Value.ExecuteAsync(_ => _httpClient.GetAsync(uri, ct), ct);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -48,10 +64,10 @@ public sealed class YahooExecutionHelper
                     "Yahoo returned {StatusCode} for {Uri}. Response is below: {Response}",
                     response.StatusCode,
                     uri,
-                    response.Content.ToString());
+                    response.Content.ReadAsStringAsync(ct));
 
                 return new InternalServerFailure500(
-                    $"Yahoo Finance API error: {response.StatusCode}");
+                    $"Yahoo Finance API error: {response}");
             }
 
             var payload = await response.Content.ReadFromJsonAsync<T>(ct);
@@ -61,7 +77,7 @@ public sealed class YahooExecutionHelper
 
             _cache.Set(cacheKey, payload, cacheTtl);
 
-            return Result<T>.Success(payload);
+            return payload;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -79,30 +95,29 @@ public sealed class YahooExecutionHelper
         }
     }
 
-    private static IAsyncPolicy<HttpResponseMessage> CreateRetryPolicy(ILogger logger) =>
+    protected virtual IAsyncPolicy<HttpResponseMessage> CreateRetryPolicy() =>
         Policy<HttpResponseMessage>
             .Handle<HttpRequestException>()
             .OrTransientHttpError()
             .WaitAndRetryAsync(
-                retryCount: 3,
+                retryCount: _retryCount,
                 sleepDurationProvider: attempt =>
                     TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt)) +
                     TimeSpan.FromMilliseconds(Random.Shared.Next(0, 100)),
                 onRetry: (outcome, delay, attempt, _) =>
                 {
-                    logger.LogWarning(
+                    _logger.LogWarning(
                         "Retry {Attempt} after {Delay}ms due to {Reason}",
                         attempt,
                         delay.TotalMilliseconds,
                         outcome.Exception?.Message ?? nameof(outcome.Result.StatusCode));
                 });
     
-    private static IAsyncPolicy<HttpResponseMessage> CreateCircuitBreakerPolicy() =>
+    protected virtual IAsyncPolicy<HttpResponseMessage> CreateCircuitBreakerPolicy() =>
         Policy<HttpResponseMessage>
             .Handle<HttpRequestException>()
             .OrTransientHttpError()
             .CircuitBreakerAsync(
-                handledEventsAllowedBeforeBreaking: 5,
-                durationOfBreak: TimeSpan.FromSeconds(30));
-    
+                handledEventsAllowedBeforeBreaking: _breakLimit,
+                durationOfBreak: TimeSpan.FromSeconds(_breakDuration));
 }

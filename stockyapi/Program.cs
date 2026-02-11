@@ -102,7 +102,7 @@ internal class Program
         // Service DIs
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IYahooFinanceService, YahooFinanceService>();
-        services.AddHttpClient<BaseApiServiceClient>(client =>
+        services.AddHttpClient<YahooApiServiceClient>(client =>
         {
             client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
             client.Timeout = TimeSpan.FromSeconds(10);
