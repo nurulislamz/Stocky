@@ -16,6 +16,7 @@ using stockyapi.Application.Auth;
 using stockyapi.Application.Funds;
 using stockyapi.Application.MarketPricing;
 using stockyapi.Application.Portfolio;
+using stockyapi.Controllers.Helpers;
 using stockyapi.Services.YahooFinance.Helper;
 using stockymodels.Data;
 
@@ -104,9 +105,9 @@ internal class Program
         services.AddScoped<IYahooFinanceService, YahooFinanceService>();
         services.AddHttpClient<YahooApiServiceClient>(client =>
         {
-            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
+            client.DefaultRequestHeaders.Add("User-Agent", UserAgents.GetRandomNewUserAgent());
             client.Timeout = TimeSpan.FromSeconds(10);
-        }).AddTransientHttpErrorPolicy(builder => builder.WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
+        });
         
         
         // Application DIs

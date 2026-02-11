@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+﻿using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Wrap;
+using stockyapi.Controllers.Helpers;
 using stockyapi.Middleware;
 
 namespace stockyapi.Services.YahooFinance.Helper;
@@ -60,14 +62,9 @@ public abstract class BaseApiServiceClient
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning(
-                    "Yahoo returned {StatusCode} for {Uri}. Response is below: {Response}",
-                    response.StatusCode,
-                    uri,
-                    response.Content.ReadAsStringAsync(ct));
-
-                return new InternalServerFailure500(
-                    $"Yahoo Finance API error: {response}");
+                string error = $"Yahoo returned {response.StatusCode} for {uri}. Response is below: {response.Content.ReadAsStringAsync(ct)}";
+                _logger.LogError(error);
+                return new InternalServerFailure500(error);
             }
 
             var payload = await response.Content.ReadFromJsonAsync<T>(ct);
@@ -111,6 +108,22 @@ public abstract class BaseApiServiceClient
                         attempt,
                         delay.TotalMilliseconds,
                         outcome.Exception?.Message ?? nameof(outcome.Result.StatusCode));
+                    
+                    if (outcome.Result.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        string oldUserAgent = _httpClient.DefaultRequestHeaders.UserAgent.ToString();
+                        string newUserAgent = UserAgents.GetRandomNewUserAgent(oldUserAgent);
+
+                        _logger.LogInformation($"429 TooManyRequests detected. Rotating User-Agent from {oldUserAgent}.");
+
+                        // IMPORTANT: Clear the old headers first
+                        _httpClient.DefaultRequestHeaders.UserAgent.Clear();
+    
+                        // Use ParseAdd to ensure the string is correctly formatted for the header
+                        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(newUserAgent);
+    
+                        _logger.LogInformation("New User-Agent applied: {newUserAgent}", newUserAgent);
+                    }
                 });
     
     protected virtual IAsyncPolicy<HttpResponseMessage> CreateCircuitBreakerPolicy() =>
