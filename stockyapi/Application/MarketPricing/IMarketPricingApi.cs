@@ -6,9 +6,9 @@ namespace stockyapi.Application.MarketPricing;
 
 public interface IMarketPricingApi
 {
-    Task<Result<ChartResultArray>> GetCurrentPrice(string ticker, CancellationToken cancellationToken);
+    Task<Result<YahooChartResponse>> GetCurrentPrice(string ticker, CancellationToken cancellationToken);
 
-    Task<Result<ChartResultArray>> GetChart(
+    Task<Result<YahooChartResponse>> GetChart(
         string symbol,
         YahooRange range,
         YahooInterval interval,

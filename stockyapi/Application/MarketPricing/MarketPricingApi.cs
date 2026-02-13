@@ -16,12 +16,12 @@ public class MarketPricingApi : IMarketPricingApi
         _yahooFinanceService = yahooFinanceService;
     }
 
-    public async Task<Result<ChartResultArray>> GetCurrentPrice(string ticker, CancellationToken cancellationToken)
+    public async Task<Result<YahooChartResponse>> GetCurrentPrice(string ticker, CancellationToken cancellationToken)
     {
         return await _yahooFinanceService.GetChartAsync(ticker, YahooRange.OneDay, YahooInterval.FifteenMinutes, [], cancellationToken);
     }
 
-    public async Task<Result<ChartResultArray>> GetChart(
+    public async Task<Result<YahooChartResponse>> GetChart(
         string symbol,
         YahooRange range,
         YahooInterval interval,

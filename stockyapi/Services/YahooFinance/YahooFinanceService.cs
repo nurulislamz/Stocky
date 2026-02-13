@@ -53,14 +53,14 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing chart price and volume data.
     /// </returns>
-    public Task<Result<ChartResultArray>> GetChartAsync(
+    public Task<Result<YahooChartResponse>> GetChartAsync(
         string symbol,
         YahooRange range,
         YahooInterval interval,
         YahooFields[] fields,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<ChartResultArray>(
+        return _executor.ExecuteAsync<YahooChartResponse>(
             cacheKey: $"chart:{symbol}:{range}:{interval}",
             cacheTtl: TimeSpan.FromMinutes(10),
             uri: YahooEndpointBuilder.BuildChartUri(symbol, range, interval, fields),

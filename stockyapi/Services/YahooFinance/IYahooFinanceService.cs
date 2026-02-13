@@ -8,7 +8,7 @@ public interface IYahooFinanceService
 {
     Task<Result<string>> GetCrumb(CancellationToken cancellationToken);
     
-    Task<Result<ChartResultArray>> GetChartAsync(
+    Task<Result<YahooChartResponse>> GetChartAsync(
         string symbol,
         YahooRange range,
         YahooInterval interval,

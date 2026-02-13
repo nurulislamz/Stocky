@@ -32,7 +32,7 @@ public class MarketPricingController : BaseController
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Chart result array containing price data.</returns>
     [HttpGet("{ticker}")]
-    public async Task<ActionResult<ChartResultArray>> GetCurrentPrice([FromRoute] string ticker, CancellationToken cancellationToken)
+    public async Task<ActionResult<YahooChartResponse>> GetCurrentPrice([FromRoute] string ticker, CancellationToken cancellationToken)
     {
         var response = await _marketPricingApi.GetCurrentPrice(ticker, cancellationToken);
         return response.IsSuccess ? ProcessSuccess(HttpStatusCode.OK, response.Value) : ProcessFailure(response.Failure);

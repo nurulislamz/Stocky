@@ -7,19 +7,49 @@ namespace stockyapi.Services.YahooFinance.Types;
 // chart  (JSR: ChartResultArray / ChartResultObject + supporting interfaces)
 // ------------------------------------------------------------
 
+public sealed class YahooChartResponse : YahooFinanceDto
+{
+    [JsonPropertyName("chart")]
+    public YahooChartResponseObject Chart { get; set; } = null!;
+}
+
+public sealed class YahooChartResponseObject : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<ChartResultObject>? Result { get; set; }
+    
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+}
+
+public sealed class ChartResultObject : YahooFinanceDto
+{
+    [JsonPropertyName("meta")]
+    public ChartMeta Meta { get; set; } = null!;
+
+    [JsonPropertyName("timestamp")]
+    public List<long>? Timestamp { get; set; }
+
+    [JsonPropertyName("indicators")]
+    public ChartIndicatorsObject Indicators { get; set; } = null!;
+
+    [JsonPropertyName("events")]
+    public ChartEventsObject? Events { get; set; }
+}
+
 public sealed class ChartResultArray : YahooFinanceDto
 {
     [JsonPropertyName("meta")]
     public ChartMeta Meta { get; set; } = null!;
 
     [JsonPropertyName("quotes")]
-    public List<ChartResultArrayQuote> Quotes { get; set; } = [];
+    public List<ChartResultObjectQuote> Quotes { get; set; } = [];
 
     [JsonPropertyName("events")]
     public ChartEventsArray? Events { get; set; }
 }
 
-public sealed class ChartResultArrayQuote : YahooFinanceDto
+public sealed class ChartResultObjectQuote : YahooFinanceDto
 {
     [JsonPropertyName("date")]
     [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
@@ -42,21 +72,6 @@ public sealed class ChartResultArrayQuote : YahooFinanceDto
 
     [JsonPropertyName("volume")]
     public long? Volume { get; set; }
-}
-
-public sealed class ChartResultObject : YahooFinanceDto
-{
-    [JsonPropertyName("meta")]
-    public ChartMeta Meta { get; set; } = null!;
-
-    [JsonPropertyName("timestamp")]
-    public List<long>? Timestamp { get; set; }
-
-    [JsonPropertyName("indicators")]
-    public ChartIndicatorsObject Indicators { get; set; } = null!;
-
-    [JsonPropertyName("events")]
-    public ChartEventsObject? Events { get; set; }
 }
 
 public sealed class ChartMeta : YahooFinanceDto

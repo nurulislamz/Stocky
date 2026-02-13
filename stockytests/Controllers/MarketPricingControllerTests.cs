@@ -35,8 +35,8 @@ public class MarketPricingControllerTests
     {
         // Arrange
         const string ticker = "AAPL";
-        var expectedResponse = new ChartResultArray();
-        var successResult = Result<ChartResultArray>.Success(expectedResponse);
+        var expectedResponse = new YahooChartResponse();
+        var successResult = Result<YahooChartResponse>.Success(expectedResponse);
 
         _marketPricingApi.Setup(x => x.GetCurrentPrice(ticker, It.IsAny<CancellationToken>()))
             .ReturnsAsync(successResult);
@@ -48,7 +48,7 @@ public class MarketPricingControllerTests
         var objectResult = result.Result as ObjectResult;
         Assert.That(objectResult, Is.Not.Null);
         Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(objectResult.Value, Is.InstanceOf<ChartResultArray>());
+        Assert.That(objectResult.Value, Is.InstanceOf<YahooChartResponse>());
         Assert.That(objectResult.Value, Is.EqualTo(expectedResponse));
         _marketPricingApi.Verify(api => api.GetCurrentPrice(ticker, Token), Times.Once);
     }
@@ -88,10 +88,10 @@ public class MarketPricingControllerTests
         var symbol = "MSFT";
         var range = YahooRange.OneDay;
         var interval = YahooInterval.OneMinute;
-        var expectedChartData = new ChartResultArray(); 
+        var expectedChartData = new YahooChartResponse(); 
 
         _marketPricingApi.Setup(x => x.GetChart(symbol, range, interval, null, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ChartResultArray>.Success(expectedChartData));
+            .ReturnsAsync(Result<YahooChartResponse>.Success(expectedChartData));
 
         // Act
         var result = await _controller.GetChart(symbol, range, interval, null, Token);
