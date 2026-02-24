@@ -1,0 +1,90 @@
+{
+  "request": {
+    "url": "https://query2.finance.yahoo.com/v7/finance/quote?symbols=B0K25.NYM&crumb=haT3oykhHqZ",
+    "method": "GET",
+    "headers": {
+      "cookie": "GUCS=AV78X-IQ; GUC=AQABCAFnsytn2UIgTASn&s=AQAAAEKG89vA&g=Z7HctQ; A3=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; A1S=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; EuConsent=CQM66kAQM66kAAOACBENBcFoAP_gAEPgACiQKptB9G7WTXFneXp2YPskOYUX0VBJ4MAwBgCBAcABzBIUIBwGVmAzJEyIICACGAIAIGBBIABtGAhAQEAAYIAFAABIAEgAIBAAIGAAACAAAABACAAAAAAAAAAQgEAXMBQgmAYEBFoIQUhAggAgAQAAAAAEAIgBCgQAEAAAQAAICAAIACgAAgAAAAAAAAAEAFAIEQAAIAECAotkdQAAAAAAAAAAAAQACAABAAAAAIKpgAkGpUQBFgSEhAIGEECAEQUBABQIAgAACBAAAATBAUIAwAVGAiAEAIAAAAAAAAACABAAABAAhAAEAAQIAAAAAIAAgAIBAAACAAAAAAAAAAAAAAAAAAAAAAAAAGIBAggAAABBAAQUAAAAAgAAAAAAAAAIgACAAAAAAAAAAAAAAIgAAAAAAAAAAAAAAAAAAIAAAAIAAAAgBEFgAAAAAAAAAAAAAACAABAAAAAIAAA; A1=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4",
+      "user-agent": "@gadicc/yahoo-finance2/0.0.1 (+https://github.com/gadicc/node-yahoo-finance2)"
+    }
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "age": "0",
+      "cache-control": "public, max-age=1, stale-while-revalidate=9",
+      "content-length": "1427",
+      "content-type": "application/json;charset=utf-8",
+      "date": "Wed, 28 May 2025 01:15:34 GMT",
+      "referrer-policy": "no-referrer-when-downgrade",
+      "server": "ATS",
+      "strict-transport-security": "max-age=31536000",
+      "vary": "Origin,Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-envoy-decorator-operation": "finance-quote-api--mtls-production-sg3.finance-k8s:4080/*",
+      "x-envoy-upstream-service-time": "3",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "y-rid": "568499dk3cotm"
+    },
+    "bodyJson": {
+      "quoteResponse": {
+        "result": [
+          {
+            "language": "en-US",
+            "region": "US",
+            "quoteType": "FUTURE",
+            "typeDisp": "Futures",
+            "quoteSourceName": "Delayed Quote",
+            "triggerable": false,
+            "customPriceAlertConfidence": "NONE",
+            "contractSymbol": true,
+            "currency": "USD",
+            "ask": 0.68,
+            "fullExchangeName": "NY Mercantile",
+            "regularMarketOpen": 0.855,
+            "fiftyTwoWeekLowChange": -0.083330035,
+            "fiftyTwoWeekLowChangePercent": -0.09746203,
+            "fiftyTwoWeekRange": "0.855 - 0.855",
+            "fiftyTwoWeekHighChange": -0.083330035,
+            "fiftyTwoWeekHighChangePercent": -0.09746203,
+            "fiftyTwoWeekLow": 0.855,
+            "fiftyTwoWeekHigh": 0.855,
+            "openInterest": 15530,
+            "expireDate": 1748908800,
+            "expireIsoDate": "2025-06-03T00:00:00Z",
+            "sourceInterval": 30,
+            "exchangeDataDelayedBy": 10,
+            "tradeable": false,
+            "cryptoTradeable": false,
+            "hasPrePostMarketData": false,
+            "priceHint": 4,
+            "regularMarketChange": 0.018339992,
+            "regularMarketDayHigh": 0.855,
+            "regularMarketDayRange": "0.855 - 0.855",
+            "regularMarketDayLow": 0.855,
+            "regularMarketVolume": 20,
+            "regularMarketPreviousClose": 0.73125,
+            "corporateActions": [],
+            "regularMarketTime": 1743522575,
+            "underlyingSymbol": "B0.NYM",
+            "underlyingExchangeSymbol": "B0K25.NYM",
+            "exchange": "NYM",
+            "exchangeTimezoneName": "America/New_York",
+            "exchangeTimezoneShortName": "EDT",
+            "gmtOffSetMilliseconds": -14400000,
+            "market": "us24_market",
+            "esgPopulated": false,
+            "shortName": "Mont Belvieu LDH Propane (OPIS)",
+            "regularMarketChangePercent": 2.4345229,
+            "regularMarketPrice": 0.77167,
+            "marketState": "REGULAR",
+            "symbol": "B0K25.NYM"
+          }
+        ],
+        "error": null
+      }
+    }
+  }
+}

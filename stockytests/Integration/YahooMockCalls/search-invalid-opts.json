@@ -1,0 +1,241 @@
+{
+  "request": {
+    "url": "https://query2.finance.yahoo.com/v1/finance/search?lang=en-US&region=US&quotesCount=6&newsCount=4&enableFuzzyQuery=false&quotesQueryId=tss_match_phrase_query&multiQuoteQueryId=multi_quote_single_token_query&newsQueryId=news_cie_vespa&enableCb=true&enableNavLinks=true&enableEnhancedTrivialQuery=true&q=symbol&invalid=true",
+    "method": "GET",
+    "headers": {
+      "cookie": "",
+      "user-agent": "@gadicc/yahoo-finance2/0.0.1 (+https://github.com/gadicc/node-yahoo-finance2)"
+    }
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "age": "0",
+      "cache-control": "public, max-age=600, stale-while-revalidate=180",
+      "content-type": "application/json;charset=utf-8",
+      "date": "Mon, 11 Aug 2025 14:34:48 GMT",
+      "referrer-policy": "no-referrer-when-downgrade",
+      "server": "ATS",
+      "strict-transport-security": "max-age=31536000",
+      "vary": "Origin,Origin,Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-envoy-decorator-operation": "finance-search--mtls-production-ir2.finance-k8s:4080/*",
+      "x-envoy-upstream-service-time": "57",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "y-rid": "1ckp62dk9jvs8"
+    },
+    "bodyJson": {
+      "explains": [],
+      "count": 11,
+      "quotes": [
+        {
+          "exchange": "OEM",
+          "shortname": "Symbolic Logic Inc.",
+          "quoteType": "EQUITY",
+          "symbol": "EVOL",
+          "index": "quotes",
+          "score": 20001,
+          "typeDisp": "Equity",
+          "longname": "Symbolic Logic, Inc.",
+          "exchDisp": "OEM",
+          "sector": "Technology",
+          "sectorDisp": "Technology",
+          "industry": "Software—Application",
+          "industryDisp": "Software—Application",
+          "dispSecIndFlag": false,
+          "isYahooFinance": true,
+          "prevName": "Evolving Systems, Inc.",
+          "nameChangeDate": "2025-08-10"
+        },
+        {
+          "exchange": "CCC",
+          "shortname": "Symbol USD",
+          "quoteType": "CRYPTOCURRENCY",
+          "symbol": "XYM-USD",
+          "index": "quotes",
+          "score": 20001,
+          "typeDisp": "Cryptocurrency",
+          "longname": "Symbol USD",
+          "exchDisp": "CCC",
+          "isYahooFinance": true
+        },
+        {
+          "exchange": "NYS",
+          "shortname": "ZVZZT.624 Test Symbol",
+          "quoteType": "INDEX",
+          "symbol": "^ZVZZT-624",
+          "index": "quotes",
+          "score": 20001,
+          "typeDisp": "Index",
+          "longname": "ZVZZT.624 Test Symbol",
+          "exchDisp": "NYSE",
+          "isYahooFinance": true
+        },
+        {
+          "exchange": "NAS",
+          "quoteType": "MUTUALFUND",
+          "symbol": "ZNTRX",
+          "index": "quotes",
+          "score": 20001,
+          "typeDisp": "Fund",
+          "longname": "Nasdaq Test Symbol - NTRC",
+          "exchDisp": "NASDAQ",
+          "isYahooFinance": true
+        },
+        {
+          "exchange": "NAS",
+          "shortname": "Nasdaq Test Symbol - NTRC",
+          "quoteType": "MONEY_MARKET",
+          "symbol": "ZNRXX",
+          "index": "quotes",
+          "score": 20000,
+          "typeDisp": "MoneyMarket",
+          "exchDisp": "NASDAQ",
+          "isYahooFinance": true
+        },
+        {
+          "index": "4a1cf023e3974bcb8833f960055ba19e",
+          "name": "Symbolica AI",
+          "permalink": "symbolica-ai",
+          "isYahooFinance": false
+        },
+        {
+          "index": "06e3f59e279b4ff79ebd1eed23afaff1",
+          "name": "Symbol",
+          "permalink": "symbol-aff1",
+          "isYahooFinance": false
+        }
+      ],
+      "news": [
+        {
+          "uuid": "0b84ec83-5ad2-3bf5-ad44-c2d3906af068",
+          "title": "APOZ Is Now Receiving Interests From Both Domestic and International",
+          "publisher": "ACCESS Newswire",
+          "link": "https://finance.yahoo.com/news/apoz-now-receiving-interests-both-130000026.html",
+          "providerPublishTime": 1754917200,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/7uWvpxvYv5HASOUcujJKXg--~B/aD03NjA7dz0xMDEyO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/accesswire.ca/da54a0dccc46ad37ec48d21d39909753",
+                "width": 1012,
+                "height": 760,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/qbTUKyBSSllQN5XNoM_oIw--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/accesswire.ca/da54a0dccc46ad37ec48d21d39909753",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          },
+          "relatedTickers": [
+            "TKCM"
+          ]
+        },
+        {
+          "uuid": "b36b591c-d677-36a7-b624-b52e32d08f97",
+          "title": "BuildDirect Announces U.S. Listing on the OTCQB",
+          "publisher": "Newsfile",
+          "link": "https://finance.yahoo.com/news/builddirect-announces-u-listing-otcqb-120000040.html",
+          "providerPublishTime": 1754913600,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/Szn63t1.JPpZA.ZYRUELPQ--~B/aD00MDA7dz00MDA7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/newsfile_64/94bf38e4e3dd1801d8f00dfe7ffa0404",
+                "width": 400,
+                "height": 400,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/w.EO3Ysm6Zi9jaPIhmthzw--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/newsfile_64/94bf38e4e3dd1801d8f00dfe7ffa0404",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          },
+          "relatedTickers": [
+            "BDCTF",
+            "BILD.V",
+            "OTCM"
+          ]
+        },
+        {
+          "uuid": "feebbcc3-61fe-3bf8-b095-97953f005302",
+          "title": "Lifeloc Reports Second Quarter 2025 Results",
+          "publisher": "ACCESS Newswire",
+          "link": "https://finance.yahoo.com/news/lifeloc-reports-second-quarter-2025-131200948.html",
+          "providerPublishTime": 1754917920,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/k87RzXZeO7ditLxuyuSFmg--~B/aD0xMzA1O3c9MTM2ODthcHBpZD15dGFjaHlvbg--/https://media.zenfs.com/en/accesswire.ca/4b40809e690e26c78a5fe48c39d9eeab",
+                "width": 1368,
+                "height": 1305,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/1WifQ2zfS0Wf_hIqaMFdNQ--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/accesswire.ca/4b40809e690e26c78a5fe48c39d9eeab",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          },
+          "relatedTickers": [
+            "LCTC"
+          ]
+        },
+        {
+          "uuid": "0dd192b0-d1d2-3960-b18f-2fd05693d9fa",
+          "title": "Builders FirstSource Announces Dual Listing on NYSE Texas",
+          "publisher": "Business Wire",
+          "link": "https://finance.yahoo.com/news/builders-firstsource-announces-dual-listing-110000067.html",
+          "providerPublishTime": 1754910000,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/4kKcoIwEaxP98Gfnb.giGg--~B/aD0yMjU7dz05MDE7YXBwaWQ9eXRhY2h5b24-/https://media.zenfs.com/en/business-wire.com/0eb1c02ffa760fc8eb747d147e30995e",
+                "width": 901,
+                "height": 225,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/YeTX5klWRYDu60X_twrYaQ--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/business-wire.com/0eb1c02ffa760fc8eb747d147e30995e",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          },
+          "relatedTickers": [
+            "BLDR"
+          ]
+        }
+      ],
+      "nav": [],
+      "lists": [],
+      "researchReports": [],
+      "screenerFieldResults": [],
+      "totalTime": 54,
+      "timeTakenForQuotes": 417,
+      "timeTakenForNews": 700,
+      "timeTakenForAlgowatchlist": 400,
+      "timeTakenForPredefinedScreener": 400,
+      "timeTakenForCrunchbase": 400,
+      "timeTakenForNav": 400,
+      "timeTakenForResearchReports": 0,
+      "timeTakenForScreenerField": 0,
+      "timeTakenForCulturalAssets": 0,
+      "timeTakenForSearchLists": 0
+    }
+  }
+}

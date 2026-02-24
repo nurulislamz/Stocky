@@ -10,6 +10,22 @@ public sealed class HistoricalHistoryResult : List<HistoricalRowHistory> { }
 public sealed class HistoricalDividendsResult : List<HistoricalRowDividend> { }
 public sealed class HistoricalStockSplitsResult : List<HistoricalRowStockSplit> { }
 
+
+public sealed class YahooHistoricalResponse : YahooFinanceDto
+{
+    [JsonPropertyName("chart")]
+    public YahooHistoricalResponseObject Chart { get; set; } = null!;
+}
+
+public sealed class YahooHistoricalResponseObject : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<HistoricalRowHistory>? Result { get; set; }
+    
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+}
+
 public sealed class HistoricalRowHistory : YahooFinanceDto
 {
     [JsonPropertyName("date")]

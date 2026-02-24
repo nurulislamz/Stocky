@@ -1,0 +1,114 @@
+{
+  "request": {
+    "url": "https://query2.finance.yahoo.com/v1/finance/search?lang=en-US&region=US&quotesCount=6&newsCount=4&enableFuzzyQuery=false&quotesQueryId=tss_match_phrase_query&multiQuoteQueryId=multi_quote_single_token_query&newsQueryId=news_cie_vespa&enableCb=true&enableNavLinks=true&enableEnhancedTrivialQuery=true&q=SWVXX",
+    "method": "GET",
+    "headers": {
+      "cookie": "",
+      "user-agent": "@gadicc/yahoo-finance2/0.0.1 (+https://github.com/gadicc/node-yahoo-finance2)"
+    }
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "age": "0",
+      "cache-control": "public, max-age=600, stale-while-revalidate=180",
+      "content-type": "application/json;charset=utf-8",
+      "date": "Wed, 07 May 2025 11:38:13 GMT",
+      "referrer-policy": "no-referrer-when-downgrade",
+      "server": "ATS",
+      "strict-transport-security": "max-age=31536000",
+      "vary": "Origin,Origin,Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-envoy-decorator-operation": "finance-search--mtls-production-ir2.finance-k8s:4080/*",
+      "x-envoy-upstream-service-time": "120",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "y-rid": "03ofpflk1mhh5"
+    },
+    "bodyJson": {
+      "explains": [],
+      "count": 3,
+      "quotes": [
+        {
+          "exchange": "NAS",
+          "shortname": "Schwab Value Advantage Money Fu",
+          "quoteType": "MONEY_MARKET",
+          "symbol": "SWVXX",
+          "index": "quotes",
+          "score": 10001500,
+          "typeDisp": "MoneyMarket",
+          "longname": "The Charles Schwab Family of Funds - Schwab Value Advantage Money Fund",
+          "exchDisp": "NASDAQ",
+          "isYahooFinance": true
+        }
+      ],
+      "news": [
+        {
+          "uuid": "41c9105a-ffae-3392-aa96-dce33b2ac289",
+          "title": "6 best money market funds in May 2025",
+          "publisher": "Bankrate",
+          "link": "https://finance.yahoo.com/news/6-best-money-market-funds-175627234.html",
+          "providerPublishTime": 1746072300,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/Vua0M.8UVRFwURQEO24vLQ--~B/aD03MjA7dz0xMjgwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/bankrate_626/a59dd80149867b2a01d84b97d216ac95",
+                "width": 1280,
+                "height": 720,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/ZmVUOy63atGzbCJTsVepYA--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/bankrate_626/a59dd80149867b2a01d84b97d216ac95",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          }
+        },
+        {
+          "uuid": "eeda012e-6f86-3de0-8eba-11d6300957c8",
+          "title": "Cash Is Still King. Where to Stash Idle Dollars Now.",
+          "publisher": "Barrons.com",
+          "link": "https://finance.yahoo.com/m/eeda012e-6f86-3de0-8eba-11d6300957c8/cash-is-still-king.-where-to.html",
+          "providerPublishTime": 1744314120,
+          "type": "STORY",
+          "thumbnail": {
+            "resolutions": [
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/kS9tAu07hvOCQrC2ilDR5Q--~B/aD02NDA7dz0xMjgwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/Barrons.com/896921d2989096885d8cb8d63ce82b90",
+                "width": 1280,
+                "height": 640,
+                "tag": "original"
+              },
+              {
+                "url": "https://s.yimg.com/uu/api/res/1.2/wgNArLy..yrTj_DrEp43_g--~B/Zmk9ZmlsbDtoPTE0MDtweW9mZj0wO3c9MTQwO2FwcGlkPXl0YWNoeW9u/https://media.zenfs.com/en/Barrons.com/896921d2989096885d8cb8d63ce82b90",
+                "width": 140,
+                "height": 140,
+                "tag": "140x140"
+              }
+            ]
+          }
+        }
+      ],
+      "nav": [],
+      "lists": [],
+      "researchReports": [],
+      "screenerFieldResults": [],
+      "totalTime": 116,
+      "timeTakenForQuotes": 417,
+      "timeTakenForNews": 700,
+      "timeTakenForAlgowatchlist": 400,
+      "timeTakenForPredefinedScreener": 400,
+      "timeTakenForCrunchbase": 400,
+      "timeTakenForNav": 400,
+      "timeTakenForResearchReports": 0,
+      "timeTakenForScreenerField": 0,
+      "timeTakenForCulturalAssets": 0,
+      "timeTakenForSearchLists": 0
+    }
+  }
+}

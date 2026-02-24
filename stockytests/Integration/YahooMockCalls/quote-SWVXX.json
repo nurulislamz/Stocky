@@ -1,0 +1,87 @@
+{
+  "request": {
+    "url": "https://query2.finance.yahoo.com/v7/finance/quote?symbols=SWVXX&crumb=haT3oykhHqZ",
+    "method": "GET",
+    "headers": {
+      "cookie": "GUCS=AV78X-IQ; GUC=AQABCAFnsytn2UIgTASn&s=AQAAAEKG89vA&g=Z7HctQ; A3=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; A1S=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; EuConsent=CQM66kAQM66kAAOACBENBcFoAP_gAEPgACiQKptB9G7WTXFneXp2YPskOYUX0VBJ4MAwBgCBAcABzBIUIBwGVmAzJEyIICACGAIAIGBBIABtGAhAQEAAYIAFAABIAEgAIBAAIGAAACAAAABACAAAAAAAAAAQgEAXMBQgmAYEBFoIQUhAggAgAQAAAAAEAIgBCgQAEAAAQAAICAAIACgAAgAAAAAAAAAEAFAIEQAAIAECAotkdQAAAAAAAAAAAAQACAABAAAAAIKpgAkGpUQBFgSEhAIGEECAEQUBABQIAgAACBAAAATBAUIAwAVGAiAEAIAAAAAAAAACABAAABAAhAAEAAQIAAAAAIAAgAIBAAACAAAAAAAAAAAAAAAAAAAAAAAAAGIBAggAAABBAAQUAAAAAgAAAAAAAAAIgACAAAAAAAAAAAAAAIgAAAAAAAAAAAAAAAAAAIAAAAIAAAAgBEFgAAAAAAAAAAAAAACAABAAAAAIAAA; A1=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4",
+      "user-agent": "@gadicc/yahoo-finance2/0.0.1 (+https://github.com/gadicc/node-yahoo-finance2)"
+    }
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "age": "0",
+      "cache-control": "public, max-age=1, stale-while-revalidate=9",
+      "content-length": "1357",
+      "content-type": "application/json;charset=utf-8",
+      "date": "Wed, 07 May 2025 11:38:13 GMT",
+      "referrer-policy": "no-referrer-when-downgrade",
+      "server": "ATS",
+      "strict-transport-security": "max-age=31536000",
+      "vary": "Origin,Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-envoy-decorator-operation": "finance-quote-api--mtls-production-gq1.finance-k8s:4080/*",
+      "x-envoy-upstream-service-time": "2",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "y-rid": "46etb69k1mhh5"
+    },
+    "bodyJson": {
+      "quoteResponse": {
+        "result": [
+          {
+            "language": "en-US",
+            "region": "US",
+            "quoteType": "MONEYMARKET",
+            "typeDisp": "MoneyMarket",
+            "quoteSourceName": "Delayed Quote",
+            "triggerable": false,
+            "customPriceAlertConfidence": "NONE",
+            "currency": "USD",
+            "marketState": "PRE",
+            "hasPrePostMarketData": false,
+            "firstTradeDateMilliseconds": 1681738200000,
+            "priceHint": 4,
+            "fullExchangeName": "Nasdaq",
+            "fiftyTwoWeekLowChange": 0,
+            "fiftyTwoWeekLowChangePercent": 0,
+            "fiftyTwoWeekRange": "1.0 - 1.0",
+            "fiftyTwoWeekHighChange": 0,
+            "fiftyTwoWeekHighChangePercent": 0,
+            "fiftyTwoWeekLow": 1,
+            "fiftyTwoWeekHigh": 1,
+            "fiftyTwoWeekChangePercent": 0,
+            "trailingAnnualDividendRate": 0,
+            "netAssets": 1,
+            "fiftyDayAverage": 1,
+            "fiftyDayAverageChange": 0,
+            "fiftyDayAverageChangePercent": 0,
+            "twoHundredDayAverage": 1,
+            "twoHundredDayAverageChange": 0,
+            "twoHundredDayAverageChangePercent": 0,
+            "sourceInterval": 15,
+            "exchangeDataDelayedBy": 0,
+            "tradeable": false,
+            "cryptoTradeable": false,
+            "corporateActions": [],
+            "regularMarketTime": 1746576150,
+            "exchange": "NAS",
+            "messageBoardId": "finmb_54695692",
+            "exchangeTimezoneName": "America/New_York",
+            "exchangeTimezoneShortName": "EDT",
+            "gmtOffSetMilliseconds": -14400000,
+            "market": "us_market",
+            "esgPopulated": false,
+            "regularMarketPrice": 1,
+            "shortName": "Schwab Value Advantage Money Fu",
+            "longName": "The Charles Schwab Family of Funds - Schwab Value Advantage Money Fund",
+            "symbol": "SWVXX"
+          }
+        ],
+        "error": null
+      }
+    }
+  }
+}

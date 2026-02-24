@@ -77,16 +77,12 @@
 	<s:String x:Key="/Default/CodeInspection/PencilsConfiguration/ActualSeverity/@EntryValue">INFO</s:String>
 	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">C:\Users\nurul\.dotnet\sdk\10.0.101\MSBuild.dll</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1179648</s:Int64>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=93ebe666_002Da871_002D49a5_002Db974_002D6cf14fec8e59/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from AuthIntegrationTests.cs" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Or&gt;&#xD;
-    &lt;ProjectFile&gt;D9337A09-54E5-415F-9898-67B23467419F/d:Integration/f:AuthIntegrationTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;D9337A09-54E5-415F-9898-67B23467419F/d:Integration/f:FundsIntegrationTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;ProjectFile&gt;D9337A09-54E5-415F-9898-67B23467419F/d:Integration/f:PortfolioIntegrationTests.cs&lt;/ProjectFile&gt;&#xD;
-    &lt;TestAncestor&gt;&#xD;
-      &lt;TestId&gt;NUnit3x::D9337A09-54E5-415F-9898-67B23467419F::net10.0::stockytests.Controllers.MarketPricingControllerTests&lt;/TestId&gt;&#xD;
-    &lt;/TestAncestor&gt;&#xD;
-  &lt;/Or&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3c9cd5b9_002Df75b_002D491b_002D8aff_002Db38ac9fe1f10/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="MarketPricingIntegrationTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::D9337A09-54E5-415F-9898-67B23467419F::net10.0::stockytests.Integration.MarketPricingIntegrationTests&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	
 	
 	
 	

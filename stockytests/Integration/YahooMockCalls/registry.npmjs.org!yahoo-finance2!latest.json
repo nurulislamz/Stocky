@@ -1,0 +1,153 @@
+{
+  "request": {
+    "url": "https://registry.npmjs.org/yahoo-finance2/latest",
+    "method": "GET"
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "access-control-allow-origin": "*",
+      "cache-control": "max-age=300",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "9739bd473a1f3da6-LHR",
+      "content-type": "application/json",
+      "date": "Sat, 23 Aug 2025 09:56:19 GMT",
+      "server": "cloudflare",
+      "set-cookie": [
+        "_cfuvid=xUGcbmSaXTUkfMHVPRZ8PQK_ZTVm1EdcVmN6ciaenAg-1755942979993-0.0.1.1-604800000; path=/; domain=.npmjs.org; HttpOnly; Secure; SameSite=None"
+      ],
+      "vary": "accept-encoding, accept"
+    },
+    "bodyJson": {
+      "name": "yahoo-finance2",
+      "version": "2.13.3",
+      "keywords": [
+        "yahoo",
+        "finance",
+        "financial",
+        "data",
+        "stock",
+        "price",
+        "quote",
+        "historical",
+        "eod",
+        "end-of-day",
+        "client",
+        "library"
+      ],
+      "author": {
+        "name": "Gadi Cohen",
+        "email": "dragon@wastelands.net"
+      },
+      "license": "MIT",
+      "_id": "yahoo-finance2@2.13.3",
+      "maintainers": [
+        {
+          "name": "gadicc",
+          "email": "dragon@wastelands.net"
+        },
+        {
+          "name": "huh",
+          "email": "pilwon@gmail.com"
+        }
+      ],
+      "homepage": "https://github.com/gadicc/node-yahoo-finance2#readme",
+      "bugs": {
+        "url": "https://github.com/gadicc/node-yahoo-finance2/issues"
+      },
+      "bin": {
+        "yahoo-finance": "bin/yahoo-finance.js"
+      },
+      "dist": {
+        "shasum": "f4e8462c8d451451cf567c28882b1052ae718320",
+        "tarball": "https://registry.npmjs.org/yahoo-finance2/-/yahoo-finance2-2.13.3.tgz",
+        "fileCount": 164,
+        "integrity": "sha512-ZECy6wQ7ymT08nVrxqQf+gwmINJ4/ECLyq+vM3SQmH3HWzje5DX1WX5YcZpWpWi4KXdmo2Vuk9OAdrTP09nE4g==",
+        "signatures": [
+          {
+            "sig": "MEUCIQC1Tccx7QF9FNaYTBnQwKP01ZeduMsxSMb2gg7LRoZApwIgNHmVe7pZBmlfYaNdn3ALRafdOFXAYFOkom81sESIF34=",
+            "keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
+          }
+        ],
+        "unpackedSize": 3680008
+      },
+      "main": "./dist/cjs/src/index-node.js",
+      "type": "module",
+      "types": "./dist/esm/src/index-node.d.ts",
+      "module": "./dist/esm/src/index-node.js",
+      "browser": "./dist/esm/src/index-browser.js",
+      "engines": {
+        "node": ">=18.0.0"
+      },
+      "exports": {
+        "import": "./dist/esm/src/index-node.js",
+        "default": "./dist/cjs/src/index-node.js"
+      },
+      "gitHead": "c69f9bc45d4fd1857a620e77d2e55ce190fe41fd",
+      "scripts": {
+        "lint": "eslint . --ext .js,.ts",
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+        "build": "yarn run build:esm && yarn run build:cjs",
+        "test:ts": "tsc --noEmit",
+        "coverage": "yarn test --coverage",
+        "test:cjs": "node ./node_modules/jest/bin/jest.js -c tests-modules/cjs/jest.config.js tests-modules/cjs/tests/*",
+        "test:esm": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js -c tests-modules/esm/jest.config.js tests-modules/esm/tests/*",
+        "build:cjs": "tsc --module commonjs --target es2015 --outDir dist/cjs && sed 's/\"type\": \"module\",/\"type:\": \"commonjs\",/' dist/cjs/package.json > dist/cjs/package-changed.json && mv dist/cjs/package-changed.json dist/cjs/package.json",
+        "build:esm": "tsc --module esnext --target es2019 --outDir dist/esm",
+        "test:build": "yarn test:modules",
+        "timeseries": "node --loader ts-node/esm scripts/timeseries.js",
+        "test:modules": "yarn test:esm && yarn test:cjs",
+        "prepublishOnly": "yarn build"
+      },
+      "_npmUser": {
+        "name": "gadicc",
+        "email": "dragon@wastelands.net"
+      },
+      "repository": {
+        "url": "git+https://github.com/gadicc/node-yahoo-finance2.git",
+        "type": "git"
+      },
+      "_npmVersion": "8.5.0",
+      "description": "JS API for Yahoo Finance",
+      "directories": {},
+      "_nodeVersion": "18.20.5",
+      "dependencies": {
+        "tough-cookie": "^4.1.2",
+        "@sinclair/typebox": "^0.32.27",
+        "@types/tough-cookie": "^4.0.2",
+        "tough-cookie-file-store": "^2.0.3"
+      },
+      "_hasShrinkwrap": false,
+      "devDependencies": {
+        "jest": "^29.7.0",
+        "eslint": "8.57.1",
+        "ts-node": "10.9.2",
+        "prettier": "^3.3.3",
+        "@swc/core": "^1.7.26",
+        "@swc/jest": "^0.2.36",
+        "typescript": "5.7.2",
+        "@types/jest": "^29.5.13",
+        "@swc/helpers": "^0.5.13",
+        "jest-tobetype": "1.2.3",
+        "@tsconfig/node12": "12.1.4",
+        "semantic-release": "19.0.5",
+        "@types/har-format": "^1.2.15",
+        "@semantic-release/git": "10.0.1",
+        "@semantic-release/npm": "9.0.2",
+        "eslint-config-prettier": "^9.1.0",
+        "@semantic-release/github": "8.1.0",
+        "@typescript-eslint/parser": "5.62.0",
+        "@semantic-release/changelog": "6.0.3",
+        "@typescript-eslint/eslint-plugin": "5.62.0",
+        "@semantic-release/commit-analyzer": "9.0.2",
+        "@semantic-release/release-notes-generator": "10.0.3"
+      },
+      "_npmOperationalInternal": {
+        "tmp": "tmp/yahoo-finance2_2.13.3_1734768373757_0.554859170672414",
+        "host": "s3://npm-registry-packages-npm-production"
+      }
+    }
+  }
+}

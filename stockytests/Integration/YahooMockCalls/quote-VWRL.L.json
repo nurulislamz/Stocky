@@ -1,0 +1,99 @@
+{
+  "request": {
+    "url": "https://query2.finance.yahoo.com/v7/finance/quote?symbols=VWRL.L&crumb=haT3oykhHqZ",
+    "method": "GET",
+    "headers": {
+      "cookie": "GUCS=AV78X-IQ; GUC=AQABCAFnsytn2UIgTASn&s=AQAAAEKG89vA&g=Z7HctQ; A3=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; A1S=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4; EuConsent=CQM66kAQM66kAAOACBENBcFoAP_gAEPgACiQKptB9G7WTXFneXp2YPskOYUX0VBJ4MAwBgCBAcABzBIUIBwGVmAzJEyIICACGAIAIGBBIABtGAhAQEAAYIAFAABIAEgAIBAAIGAAACAAAABACAAAAAAAAAAQgEAXMBQgmAYEBFoIQUhAggAgAQAAAAAEAIgBCgQAEAAAQAAICAAIACgAAgAAAAAAAAAEAFAIEQAAIAECAotkdQAAAAAAAAAAAAQACAABAAAAAIKpgAkGpUQBFgSEhAIGEECAEQUBABQIAgAACBAAAATBAUIAwAVGAiAEAIAAAAAAAAACABAAABAAhAAEAAQIAAAAAIAAgAIBAAACAAAAAAAAAAAAAAAAAAAAAAAAAGIBAggAAABBAAQUAAAAAgAAAAAAAAAIgACAAAAAAAAAAAAAAIgAAAAAAAAAAAAAAAAAAIAAAAIAAAAgBEFgAAAAAAAAAAAAAACAABAAAAAIAAA; A1=d=AQABBKvcsWcCEIGLkyl67hr2YX7XekV46j4FEgABCAErs2fZZ_bPb2UB9qMAAAcIq9yxZ63aZoI&S=AQAAAtFJa---IoVh8DRgGhGzVr4",
+      "user-agent": "@gadicc/yahoo-finance2/0.0.1 (+https://github.com/gadicc/node-yahoo-finance2)"
+    }
+  },
+  "response": {
+    "ok": true,
+    "status": 200,
+    "statusText": "OK",
+    "headers": {
+      "age": "0",
+      "cache-control": "public, max-age=1, stale-while-revalidate=9",
+      "content-length": "1679",
+      "content-type": "application/json;charset=utf-8",
+      "date": "Fri, 23 May 2025 00:37:52 GMT",
+      "referrer-policy": "no-referrer-when-downgrade",
+      "server": "ATS",
+      "strict-transport-security": "max-age=31536000",
+      "vary": "Origin,Accept-Encoding",
+      "x-content-type-options": "nosniff",
+      "x-envoy-decorator-operation": "finance-quote-api--mtls-baseline-production-sg3.finance-k8s:4080/*",
+      "x-envoy-upstream-service-time": "3",
+      "x-frame-options": "SAMEORIGIN",
+      "x-xss-protection": "1; mode=block",
+      "y-rid": "1nqlnnlk2vgr0"
+    },
+    "bodyJson": {
+      "quoteResponse": {
+        "result": [
+          {
+            "language": "en-US",
+            "region": "US",
+            "quoteType": "ETF",
+            "typeDisp": "ETF",
+            "quoteSourceName": "Delayed Quote",
+            "triggerable": false,
+            "customPriceAlertConfidence": "LOW",
+            "currency": "GBP",
+            "regularMarketChangePercent": -1.0992047,
+            "regularMarketPrice": 106.62,
+            "exchange": "LSE",
+            "messageBoardId": "finmb_215299893",
+            "exchangeTimezoneName": "Europe/London",
+            "exchangeTimezoneShortName": "BST",
+            "gmtOffSetMilliseconds": 3600000,
+            "market": "gb_market",
+            "esgPopulated": false,
+            "regularMarketDayHigh": 0,
+            "regularMarketDayRange": "0.0 - 0.0",
+            "regularMarketDayLow": 0,
+            "regularMarketVolume": 166,
+            "regularMarketPreviousClose": 107.805,
+            "bid": 0,
+            "ask": 0,
+            "bidSize": 378,
+            "askSize": 5000,
+            "fullExchangeName": "LSE",
+            "regularMarketOpen": 0,
+            "averageDailyVolume3Month": 106823,
+            "averageDailyVolume10Day": 63811,
+            "fiftyTwoWeekLowChange": 106.62,
+            "fiftyTwoWeekRange": "0.0 - 115.64",
+            "fiftyTwoWeekHighChange": -9.019997,
+            "fiftyTwoWeekHighChangePercent": -0.078000665,
+            "fiftyTwoWeekLow": 0,
+            "fiftyTwoWeekHigh": 115.64,
+            "fiftyTwoWeekChangePercent": 5.1653504,
+            "netAssets": 37080572000,
+            "fiftyDayAverage": 103.2779,
+            "fiftyDayAverageChange": 3.342102,
+            "fiftyDayAverageChangePercent": 0.03236028,
+            "twoHundredDayAverage": 107.39438,
+            "twoHundredDayAverageChange": -0.7743759,
+            "twoHundredDayAverageChangePercent": -0.0072105816,
+            "sourceInterval": 15,
+            "exchangeDataDelayedBy": 15,
+            "tradeable": false,
+            "cryptoTradeable": false,
+            "hasPrePostMarketData": false,
+            "firstTradeDateMilliseconds": 1337670000000,
+            "priceHint": 2,
+            "regularMarketChange": -1.1849976,
+            "shortName": "VANGUARD FUNDS PLC VANGUARD FTS",
+            "longName": "Vanguard FTSE All-World UCITS ETF",
+            "corporateActions": [],
+            "regularMarketTime": 1747928119,
+            "marketState": "PREPRE",
+            "symbol": "VWRL.L"
+          }
+        ],
+        "error": null
+      }
+    }
+  }
+}

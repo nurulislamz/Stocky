@@ -59,10 +59,13 @@ public abstract class BaseApiServiceClient
         try
         {
             var response = await _policy.Value.ExecuteAsync(_ => _httpClient.GetAsync(uri, ct), ct);
+            
+            string info = $"Yahoo returned {response.StatusCode} for {uri}. Response is below: {response.Content.ReadAsStringAsync(ct).Result}";
+            _logger.LogInformation(info);
 
             if (!response.IsSuccessStatusCode)
             {
-                string error = $"Yahoo returned {response.StatusCode} for {uri}. Response is below: {response.Content.ReadAsStringAsync(ct)}";
+                string error = $"Yahoo returned {response.StatusCode}. Response is below: {response.Content.ReadAsStringAsync(ct).Result}";
                 _logger.LogError(error);
                 return new InternalServerFailure500(error);
             }
