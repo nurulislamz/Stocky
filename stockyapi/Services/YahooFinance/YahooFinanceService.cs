@@ -1,4 +1,4 @@
-﻿using stockyapi.Middleware;
+using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Helper;
 using stockyapi.Services.YahooFinance.Types;
@@ -84,12 +84,12 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing time-series fundamentals.
     /// </returns>
-    public Task<Result<FundamentalsTimeSeriesResults>> GetFundamentalsTimeSeriesAsync(
+    public Task<Result<FundamentalsTimeSeriesResponse>> GetFundamentalsTimeSeriesAsync(
         string symbol,
         CancellationToken ct = default,
         params string[] types)
     {
-        return _executor.ExecuteAsync<FundamentalsTimeSeriesResults>(
+        return _executor.ExecuteAsync<FundamentalsTimeSeriesResponse>(
             cacheKey: $"fundamentals:{symbol}:{string.Join(",", types)}",
             cacheTtl: TimeSpan.FromHours(1),
             uri: YahooEndpointBuilder.BuildFundamentalsTimeSeriesUri(symbol, types),
@@ -101,7 +101,7 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// Retrieves raw historical price data for a symbol within a specified time window.
     /// </summary>
     /// <remarks>
-    /// Maps to Yahoo Finance <c>/v7/finance/download</c> or historical chart endpoints.
+    /// Maps to Yahoo Finance chart endpoint and transforms the response into flat historical rows.
     /// Results are cached for 6 hours.
     /// </remarks>
     /// <param name="symbol">Ticker symbol.</param>
@@ -112,19 +112,64 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing historical price records.
     /// </returns>
-    public Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
+    public async Task<Result<HistoricalHistoryResult>> GetHistoricalAsync(
         string symbol,
         DateTime period1,
         DateTime period2,
         YahooInterval interval,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<HistoricalHistoryResult>(
+        var chartResult = await _executor.ExecuteAsync<YahooChartResponse>(
             cacheKey: $"historical:{symbol}:{period1}:{period2}:{interval}",
             cacheTtl: TimeSpan.FromHours(6),
             uri: YahooEndpointBuilder.BuildHistoricalUri(symbol, period1, period2, interval.ToApiString()),
             ct
         );
+
+        if (!chartResult.IsSuccess)
+        {
+            return Result<HistoricalHistoryResult>.Fail(chartResult.Failure);
+        }
+
+        var result = new HistoricalHistoryResult();
+        var chartData = chartResult.Value.Chart.Result?.FirstOrDefault();
+        
+        if (chartData?.Timestamp == null || chartData.Indicators.Quote.Count == 0)
+        {
+            return Result<HistoricalHistoryResult>.Success(result);
+        }
+
+        var timestamps = chartData.Timestamp;
+        var quote = chartData.Indicators.Quote[0];
+        var adjclose = chartData.Indicators.Adjclose?.FirstOrDefault()?.Adjclose;
+
+        for (int i = 0; i < timestamps.Count; i++)
+        {
+            var open = i < quote.Open.Count ? quote.Open[i] : null;
+            var high = i < quote.High.Count ? quote.High[i] : null;
+            var low = i < quote.Low.Count ? quote.Low[i] : null;
+            var close = i < quote.Close.Count ? quote.Close[i] : null;
+            var volume = i < quote.Volume.Count ? quote.Volume[i] : null;
+            var adj = adjclose != null && i < adjclose.Count ? adjclose[i] : null;
+
+            if (open == null && high == null && low == null && close == null)
+            {
+                continue;
+            }
+
+            result.Add(new HistoricalRowHistory
+            {
+                Date = DateTimeOffset.FromUnixTimeSeconds(timestamps[i]),
+                Open = open ?? 0,
+                High = high ?? 0,
+                Low = low ?? 0,
+                Close = close ?? 0,
+                AdjClose = adj,
+                Volume = volume ?? 0
+            });
+        }
+
+        return Result<HistoricalHistoryResult>.Success(result);
     }
 
     /// <summary>
@@ -250,11 +295,11 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing recommendation data.
     /// </returns>
-    public Task<Result<RecommendationsBySymbolResponseArray>> GetRecommendationsBySymbolAsync(
+    public Task<Result<RecommendationsBySymbolApiResponse>> GetRecommendationsBySymbolAsync(
         string symbol,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<RecommendationsBySymbolResponseArray>(
+        return _executor.ExecuteAsync<RecommendationsBySymbolApiResponse>(
             cacheKey: $"recommendations:{symbol}",
             cacheTtl: TimeSpan.FromHours(6),
             uri: YahooEndpointBuilder.BuildRecommendationsBySymbolUri(symbol),
@@ -273,11 +318,11 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing screener results.
     /// </returns>
-    public Task<Result<ScreenerResult>> RunScreenerAsync(
+    public Task<Result<ScreenerResponse>> RunScreenerAsync(
         string screenerId,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<ScreenerResult>(
+        return _executor.ExecuteAsync<ScreenerResponse>(
             cacheKey: $"screener:{screenerId}",
             cacheTtl: TimeSpan.FromMinutes(5),
             uri: YahooEndpointBuilder.BuildScreenerUri(screenerId),
@@ -319,11 +364,11 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing trending symbols.
     /// </returns>
-    public Task<Result<TrendingSymbolsResult>> GetTrendingSymbolsAsync(
+    public Task<Result<TrendingSymbolsResponse>> GetTrendingSymbolsAsync(
         string region,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<TrendingSymbolsResult>(
+        return _executor.ExecuteAsync<TrendingSymbolsResponse>(
             cacheKey: $"trending:{region}",
             cacheTtl: TimeSpan.FromMinutes(10),
             uri: YahooEndpointBuilder.BuildTrendingSymbolsUri(region),

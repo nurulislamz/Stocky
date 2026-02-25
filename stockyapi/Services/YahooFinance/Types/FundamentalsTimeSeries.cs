@@ -5,7 +5,54 @@ namespace stockyapi.Services.YahooFinance.Types;
 
 // ------------------------------------------------------------
 // fundamentalsTimeSeries  (JSR: time series for many financial types; huge surface)
+// Yahoo API returns: { "timeseries": { "result": [...], "error": null } }
 // ------------------------------------------------------------
+
+/// <summary>
+/// Root response wrapper for the fundamentals timeseries endpoint.
+/// </summary>
+public sealed class FundamentalsTimeSeriesResponse : YahooFinanceDto
+{
+    [JsonPropertyName("timeseries")]
+    public FundamentalsTimeseries Timeseries { get; set; } = null!;
+}
+
+/// <summary>
+/// Timeseries wrapper containing the result array.
+/// </summary>
+public sealed class FundamentalsTimeseries : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<FundamentalsTimeSeriesResultItem> Result { get; set; } = [];
+
+    [JsonPropertyName("error")]
+    public object? Error { get; set; }
+}
+
+/// <summary>
+/// Individual result item from the timeseries endpoint.
+/// Each item represents a single metric type with its values over time.
+/// </summary>
+public sealed class FundamentalsTimeSeriesResultItem : YahooFinanceDto
+{
+    [JsonPropertyName("meta")]
+    public FundamentalsTimeSeriesMeta Meta { get; set; } = new();
+
+    [JsonPropertyName("timestamp")]
+    public List<long>? Timestamp { get; set; }
+}
+
+/// <summary>
+/// Metadata for a fundamentals time series result.
+/// </summary>
+public sealed class FundamentalsTimeSeriesMeta : YahooFinanceDto
+{
+    [JsonPropertyName("symbol")]
+    public List<string> Symbol { get; set; } = [];
+
+    [JsonPropertyName("type")]
+    public List<string> Type { get; set; } = [];
+}
 
 public sealed class FundamentalsTimeSeriesResults : List<FundamentalsTimeSeriesResult> { }
 

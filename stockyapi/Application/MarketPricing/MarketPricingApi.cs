@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using stockyapi.Application.MarketPricing.GetCurrentPrice;
 using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance;
@@ -60,7 +60,7 @@ public class MarketPricingApi : IMarketPricingApi
         return await _yahooFinanceService.GetQuoteSummaryAsync(symbol, cancellationToken, modules);
     }
 
-    public async Task<Result<ScreenerResult>> RunScreener(
+    public async Task<Result<ScreenerResponse>> RunScreener(
         string screenerId,
         CancellationToken cancellationToken)
     {
@@ -74,7 +74,7 @@ public class MarketPricingApi : IMarketPricingApi
         return await _yahooFinanceService.SearchAsync(query, cancellationToken);
     }
 
-    public async Task<Result<TrendingSymbolsResult>> GetTrendingSymbols(
+    public async Task<Result<TrendingSymbolsResponse>> GetTrendingSymbols(
         string region,
         CancellationToken cancellationToken)
     {

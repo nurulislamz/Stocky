@@ -1,4 +1,4 @@
-﻿using stockyapi.Middleware;
+using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Types;
 
@@ -16,7 +16,7 @@ public interface IYahooFinanceService
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<FundamentalsTimeSeriesResults>> GetFundamentalsTimeSeriesAsync(
+    Task<Result<FundamentalsTimeSeriesResponse>> GetFundamentalsTimeSeriesAsync(
         string symbol,
         CancellationToken cancellationToken = default,
         params string[] types
@@ -59,12 +59,12 @@ public interface IYahooFinanceService
         params string[] modules
     );
 
-    Task<Result<RecommendationsBySymbolResponseArray>> GetRecommendationsBySymbolAsync(
+    Task<Result<RecommendationsBySymbolApiResponse>> GetRecommendationsBySymbolAsync(
         string symbol,
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<ScreenerResult>> RunScreenerAsync(
+    Task<Result<ScreenerResponse>> RunScreenerAsync(
         string screenerId,
         CancellationToken cancellationToken = default
     );
@@ -74,7 +74,7 @@ public interface IYahooFinanceService
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<TrendingSymbolsResult>> GetTrendingSymbolsAsync(
+    Task<Result<TrendingSymbolsResponse>> GetTrendingSymbolsAsync(
         string region,
         CancellationToken cancellationToken = default
     );

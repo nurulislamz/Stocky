@@ -1,4 +1,4 @@
-﻿using stockyapi.Middleware;
+using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Types;
 
@@ -31,7 +31,7 @@ public interface IMarketPricingApi
         string[]? modules,
         CancellationToken cancellationToken);
 
-    Task<Result<ScreenerResult>> RunScreener(
+    Task<Result<ScreenerResponse>> RunScreener(
         string screenerId,
         CancellationToken cancellationToken);
 
@@ -39,7 +39,7 @@ public interface IMarketPricingApi
         string query,
         CancellationToken cancellationToken);
 
-    Task<Result<TrendingSymbolsResult>> GetTrendingSymbols(
+    Task<Result<TrendingSymbolsResponse>> GetTrendingSymbols(
         string region,
         CancellationToken cancellationToken);
 }

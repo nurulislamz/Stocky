@@ -136,12 +136,16 @@ public class YahooLiveServiceTests
         // Assert
         Assert.That(result.IsSuccess, Is.True);
         Assert.That(result.Value, Is.Not.Null);
-        Assert.That(result.Value.Id, Is.Not.Null.And.Not.Empty);
-        Assert.That(result.Value.Title, Is.Not.Null.And.Not.Empty);
-        Assert.That(result.Value.Total, Is.GreaterThan(0));
-        Assert.That(result.Value.Quotes, Is.Not.Null.And.Not.Empty);
+        Assert.That(result.Value.Finance, Is.Not.Null);
+        Assert.That(result.Value.Finance.Result, Is.Not.Empty);
         
-        var firstQuote = result.Value.Quotes.First();
+        var screenerResult = result.Value.Finance.Result.First();
+        Assert.That(screenerResult.Id, Is.Not.Null.And.Not.Empty);
+        Assert.That(screenerResult.Title, Is.Not.Null.And.Not.Empty);
+        Assert.That(screenerResult.Total, Is.GreaterThan(0));
+        Assert.That(screenerResult.Quotes, Is.Not.Null.And.Not.Empty);
+        
+        var firstQuote = screenerResult.Quotes.First();
         Assert.That(firstQuote.Symbol, Is.Not.Null.And.Not.Empty);
         Assert.That(firstQuote.ShortName, Is.Not.Null.And.Not.Empty);
         Assert.That(firstQuote.RegularMarketPrice, Is.GreaterThan(0));
@@ -184,9 +188,13 @@ public class YahooLiveServiceTests
         // Assert
         Assert.That(result.IsSuccess, Is.True);
         Assert.That(result.Value, Is.Not.Null);
-        Assert.That(result.Value.Count, Is.GreaterThan(0));
-        Assert.That(result.Value.JobTimestamp, Is.GreaterThan(0));
-        Assert.That(result.Value.Quotes, Is.Not.Null.And.Not.Empty);
-        Assert.That(result.Value.Quotes.First().Symbol, Is.Not.Null.And.Not.Empty);
+        Assert.That(result.Value.Finance, Is.Not.Null);
+        Assert.That(result.Value.Finance.Result, Is.Not.Empty);
+        
+        var trendingResult = result.Value.Finance.Result.First();
+        Assert.That(trendingResult.Count, Is.GreaterThan(0));
+        Assert.That(trendingResult.JobTimestamp, Is.GreaterThan(0));
+        Assert.That(trendingResult.Quotes, Is.Not.Null.And.Not.Empty);
+        Assert.That(trendingResult.Quotes.First().Symbol, Is.Not.Null.And.Not.Empty);
     }
 }

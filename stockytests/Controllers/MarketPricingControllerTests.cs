@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -265,10 +265,10 @@ public class MarketPricingControllerTests
     {
         // Arrange
         var screenerId = "day_gainers";
-        var expectedData = new ScreenerResult();
+        var expectedData = new ScreenerResponse();
 
         _marketPricingApi.Setup(x => x.RunScreener(screenerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<ScreenerResult>.Success(expectedData));
+            .ReturnsAsync(Result<ScreenerResponse>.Success(expectedData));
 
         // Act
         var result = await _controller.RunScreener(screenerId, Token);
@@ -352,10 +352,10 @@ public class MarketPricingControllerTests
     {
         // Arrange
         var region = "US";
-        var expectedData = new TrendingSymbolsResult();
+        var expectedData = new TrendingSymbolsResponse();
 
         _marketPricingApi.Setup(x => x.GetTrendingSymbols(region, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<TrendingSymbolsResult>.Success(expectedData));
+            .ReturnsAsync(Result<TrendingSymbolsResponse>.Success(expectedData));
 
         // Act
         var result = await _controller.GetTrendingSymbols(region, Token);

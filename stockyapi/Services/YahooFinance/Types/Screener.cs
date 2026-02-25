@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 // ReSharper disable InconsistentNaming
 
@@ -6,27 +6,49 @@ namespace stockyapi.Services.YahooFinance.Types;
 
 // ------------------------------------------------------------
 // screener  (JSR: ScreenerResult + ScreenerQuote etc.)
+// Yahoo API returns: { "finance": { "result": [...], "error": null } }
 // ------------------------------------------------------------
+
+/// <summary>
+/// Root response wrapper for the screener endpoint.
+/// </summary>
+public sealed class ScreenerResponse : YahooFinanceDto
+{
+    [JsonPropertyName("finance")]
+    public ScreenerFinance Finance { get; set; } = null!;
+}
+
+/// <summary>
+/// Finance wrapper containing the result array.
+/// </summary>
+public sealed class ScreenerFinance : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<ScreenerResult> Result { get; set; } = [];
+
+    [JsonPropertyName("error")]
+    public object? Error { get; set; }
+}
 
 public sealed class ScreenerResult : YahooFinanceDto
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = null!;
+    public string Id { get; set; } = string.Empty;
 
     [JsonPropertyName("title")]
-    public string Title { get; set; } = null!;
+    public string Title { get; set; } = string.Empty;
 
     [JsonPropertyName("description")]
-    public string Description { get; set; } = null!;
+    public string Description { get; set; } = string.Empty;
 
     [JsonPropertyName("canonicalName")]
-    public string CanonicalName { get; set; } = null!;
+    public string CanonicalName { get; set; } = string.Empty;
 
     [JsonPropertyName("criteriaMeta")]
-    public ScreenerCriteriaMeta CriteriaMeta { get; set; } = null!;
+    public ScreenerCriteriaMeta CriteriaMeta { get; set; } = new();
 
     [JsonPropertyName("rawCriteria")]
-    public string RawCriteria { get; set; } = null!;
+    public string RawCriteria { get; set; } = string.Empty;
 
     [JsonPropertyName("start")]
     public int Start { get; set; }
@@ -59,7 +81,7 @@ public sealed class ScreenerResult : YahooFinanceDto
     public bool IsPremium { get; set; }
 
     [JsonPropertyName("iconUrl")]
-    public string IconUrl { get; set; } = null!;
+    public string IconUrl { get; set; } = string.Empty;
 }
 
 public sealed class ScreenerCriteriaMeta : YahooFinanceDto
@@ -71,19 +93,22 @@ public sealed class ScreenerCriteriaMeta : YahooFinanceDto
     public int Offset { get; set; }
 
     [JsonPropertyName("sortField")]
-    public string SortField { get; set; } = null!;
+    public string SortField { get; set; } = string.Empty;
 
     [JsonPropertyName("sortType")]
-    public string SortType { get; set; } = null!;
+    public string SortType { get; set; } = string.Empty;
 
     [JsonPropertyName("quoteType")]
-    public string QuoteType { get; set; } = null!;
+    public string QuoteType { get; set; } = string.Empty;
 
     [JsonPropertyName("criteria")]
     public List<ScreenerCriterum> Criteria { get; set; } = [];
 
     [JsonPropertyName("topOperator")]
-    public string TopOperator { get; set; } = null!;
+    public string TopOperator { get; set; } = string.Empty;
+
+    [JsonPropertyName("includeFields")]
+    public List<string> IncludeFields { get; set; } = [];
 }
 
 public sealed class ScreenerCriterum : YahooFinanceDto
@@ -137,10 +162,10 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public decimal? LastClosePriceToNNWCPerShare { get; set; }
 
     [JsonPropertyName("firstTradeDateMilliseconds")]
-    public long FirstTradeDateMilliseconds { get; set; }
+    public long? FirstTradeDateMilliseconds { get; set; }
 
     [JsonPropertyName("priceHint")]
-    public int PriceHint { get; set; }
+    public int? PriceHint { get; set; }
 
     [JsonPropertyName("postMarketChangePercent")]
     public decimal? PostMarketChangePercent { get; set; }
@@ -155,13 +180,13 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public decimal? PostMarketChange { get; set; }
 
     [JsonPropertyName("regularMarketChange")]
-    public decimal RegularMarketChange { get; set; }
+    public decimal? RegularMarketChange { get; set; }
 
     [JsonPropertyName("regularMarketTime")]
-    public long RegularMarketTime { get; set; }
+    public long? RegularMarketTime { get; set; }
 
     [JsonPropertyName("regularMarketPrice")]
-    public decimal RegularMarketPrice { get; set; }
+    public decimal? RegularMarketPrice { get; set; }
 
     [JsonPropertyName("regularMarketDayHigh")]
     public decimal? RegularMarketDayHigh { get; set; }
@@ -179,7 +204,7 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public long? RegularMarketVolume { get; set; }
 
     [JsonPropertyName("regularMarketPreviousClose")]
-    public decimal RegularMarketPreviousClose { get; set; }
+    public decimal? RegularMarketPreviousClose { get; set; }
 
     [JsonPropertyName("bid")]
     public decimal? Bid { get; set; }
@@ -218,7 +243,7 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public long? AverageDailyVolume10Day { get; set; }
 
     [JsonPropertyName("fiftyTwoWeekLowChange")]
-    public decimal FiftyTwoWeekLowChange { get; set; }
+    public decimal? FiftyTwoWeekLowChange { get; set; }
 
     [JsonPropertyName("fiftyTwoWeekLowChangePercent")]
     public decimal? FiftyTwoWeekLowChangePercent { get; set; }
@@ -227,13 +252,13 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public string FiftyTwoWeekRange { get; set; } = null!;
 
     [JsonPropertyName("fiftyTwoWeekHighChange")]
-    public decimal FiftyTwoWeekHighChange { get; set; }
+    public decimal? FiftyTwoWeekHighChange { get; set; }
 
     [JsonPropertyName("fiftyTwoWeekHighChangePercent")]
-    public decimal FiftyTwoWeekHighChangePercent { get; set; }
+    public decimal? FiftyTwoWeekHighChangePercent { get; set; }
 
     [JsonPropertyName("fiftyTwoWeekChangePercent")]
-    public decimal FiftyTwoWeekChangePercent { get; set; }
+    public decimal? FiftyTwoWeekChangePercent { get; set; }
 
     [JsonPropertyName("earningsTimestamp")]
     public long? EarningsTimestamp { get; set; }
@@ -272,22 +297,22 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public decimal? BookValue { get; set; }
 
     [JsonPropertyName("fiftyDayAverage")]
-    public decimal FiftyDayAverage { get; set; }
+    public decimal? FiftyDayAverage { get; set; }
 
     [JsonPropertyName("fiftyDayAverageChange")]
-    public decimal FiftyDayAverageChange { get; set; }
+    public decimal? FiftyDayAverageChange { get; set; }
 
     [JsonPropertyName("fiftyDayAverageChangePercent")]
-    public decimal FiftyDayAverageChangePercent { get; set; }
+    public decimal? FiftyDayAverageChangePercent { get; set; }
 
     [JsonPropertyName("twoHundredDayAverage")]
-    public decimal TwoHundredDayAverage { get; set; }
+    public decimal? TwoHundredDayAverage { get; set; }
 
     [JsonPropertyName("twoHundredDayAverageChange")]
-    public decimal TwoHundredDayAverageChange { get; set; }
+    public decimal? TwoHundredDayAverageChange { get; set; }
 
     [JsonPropertyName("twoHundredDayAverageChangePercent")]
-    public decimal TwoHundredDayAverageChangePercent { get; set; }
+    public decimal? TwoHundredDayAverageChangePercent { get; set; }
 
     [JsonPropertyName("marketCap")]
     public long? MarketCap { get; set; }
@@ -299,10 +324,10 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public decimal? PriceToBook { get; set; }
 
     [JsonPropertyName("sourceInterval")]
-    public int SourceInterval { get; set; }
+    public int? SourceInterval { get; set; }
 
     [JsonPropertyName("exchangeDataDelayedBy")]
-    public int ExchangeDataDelayedBy { get; set; }
+    public int? ExchangeDataDelayedBy { get; set; }
 
     [JsonPropertyName("exchangeTimezoneName")]
     public string ExchangeTimezoneName { get; set; } = null!;
@@ -311,7 +336,7 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public string ExchangeTimezoneShortName { get; set; } = null!;
 
     [JsonPropertyName("gmtOffSetMilliseconds")]
-    public int GmtOffSetMilliseconds { get; set; }
+    public int? GmtOffSetMilliseconds { get; set; }
 
     [JsonPropertyName("esgPopulated")]
     public bool EsgPopulated { get; set; }
@@ -326,10 +351,10 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public string Exchange { get; set; } = null!;
 
     [JsonPropertyName("fiftyTwoWeekLow")]
-    public decimal FiftyTwoWeekLow { get; set; }
+    public decimal? FiftyTwoWeekLow { get; set; }
 
     [JsonPropertyName("fiftyTwoWeekHigh")]
-    public decimal FiftyTwoWeekHigh { get; set; }
+    public decimal? FiftyTwoWeekHigh { get; set; }
 
     [JsonPropertyName("shortName")]
     public string ShortName { get; set; } = null!;
@@ -338,7 +363,7 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public string? AverageAnalystRating { get; set; }
 
     [JsonPropertyName("regularMarketChangePercent")]
-    public decimal RegularMarketChangePercent { get; set; }
+    public decimal? RegularMarketChangePercent { get; set; }
 
     [JsonPropertyName("symbol")]
     public string Symbol { get; set; } = null!;
@@ -356,10 +381,10 @@ public sealed class ScreenerQuote : YahooFinanceDto
     public string? PrevName { get; set; }
 
     [JsonPropertyName("nameChangeDate")]
-    public long? NameChangeDate { get; set; }
+    public string? NameChangeDate { get; set; }
 
     [JsonPropertyName("ipoExpectedDate")]
-    public long? IpoExpectedDate { get; set; }
+    public string? IpoExpectedDate { get; set; }
 
     [JsonPropertyName("dividendYield")]
     public decimal? DividendYield { get; set; }

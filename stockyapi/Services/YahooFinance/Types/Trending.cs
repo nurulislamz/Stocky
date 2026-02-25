@@ -1,10 +1,32 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace stockyapi.Services.YahooFinance.Types;
 
 // ------------------------------------------------------------
 // trendingSymbols  (JSR: TrendingSymbolsResult with quotes list of TrendingSymbol)
+// Yahoo API returns: { "finance": { "result": [...], "error": null } }
 // ------------------------------------------------------------
+
+/// <summary>
+/// Root response wrapper for the trending symbols endpoint.
+/// </summary>
+public sealed class TrendingSymbolsResponse : YahooFinanceDto
+{
+    [JsonPropertyName("finance")]
+    public TrendingSymbolsFinance Finance { get; set; } = null!;
+}
+
+/// <summary>
+/// Finance wrapper containing the result array.
+/// </summary>
+public sealed class TrendingSymbolsFinance : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<TrendingSymbolsResult> Result { get; set; } = [];
+
+    [JsonPropertyName("error")]
+    public object? Error { get; set; }
+}
 
 public sealed class TrendingSymbolsResult : YahooFinanceDto
 {
