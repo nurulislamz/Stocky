@@ -8,11 +8,12 @@ using stockyapi.Controllers;
 using stockyapi.Middleware;
 using stockyapi.Services.YahooFinance.EndpointBuilder;
 using stockyapi.Services.YahooFinance.Types;
-using stockyunittests.Helpers;
+using stockytests.Helpers;
 
 namespace stockytests.Controllers;
 
 [TestFixture]
+[Category("Unit")]
 public class MarketPricingControllerTests
 {
     private Mock<IMarketPricingApi> _marketPricingApi;
@@ -30,6 +31,21 @@ public class MarketPricingControllerTests
     /// <summary>
     /// BLUEPRINT
     /// </summary>
+    [Test]
+    public async Task GetCurrentPrice_WhenNotFound404_ReturnsNotFound()
+    {
+        const string ticker = "NOSUCH";
+        var failure = new NotFoundFailure404("Symbol not found");
+        _marketPricingApi.Setup(x => x.GetCurrentPrice(ticker, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(failure);
+
+        var result = await _controller.GetCurrentPrice(ticker, Token);
+
+        var objectResult = result.Result as ObjectResult;
+        Assert.That(objectResult, Is.Not.Null);
+        Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));
+    }
+
     [Test]
     public async Task GetCurrentPrice_WithValidTicker_ReturnsOkResult()
     {

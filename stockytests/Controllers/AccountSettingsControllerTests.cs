@@ -1,11 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using stockyapi.Controllers;
-using stockyunittests.Helpers;
+using stockytests.Helpers;
 
-namespace stockyunittests.Controllers;
+namespace stockytests.Controllers;
 
 [TestFixture]
+[Category("Unit")]
 public class AccountSettingsControllerTests
 {
     private AccountSettingsController _controller = null!;

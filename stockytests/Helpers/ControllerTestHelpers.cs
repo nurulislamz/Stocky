@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace stockyunittests.Helpers;
+namespace stockytests.Helpers;
 
 public static class ControllerTestHelpers
 {

@@ -8,11 +8,12 @@ using stockyapi.Application.Funds.Response;
 using stockyapi.Application.Funds.SubtractFunds;
 using stockyapi.Controllers;
 using stockyapi.Middleware;
-using stockyunittests.Helpers;
+using stockytests.Helpers;
 
-namespace stockyunittests.Controllers;
+namespace stockytests.Controllers;
 
 [TestFixture]
+[Category("Unit")]
 public class FundsControllerTests
 {
     private Mock<IFundsApi> _fundsApi = null!;

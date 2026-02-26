@@ -11,11 +11,12 @@ using stockyapi.Application.Portfolio.SellTicker;
 using stockyapi.Application.Portfolio.ZHelperTypes;
 using stockyapi.Controllers;
 using stockyapi.Middleware;
-using stockyunittests.Helpers;
+using stockytests.Helpers;
 
-namespace stockyunittests.Controllers;
+namespace stockytests.Controllers;
 
 [TestFixture]
+[Category("Unit")]
 public class PortfolioControllerTests
 {
     private Mock<IPortfolioApi> _portfolioApi = null!;
@@ -104,6 +105,22 @@ public class PortfolioControllerTests
         Assert.That(objectResult, Is.Not.Null);
         Assert.That(objectResult!.StatusCode, Is.EqualTo((int)failure.StatusCode));
         Assert.That(objectResult.Value, Is.TypeOf<ProblemDetails>());
+    }
+
+    [Test]
+    public async Task GetHoldingsById_WhenValidation422_ReturnsUnprocessableEntity()
+    {
+        var id = Guid.NewGuid();
+        var failure = new ValidationFailure422("These tickers were not found in your portfolio: [missing-id]");
+        _portfolioApi.Setup(api => api.GetHoldingsById(
+                It.Is<Guid[]>(ids => ids.SequenceEqual(new[] { id })), Token))
+            .ReturnsAsync(Result<GetHoldingsResponse>.Fail(failure));
+
+        var result = await _controller.GetHoldingsById(new[] { id.ToString() }, Token);
+
+        var objectResult = result.Result as ObjectResult;
+        Assert.That(objectResult, Is.Not.Null);
+        Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
     }
 
     [Test]

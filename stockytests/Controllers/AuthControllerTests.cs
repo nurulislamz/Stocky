@@ -7,11 +7,12 @@ using stockyapi.Application.Auth.Login;
 using stockyapi.Application.Auth.Register;
 using stockyapi.Controllers;
 using stockyapi.Middleware;
-using stockyunittests.Helpers;
+using stockytests.Helpers;
 
-namespace stockyunittests.Controllers;
+namespace stockytests.Controllers;
 
 [TestFixture]
+[Category("Unit")]
 public class AuthControllerTests
 {
     private Mock<IAuthenticationApi> _authenticationApi = null!;
@@ -102,5 +103,26 @@ public class AuthControllerTests
         Assert.That(objectResult, Is.Not.Null);
         Assert.That(objectResult!.StatusCode, Is.EqualTo((int)failure.StatusCode));
         Assert.That(objectResult.Value, Is.TypeOf<ProblemDetails>());
+    }
+
+    [Test]
+    public async Task Register_WhenValidationFailure422_ReturnsUnprocessableEntity()
+    {
+        var request = new RegisterRequest
+        {
+            Email = "bad-email",
+            Password = "short",
+            FirstName = "F",
+            Surname = "L"
+        };
+        var failure = new ValidationFailure422("Invalid email format.");
+        _authenticationApi.Setup(api => api.Register(request, Token))
+            .ReturnsAsync(Result<RegisterResponse>.Fail(failure));
+
+        var result = await _controller.Register(request, Token);
+
+        var objectResult = result.Result as ObjectResult;
+        Assert.That(objectResult, Is.Not.Null);
+        Assert.That(objectResult!.StatusCode, Is.EqualTo(StatusCodes.Status422UnprocessableEntity));
     }
 }
