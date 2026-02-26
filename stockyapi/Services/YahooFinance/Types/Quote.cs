@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace stockyapi.Services.YahooFinance.Types;
 
@@ -130,7 +130,7 @@ public class QuoteBase : YahooFinanceDto
     public int ExchangeDataDelayedBy { get; set; }
 
     [JsonPropertyName("firstTradeDateMilliseconds")]
-    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
+    [JsonConverter(typeof(UnixMillisecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? FirstTradeDateMilliseconds { get; set; }
 
     [JsonPropertyName("priceHint")]

@@ -184,11 +184,11 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing insight data.
     /// </returns>
-    public Task<Result<InsightsResult>> GetInsightsAsync(
+    public Task<Result<InsightsApiResponse>> GetInsightsAsync(
         string symbol,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<InsightsResult>(
+        return _executor.ExecuteAsync<InsightsApiResponse>(
             cacheKey: $"insights:{symbol}",
             cacheTtl: TimeSpan.FromHours(12),
             uri: YahooEndpointBuilder.BuildInsightsUri(symbol),
@@ -204,7 +204,7 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing the options chain.
     /// </returns>
-    public Task<Result<OptionsResult>> GetOptionsAsync(
+    public Task<Result<OptionsApiResponse>> GetOptionsAsync(
         string symbol,
         CancellationToken ct = default)
         => GetOptionsAsync(symbol, null, ct);
@@ -221,12 +221,12 @@ public sealed class YahooFinanceService : IYahooFinanceService
     /// <returns>
     /// A <see cref="Result{T}"/> containing options contracts.
     /// </returns>
-    public Task<Result<OptionsResult>> GetOptionsAsync(
+    public Task<Result<OptionsApiResponse>> GetOptionsAsync(
         string symbol,
         string? date,
         CancellationToken ct = default)
     {
-        return _executor.ExecuteAsync<OptionsResult>(
+        return _executor.ExecuteAsync<OptionsApiResponse>(
             cacheKey: $"options:{symbol}:{date ?? "latest"}",
             cacheTtl: TimeSpan.FromMinutes(15),
             uri: YahooEndpointBuilder.BuildOptionsUri(symbol, date),

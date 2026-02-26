@@ -1,11 +1,27 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 // ReSharper disable InconsistentNaming
 
 namespace stockyapi.Services.YahooFinance.Types;
 
 // ------------------------------------------------------------
 // insights  (JSR: InsightsResult with nested interfaces)
+// Yahoo API returns: { "finance": { "result": { ... }, "error": null } }
 // ------------------------------------------------------------
+
+public sealed class InsightsApiResponse : YahooFinanceDto
+{
+    [JsonPropertyName("finance")]
+    public InsightsFinance Finance { get; set; } = null!;
+}
+
+public sealed class InsightsFinance : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public InsightsResult? Result { get; set; }
+
+    [JsonPropertyName("error")]
+    public object? Error { get; set; }
+}
 
 public sealed class InsightsResult : YahooFinanceDto
 {
@@ -145,7 +161,7 @@ public sealed class InsightsValuation : YahooFinanceDto
     public string Provider { get; set; } = null!;
 
     [JsonPropertyName("color")]
-    public int? Color { get; set; }
+    public decimal? Color { get; set; }
 
     [JsonPropertyName("description")]
     public string? Description { get; set; }
@@ -198,7 +214,6 @@ public sealed class InsightsReport : YahooFinanceDto
     public string Provider { get; set; } = null!;
 
     [JsonPropertyName("reportDate")]
-    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ReportDate { get; set; }
 
     [JsonPropertyName("reportTitle")]
@@ -232,7 +247,6 @@ public sealed class InsightsResearchReport : YahooFinanceDto
     public string Title { get; set; } = null!;
 
     [JsonPropertyName("reportDate")]
-    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
     public DateTimeOffset ReportDate { get; set; }
 
     [JsonPropertyName("summary")]
@@ -248,7 +262,7 @@ public sealed class InsightsSecReport : YahooFinanceDto
     public string Description { get; set; } = null!;
 
     [JsonPropertyName("filingDate")]
-    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
+    [JsonConverter(typeof(UnixMillisecondsDateTimeOffsetConverter))]
     public DateTimeOffset FilingDate { get; set; }
 
     [JsonPropertyName("formType")]
@@ -270,8 +284,7 @@ public sealed class InsightsSecReport : YahooFinanceDto
 public sealed class InsightsSigDev : YahooFinanceDto
 {
     [JsonPropertyName("date")]
-    [JsonConverter(typeof(UnixSecondsDateTimeOffsetConverter))]
-    public DateTimeOffset Date { get; set; }
+    public string Date { get; set; } = null!;
 
     [JsonPropertyName("headline")]
     public string Headline { get; set; } = null!;
@@ -319,7 +332,7 @@ public sealed class InsightsUpsell : YahooFinanceDto
     public List<string>? MsBearishSummary { get; set; }
 
     [JsonPropertyName("msBullishBearishSummariesPublishDate")]
-    [JsonConverter(typeof(UnixSecondsNullableDateTimeOffsetConverter))]
+    [JsonConverter(typeof(UnixMillisecondsNullableDateTimeOffsetConverter))]
     public DateTimeOffset? MsBullishBearishSummariesPublishDate { get; set; }
 
     [JsonPropertyName("msBullishSummary")]

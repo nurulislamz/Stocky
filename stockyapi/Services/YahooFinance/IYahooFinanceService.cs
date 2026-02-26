@@ -30,17 +30,17 @@ public interface IYahooFinanceService
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<InsightsResult>> GetInsightsAsync(
+    Task<Result<InsightsApiResponse>> GetInsightsAsync(
         string symbol,
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<OptionsResult>> GetOptionsAsync(
+    Task<Result<OptionsApiResponse>> GetOptionsAsync(
         string symbol,
         CancellationToken cancellationToken = default
     );
 
-    Task<Result<OptionsResult>> GetOptionsAsync(
+    Task<Result<OptionsApiResponse>> GetOptionsAsync(
         string symbol,
         string date,
         CancellationToken cancellationToken = default

@@ -1,10 +1,26 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace stockyapi.Services.YahooFinance.Types;
 
 // ------------------------------------------------------------
 // options  (JSR: OptionsResult -> expirationDates/strikes/quote/options/underlyingSymbol)
+// Yahoo API returns: { "optionChain": { "result": [...], "error": null } }
 // ------------------------------------------------------------
+
+public sealed class OptionsApiResponse : YahooFinanceDto
+{
+    [JsonPropertyName("optionChain")]
+    public OptionsChain OptionChain { get; set; } = null!;
+}
+
+public sealed class OptionsChain : YahooFinanceDto
+{
+    [JsonPropertyName("result")]
+    public List<OptionsResult> Result { get; set; } = [];
+
+    [JsonPropertyName("error")]
+    public object? Error { get; set; }
+}
 
 public sealed class OptionsResult : YahooFinanceDto
 {

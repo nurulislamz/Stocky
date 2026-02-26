@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace stockyapi.Services.YahooFinance.Types;
@@ -87,6 +87,63 @@ public sealed class UnixSecondsDateTimeOffsetListConverter : JsonConverter<List<
     {
         var seconds = value.Select(item => item.ToUnixTimeSeconds()).ToList();
         JsonSerializer.Serialize(writer, seconds, options);
+    }
+}
+
+public sealed class UnixMillisecondsDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
+{
+    public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64());
+        }
+
+        if (reader.TokenType == JsonTokenType.String && long.TryParse(reader.GetString(), out var ms))
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(ms);
+        }
+
+        throw new JsonException("Expected unix timestamp in milliseconds.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
+    {
+        writer.WriteNumberValue(value.ToUnixTimeMilliseconds());
+    }
+}
+
+public sealed class UnixMillisecondsNullableDateTimeOffsetConverter : JsonConverter<DateTimeOffset?>
+{
+    public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Null)
+        {
+            return null;
+        }
+
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(reader.GetInt64());
+        }
+
+        if (reader.TokenType == JsonTokenType.String && long.TryParse(reader.GetString(), out var ms))
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(ms);
+        }
+
+        throw new JsonException("Expected unix timestamp in milliseconds or null.");
+    }
+
+    public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
+    {
+        if (value is null)
+        {
+            writer.WriteNullValue();
+            return;
+        }
+
+        writer.WriteNumberValue(value.Value.ToUnixTimeMilliseconds());
     }
 }
 

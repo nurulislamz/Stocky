@@ -1,4 +1,5 @@
-﻿using System.Net;
+using System.Net;
+using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Polly;
 using Polly.Extensions.Http;
@@ -16,7 +17,6 @@ public abstract class BaseApiServiceClient
     private readonly SemaphoreSlim _rateLimiter;
     private readonly Lazy<AsyncPolicyWrap<HttpResponseMessage>> _policy;
 
-    private int _maxConcurrencyRequests;
     private readonly int _retryCount;
     private readonly int _breakLimit;
     private readonly int _breakDuration;
@@ -35,13 +35,13 @@ public abstract class BaseApiServiceClient
         _cache = cache;
         _logger = logger;
         _rateLimiter = new SemaphoreSlim(maxConcurrentRequests);
-        _maxConcurrencyRequests = maxConcurrentRequests;
         _retryCount = retryCount;
         _breakLimit = breakLimit;
         _breakDuration = breakDuration;
-        
-        _policy = new Lazy<AsyncPolicyWrap<HttpResponseMessage>>(() => 
-            Policy.WrapAsync(CreateRetryPolicy(), CreateCircuitBreakerPolicy()));
+
+        // Circuit breaker outer: fail fast when open. Retry inner: retries only when circuit allows.
+        _policy = new Lazy<AsyncPolicyWrap<HttpResponseMessage>>(() =>
+            Policy.WrapAsync(CreateCircuitBreakerPolicy(), CreateRetryPolicy()));
     }
 
     public async Task<Result<T>> ExecuteAsync<T>(
@@ -59,18 +59,29 @@ public abstract class BaseApiServiceClient
         try
         {
             var response = await _policy.Value.ExecuteAsync(_ => _httpClient.GetAsync(uri, ct), ct);
-            
-            string info = $"Yahoo returned {response.StatusCode} for {uri}. Response is below: {response.Content.ReadAsStringAsync(ct).Result}";
-            _logger.LogInformation(info);
+
+            // Read body once; HttpContent stream is not rewindable.
+            var body = await response.Content.ReadAsStringAsync(ct);
 
             if (!response.IsSuccessStatusCode)
             {
-                string error = $"Yahoo returned {response.StatusCode}. Response is below: {response.Content.ReadAsStringAsync(ct).Result}";
-                _logger.LogError(error);
+                var error = $"Yahoo returned {response.StatusCode}. Response: {body}";
+                _logger.LogError("{Error}", error);
                 return new InternalServerFailure500(error);
             }
 
-            var payload = await response.Content.ReadFromJsonAsync<T>(ct);
+            _logger.LogDebug("Yahoo returned {StatusCode} for {Uri}", response.StatusCode, uri);
+
+            T? payload;
+            try
+            {
+                payload = JsonSerializer.Deserialize<T>(body);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Failed to deserialize response from {Uri}", uri);
+                return new InternalServerFailure500($"Invalid response: {ex.Message}");
+            }
 
             if (payload is null)
                 return new InternalServerFailure500("Yahoo returned empty payload");
@@ -81,7 +92,6 @@ public abstract class BaseApiServiceClient
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            // Propagate cancellation correctly
             throw;
         }
         catch (Exception ex)
@@ -106,13 +116,14 @@ public abstract class BaseApiServiceClient
                     TimeSpan.FromMilliseconds(Random.Shared.Next(0, 100)),
                 onRetry: (outcome, delay, attempt, _) =>
                 {
+                    var reason = outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString() ?? "Unknown";
                     _logger.LogWarning(
                         "Retry {Attempt} after {Delay}ms due to {Reason}",
                         attempt,
                         delay.TotalMilliseconds,
-                        outcome.Exception?.Message ?? nameof(outcome.Result.StatusCode));
-                    
-                    if (outcome.Result.StatusCode == HttpStatusCode.TooManyRequests)
+                        reason);
+
+                    if (outcome.Result?.StatusCode == HttpStatusCode.TooManyRequests)
                     {
                         string oldUserAgent = _httpClient.DefaultRequestHeaders.UserAgent.ToString();
                         string newUserAgent = UserAgents.GetRandomNewUserAgent(oldUserAgent);
@@ -121,14 +132,14 @@ public abstract class BaseApiServiceClient
 
                         // IMPORTANT: Clear the old headers first
                         _httpClient.DefaultRequestHeaders.UserAgent.Clear();
-    
+
                         // Use ParseAdd to ensure the string is correctly formatted for the header
                         _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(newUserAgent);
-    
+
                         _logger.LogInformation("New User-Agent applied: {newUserAgent}", newUserAgent);
                     }
                 });
-    
+
     protected virtual IAsyncPolicy<HttpResponseMessage> CreateCircuitBreakerPolicy() =>
         Policy<HttpResponseMessage>
             .Handle<HttpRequestException>()
