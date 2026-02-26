@@ -12,6 +12,7 @@ using stockytests.Helpers;
 namespace stockytests.Integration;
 
 [TestFixture]
+[Category("Integration")]
 public class AuthIntegrationTests
 {
     private static AuthenticationApi CreateAuthenticationApi(ApplicationDbContext context)

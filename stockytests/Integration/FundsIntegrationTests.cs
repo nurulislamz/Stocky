@@ -11,6 +11,7 @@ using stockytests.Helpers;
 namespace stockytests.Integration;
 
 [TestFixture]
+[Category("Integration")]
 public class FundsIntegrationTests
 {
     private SqliteTestSession _session;
