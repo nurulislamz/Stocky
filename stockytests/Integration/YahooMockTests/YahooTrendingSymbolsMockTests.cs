@@ -38,7 +38,7 @@ public class YahooTrendingSymbolsMockTests
         Assert.That(result.Value, Is.Not.Null);
         Assert.That(result.Value.Finance, Is.Not.Null);
         Assert.That(result.Value.Finance.Result, Is.Not.Empty);
-        
+
         var trendingResult = result.Value.Finance.Result.First();
         Assert.That(trendingResult.Quotes, Is.Not.Empty);
         Assert.That(trendingResult.Count, Is.GreaterThan(0));

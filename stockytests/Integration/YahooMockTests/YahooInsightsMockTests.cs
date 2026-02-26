@@ -7,6 +7,7 @@ using stockytests.Mocks;
 namespace stockytests.Integration.MockTests;
 
 [TestFixture]
+[Category("Integration")]
 public class YahooInsightsMockTests
 {
     private IMemoryCache _memoryCache = null!;

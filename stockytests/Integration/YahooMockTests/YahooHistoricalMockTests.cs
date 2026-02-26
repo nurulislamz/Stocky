@@ -8,6 +8,7 @@ using stockytests.Mocks;
 namespace stockytests.Integration.MockTests;
 
 [TestFixture]
+[Category("Integration")]
 public class YahooHistoricalMockTests
 {
     private IMemoryCache _memoryCache = null!;
