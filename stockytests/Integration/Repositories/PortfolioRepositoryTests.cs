@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
-using stockyapi.Application.Portfolio.ZHelperTypes;
+using stockyapi.Application.Commands.Portfolio;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.PortfolioRepository;
 using stockytests.Helpers;
 
@@ -15,7 +16,8 @@ public class PortfolioRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(1000m, 0m);
-        var repo = new PortfolioRepository(session.Context, NullLogger<PortfolioRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new PortfolioRepository(session.Context, eventRepo, NullLogger<PortfolioRepository>.Instance);
 
         var result = await repo.ListAllHoldingsAsync(session.UserId, CancellationToken.None);
 
@@ -28,8 +30,9 @@ public class PortfolioRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(1000m, 0m);
-        var repo = new PortfolioRepository(session.Context, NullLogger<PortfolioRepository>.Instance);
-        var command = new BuyOrderCommand(session.PortfolioId, "AAPL", 5, 100m);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new PortfolioRepository(session.Context, eventRepo, NullLogger<PortfolioRepository>.Instance);
+        var command = new StockBoughtCommand("AAPL", 5, 100m);
         await repo.BuyHoldingAsync(session.UserId, command, CancellationToken.None);
 
         var result = await repo.ListAllHoldingsAsync(session.UserId, CancellationToken.None);
@@ -45,7 +48,8 @@ public class PortfolioRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(1000m, 0m);
-        var repo = new PortfolioRepository(session.Context, NullLogger<PortfolioRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new PortfolioRepository(session.Context, eventRepo, NullLogger<PortfolioRepository>.Instance);
         var nonExistentId = Guid.NewGuid();
 
         var result = await repo.GetHoldingsByIdAsync(session.UserId, new[] { nonExistentId }, CancellationToken.None);
@@ -60,7 +64,8 @@ public class PortfolioRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(1000m, 0m);
-        var repo = new PortfolioRepository(session.Context, NullLogger<PortfolioRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new PortfolioRepository(session.Context, eventRepo, NullLogger<PortfolioRepository>.Instance);
 
         var result = await repo.GetHoldingsByTickerAsync(session.UserId, new[] { "NOSUCH" }, CancellationToken.None);
 
@@ -74,8 +79,9 @@ public class PortfolioRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(1000m, 0m);
-        var repo = new PortfolioRepository(session.Context, NullLogger<PortfolioRepository>.Instance);
-        await repo.BuyHoldingAsync(session.UserId, new BuyOrderCommand(session.PortfolioId, "MSFT", 3, 200m), CancellationToken.None);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new PortfolioRepository(session.Context, eventRepo, NullLogger<PortfolioRepository>.Instance);
+        await repo.BuyHoldingAsync(session.UserId, new StockBoughtCommand("MSFT", 3, 200m), CancellationToken.None);
 
         var result = await repo.GetHoldingsByTickerAsync(session.UserId, new[] { "MSFT" }, CancellationToken.None);
         var holdings = result.Holdings.ToList();

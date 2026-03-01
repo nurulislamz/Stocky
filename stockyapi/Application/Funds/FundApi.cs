@@ -1,10 +1,9 @@
-﻿using stockyapi.Application.Funds.AddFunds;
+using stockyapi.Application.Commands.Funds;
+using stockyapi.Application.Funds.AddFunds;
 using stockyapi.Application.Funds.Response;
 using stockyapi.Application.Funds.SubtractFunds;
 using stockyapi.Middleware;
 using stockyapi.Repository.Funds;
-using stockyapi.Repository.PortfolioRepository;
-using stockymodels.Models.Enums;
 
 namespace stockyapi.Application.Funds;
 
@@ -28,17 +27,19 @@ public sealed class FundsApi : IFundsApi
 
     public async Task<Result<FundsResponse>> DepositFunds(DepositFundsRequest request, CancellationToken cancellationToken)
     {
-        var updateFunds = await _fundsRepository.DepositFundsAsync(_userContext.UserId, request.Amount, cancellationToken);
-        return new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount);
+        var command = new DepositFundsCommand(request.Amount);
+        var updateFunds = await _fundsRepository.DepositFundsAsync(_userContext.UserId, command, cancellationToken);
+        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
     }
-    
+
     public async Task<Result<FundsResponse>> WithdrawFunds(WithdrawFundsRequest request, CancellationToken cancellationToken)
     {
-        var userFunds =  await _fundsRepository.GetFundsAsync(_userContext.UserId, cancellationToken);
+        var userFunds = await _fundsRepository.GetFundsAsync(_userContext.UserId, cancellationToken);
         if (userFunds.CashBalance < request.Amount)
-            return new BadRequestFailure400($"Insufficient funds. Withdraw amount {request.Amount} is greater than user balance {request.Amount}");
-        
-        var updateFunds = await _fundsRepository.WithdrawFundsAsync(_userContext.UserId, request.Amount, cancellationToken);
-        return new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount);
+            return new BadRequestFailure400($"Insufficient funds. Withdraw amount {request.Amount} is greater than user balance {userFunds.CashBalance}");
+
+        var command = new WithdrawFundsCommand(request.Amount);
+        var updateFunds = await _fundsRepository.WithdrawFundsAsync(_userContext.UserId, command, cancellationToken);
+        return Result<FundsResponse>.Success(new FundsResponse(updateFunds.CashBalance, updateFunds.TotalValue, updateFunds.InvestedAmount));
     }
 }

@@ -1,4 +1,5 @@
-﻿using stockyapi.Middleware;
+using stockyapi.Application.Commands.User;
+using stockyapi.Middleware;
 using stockymodels.models;
 
 namespace stockyapi.Repository.User;
@@ -9,7 +10,8 @@ public interface IUserRepository
     Task<UserModel?> GetUserByIdAsync(Guid id);
     Task<bool> UserExistsByEmailAsync(string email);
     Task<UserModel?> GetUserByEmailAsync(string email);
-    Task CreateUserAsync(UserModel user);
+    /// <summary>Creates a user from the command and appends a UserCreate event to the event store.</summary>
+    Task<UserModel> CreateUserAsync(UserCreateCommand command, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(UserModel user);
 
     // // User preferences operations

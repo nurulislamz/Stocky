@@ -1,5 +1,8 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using stockyapi.Application.Commands.Funds;
 using stockyapi.Middleware;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.Funds.Types;
 using stockymodels.Data;
 using stockymodels.models;
@@ -10,11 +13,16 @@ namespace stockyapi.Repository.Funds;
 public class FundsRepository : IFundsRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IEventRepository _eventRepository;
     private readonly ILogger<FundsRepository> _logger;
 
-    public FundsRepository(ApplicationDbContext dbContext, ILogger<FundsRepository> logger)
+    public FundsRepository(
+        ApplicationDbContext dbContext,
+        IEventRepository eventRepository,
+        ILogger<FundsRepository> logger)
     {
         _dbContext = dbContext;
+        _eventRepository = eventRepository;
         _logger = logger;
     }
 
@@ -36,8 +44,10 @@ public class FundsRepository : IFundsRepository
         return portfolio;
     }
 
-    public async Task<PortfolioBalances> DepositFundsAsync(Guid userId, decimal cashDelta, CancellationToken ct)
+    public async Task<PortfolioBalances> DepositFundsAsync(Guid userId, DepositFundsCommand command, CancellationToken ct)
     {
+        var cashDelta = command.Amount;
+
         var portfolio = await _dbContext.Portfolios
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
 
@@ -47,8 +57,6 @@ public class FundsRepository : IFundsRepository
             _logger.LogError(LoggingEventIds.FundsPortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
-
-        var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Deposit);
 
         var updatedCashBalance = portfolio.CashBalance + cashDelta;
         var updatedTotalValue = portfolio.TotalValue + cashDelta;
@@ -71,17 +79,43 @@ public class FundsRepository : IFundsRepository
             throw exception;
         }
 
+        var maxSeq = await _dbContext.EventModels
+            .Where(e => e.AggregateType == AggregateType.PortfolioId && e.AggregateId == portfolio.Id)
+            .MaxAsync(e => (int?)e.SequenceId, ct);
+        var nextSequenceId = (maxSeq ?? 0) + 1;
+
+        var now = DateTimeOffset.UtcNow;
+        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+        var eventPayloadJson = JsonSerializer.Serialize(command);
+
+        var evt = new EventModel
+        {
+            Id = Guid.NewGuid(),
+            AggregateType = AggregateType.PortfolioId,
+            AggregateId = portfolio.Id,
+            SequenceId = nextSequenceId,
+            EventType = EventType.DepositFunds,
+            EventPayloadJson = eventPayloadJson,
+            EventPayloadProtobuf = Array.Empty<byte>(),
+            TtStart = now,
+            TtEnd = now,
+            ValidFrom = now,
+            ValidTo = validTo
+        };
+
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;
 
-        await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
+        _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
         return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
 
-    public async Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, decimal cashDelta, CancellationToken ct)
+    public async Task<PortfolioBalances> WithdrawFundsAsync(Guid userId, WithdrawFundsCommand command, CancellationToken ct)
     {
+        var cashDelta = command.Amount;
+
         var portfolio = await _dbContext.Portfolios
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
 
@@ -91,8 +125,6 @@ public class FundsRepository : IFundsRepository
             _logger.LogError(LoggingEventIds.FundsPortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
-
-        var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Withdrawal);
 
         var updatedCashBalance = portfolio.CashBalance - cashDelta;
         var updatedTotalValue = portfolio.TotalValue - cashDelta;
@@ -115,18 +147,37 @@ public class FundsRepository : IFundsRepository
             throw exception;
         }
 
+        var maxSeq = await _dbContext.EventModels
+            .Where(e => e.AggregateType == AggregateType.PortfolioId && e.AggregateId == portfolio.Id)
+            .MaxAsync(e => (int?)e.SequenceId, ct);
+        var nextSequenceId = (maxSeq ?? 0) + 1;
+
+        var now = DateTimeOffset.UtcNow;
+        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+        var eventPayloadJson = JsonSerializer.Serialize(command);
+
+        var evt = new EventModel
+        {
+            Id = Guid.NewGuid(),
+            AggregateType = AggregateType.PortfolioId,
+            AggregateId = portfolio.Id,
+            SequenceId = nextSequenceId,
+            EventType = EventType.WithdrawFunds,
+            EventPayloadJson = eventPayloadJson,
+            EventPayloadProtobuf = Array.Empty<byte>(),
+            TtStart = now,
+            TtEnd = now,
+            ValidFrom = now,
+            ValidTo = validTo
+        };
+
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;
 
-        await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
+        _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
         return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
-
-    private static FundsTransactionModel CreateFundsTransactionModel(Guid userId, Guid portfolioId, decimal cashDelta,
-        FundOperationType operationType)
-     => new () { Id = userId, PortfolioId = portfolioId, Type = operationType, CashAmount = Math.Abs(cashDelta) };
-
 
 }

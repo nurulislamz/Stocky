@@ -4,12 +4,18 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class TransactionConfiguration : IEntityTypeConfiguration<AssetTransactionModel>
+public class EventConfiguration : IEntityTypeConfiguration<EventModel>
 {
-    public void Configure(EntityTypeBuilder<AssetTransactionModel> builder)
+    public void Configure(EntityTypeBuilder<EventModel> builder)
     {
-        builder.ToTable("Transactions");
+        builder.ToTable("Events");
 
-        builder.HasIndex(e => new { e.PortfolioId, e.CreatedAt });
+        builder.HasKey(e => e.Id);
+        builder.Property(e => e.Id).HasColumnName("EventId");
+
+        builder.Property(e => e.EventPayloadProtobuf)
+            .IsRequired();
+        builder.Property(e => e.EventPayloadJson)
+            .IsRequired();
     }
 }

@@ -5,6 +5,7 @@ using stockyapi.Application.Auth.Login;
 using stockyapi.Application.Auth.Register;
 using stockyapi.Middleware;
 using stockyapi.Options;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.User;
 using stockyapi.Services;
 using stockymodels.Data;
@@ -16,7 +17,7 @@ namespace stockytests.Integration;
 [Category("Integration")]
 public class AuthIntegrationTests
 {
-    private static AuthenticationApi CreateAuthenticationApi(ApplicationDbContext context)
+    private static AuthenticationApi CreateAuthApi(ApplicationDbContext ctx)
     {
         var jwtSettings = new JwtSettings
         {
@@ -25,12 +26,11 @@ public class AuthIntegrationTests
             Audience = "your-audience",
             ExpirationInMinutes = 60
         };
-        var options = Options.Create(jwtSettings);
-
-        var tokenService = new TokenService(options);
-        var userRepository = new UserRepository(context, NullLogger<UserRepository>.Instance);
-
-        return new AuthenticationApi(tokenService, userRepository);
+        var opts = Options.Create(jwtSettings);
+        var tokenSvc = new TokenService(opts);
+        var evtRepo = new EventRepository(ctx, NullLogger<EventRepository>.Instance);
+        var userRepo = new UserRepository(ctx, evtRepo, NullLogger<UserRepository>.Instance);
+        return new AuthenticationApi(tokenSvc, userRepo);
     }
 
     [Test]
@@ -38,7 +38,7 @@ public class AuthIntegrationTests
     {
         // Arrange
         await using var session = await SqliteTestSession.CreateAsync();
-        var authApi = CreateAuthenticationApi(session.Context);
+        var authApi = CreateAuthApi(session.Context);
         var request = new RegisterRequest
         {
             Email = "test@example.com",
@@ -64,7 +64,7 @@ public class AuthIntegrationTests
     {
         // Arrange
         await using var session = await SqliteTestSession.CreateAsync();
-        var authApi = CreateAuthenticationApi(session.Context);
+        var authApi = CreateAuthApi(session.Context);
         var request = new RegisterRequest
         {
             Email = "test@example.com",
@@ -87,7 +87,7 @@ public class AuthIntegrationTests
     {
         // Arrange
         await using var session = await SqliteTestSession.CreateAsync();
-        var authApi = CreateAuthenticationApi(session.Context);
+        var authApi = CreateAuthApi(session.Context);
         var registerRequest = new RegisterRequest
         {
             Email = "test@example.com",
@@ -116,7 +116,7 @@ public class AuthIntegrationTests
     {
         // Arrange
         await using var session = await SqliteTestSession.CreateAsync();
-        var authApi = CreateAuthenticationApi(session.Context);
+        var authApi = CreateAuthApi(session.Context);
         var loginRequest = new LoginRequest
         {
             Email = "nouser@example.com",
@@ -136,7 +136,7 @@ public class AuthIntegrationTests
     {
         // Arrange
         await using var session = await SqliteTestSession.CreateAsync();
-        var authApi = CreateAuthenticationApi(session.Context);
+        var authApi = CreateAuthApi(session.Context);
         var registerRequest = new RegisterRequest
         {
             Email = "test@example.com",

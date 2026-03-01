@@ -1,4 +1,7 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using stockyapi.Application.Commands.User;
+using stockyapi.Repository.Event;
 using stockyapi.Middleware;
 using stockymodels.Data;
 using stockymodels.models;
@@ -9,11 +12,16 @@ namespace stockyapi.Repository.User;
 public class UserRepository : IUserRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
     private readonly ILogger<UserRepository> _logger;
 
-    public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
+    public UserRepository(
+        ApplicationDbContext context,
+        IEventRepository eventRepository,
+        ILogger<UserRepository> logger)
     {
         _context = context;
+        _eventRepository = eventRepository;
         _logger = logger;
     }
 
@@ -41,43 +49,80 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task CreateUserAsync(UserModel user)
+    public async Task<UserModel> CreateUserAsync(UserCreateCommand command, CancellationToken cancellationToken = default)
     {
-        // TODO: Modify this code to createUsers and then seperately have another repo to initiate preferences and a other things
-        // user.Portfolio = new PortfolioModel
-        // {
-        //     Id = user.Id,
-        //     UserId = user.Id,
-        //     TotalValue = 0,
-        //     CashBalance = 0,
-        //     InvestedAmount = 0,
-        //     User = user,
-        //     Funds = new List<FundsTransactionModel>(),
-        //     StockHoldings = new List<StockHoldingModel>(),
-        //     Transactions = new List<AssetTransactionModel>(),
-        //     CreatedAt = DateTime.UtcNow,
-        //     UpdatedAt = DateTime.UtcNow
-        // };
-        //
-        // // Create preferences using repository
-        // user.Preferences = new UserPreferencesModel
-        // {
-        //     Id = user.Id,
-        //     UserId = user.Id,
-        //     Theme = Theme.Light,
-        //     Currency = DefaultCurrency.GDP,
-        //     Language = Language.English,
-        //     EmailNotifications = true,
-        //     PushNotifications = true,
-        //     PriceAlerts = true,
-        //     NewsAlerts = true,
-        //     Timezone = "UTC",
-        //     User = user,
-        //     CreatedAt = DateTime.UtcNow,
-        //     UpdatedAt = DateTime.UtcNow
-        // };
+        var userId = Guid.NewGuid();
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(command.Password);
+        var now = DateTimeOffset.UtcNow;
+        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+        var payload = new
+        {
+            command.FirstName,
+            command.Surname,
+            command.Email,
+            PasswordHash = hashedPassword
+        };
+        var eventPayloadJson = JsonSerializer.Serialize(payload);
+
+        var evt = new EventModel
+        {
+            Id = Guid.NewGuid(),
+            AggregateType = AggregateType.UserId,
+            AggregateId = userId,
+            SequenceId = 1,
+            EventType = EventType.UserCreate,
+            EventPayloadJson = eventPayloadJson,
+            EventPayloadProtobuf = Array.Empty<byte>(),
+            TtStart = now,
+            TtEnd = now,
+            ValidFrom = now,
+            ValidTo = validTo
+        };
+
+        var user = new UserModel
+        {
+            Id = userId,
+            FirstName = command.FirstName,
+            Surname = command.Surname,
+            Email = command.Email,
+            Password = hashedPassword,
+            Role = UserRole.User,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var portfolio = new PortfolioModel
+        {
+            Id = userId,
+            UserId = userId,
+            TotalValue = 0,
+            CashBalance = 0,
+            InvestedAmount = 0
+        };
+
+        var preferences = new UserPreferencesModel
+        {
+            Id = userId,
+            UserId = userId,
+            Theme = Theme.Light,
+            Currency = DefaultCurrency.GDP,
+            Language = Language.English,
+            EmailNotifications = true,
+            PushNotifications = true,
+            PriceAlerts = true,
+            NewsAlerts = true,
+            Timezone = "UTC"
+        };
+
+        // Single transaction: event + user + portfolio + preferences. If any part fails, nothing is committed.
+        _eventRepository.Add(evt);
         _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        _context.Portfolios.Add(portfolio);
+        _context.UserPreferences.Add(preferences);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return user;
     }
 
     public async Task UpdateUserAsync(UserModel user)

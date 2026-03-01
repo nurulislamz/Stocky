@@ -3,9 +3,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using stockyapi.Application.Funds;
 using stockyapi.Application.Funds.AddFunds;
 using stockyapi.Application.Funds.SubtractFunds;
-using stockyapi.Repository.Funds;
-using stockyapi.Repository.PortfolioRepository;
+using stockyapi.Repository.Event;
 using stockyapi.Middleware;
+using stockyapi.Repository.Funds;
 using stockytests.Helpers;
 
 namespace stockytests.Integration;
@@ -30,7 +30,8 @@ public class FundsIntegrationTests
         await _session.SetupUser(cash, invested);
         _userContext = new TestUserContext(true, _session.UserId, _session.UserEmail, "Integration", "Tester", "User");
 
-        var fundsRepo = new FundsRepository(_session.Context, NullLogger<FundsRepository>.Instance);
+        var eventRepo = new EventRepository(_session.Context, NullLogger<EventRepository>.Instance);
+        var fundsRepo = new FundsRepository(_session.Context, eventRepo, NullLogger<FundsRepository>.Instance);
         _fundsApi = new FundsApi(_userContext, fundsRepo);
     }
 

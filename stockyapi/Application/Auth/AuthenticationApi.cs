@@ -1,10 +1,9 @@
 using stockyapi.Application.Auth.Login;
 using stockyapi.Application.Auth.Register;
+using stockyapi.Application.Commands.User;
 using stockyapi.Middleware;
 using stockyapi.Repository.User;
 using stockyapi.Services;
-using stockymodels.models;
-using stockymodels.Models.Enums;
 
 namespace stockyapi.Application.Auth;
 
@@ -40,33 +39,17 @@ public class AuthenticationApi : IAuthenticationApi
 
     public async Task<Result<RegisterResponse>> Register(RegisterRequest request, CancellationToken cancellationToken)
     {
-        // Variables
-        string email = request.Email;
-        string password = request.Password;
-        string firstName = request.FirstName;
-        string surname = request.Surname;
-        
-        // Verify User DNE
-        if (await _userRepository.UserExistsByEmailAsync(email))
-        {
+        if (await _userRepository.UserExistsByEmailAsync(request.Email))
             return new ConflictFailure409("Email address already exists.");
-        }
 
-        var user = new UserModel
-        {
-            FirstName = firstName,
-            Surname = surname,
-            Email = email,
-            Password = BCrypt.Net.BCrypt.HashPassword(password),
-            Role = UserRole.User,
-            IsActive = true,
-            CreatedAt = DateTime.UtcNow
-        };
+        var command = new UserCreateCommand(
+            request.FirstName,
+            request.Surname,
+            request.Email,
+            request.Password);
 
-        // Create user first
-        await _userRepository.CreateUserAsync(user);
+        var user = await _userRepository.CreateUserAsync(command, cancellationToken);
 
-        // Return user with related entities
         var token = _tokenService.CreateToken(user);
         return Result<RegisterResponse>.Success(new RegisterResponse(token, user.Email, user.Id.ToString()));
     }

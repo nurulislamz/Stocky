@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using stockyapi.Application.Commands.Funds;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.Funds;
 using stockytests.Helpers;
 
@@ -14,7 +16,8 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(100m, 50m);
-        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new FundsRepository(session.Context, eventRepo, NullLogger<FundsRepository>.Instance);
 
         var balances = await repo.GetFundsAsync(session.UserId, CancellationToken.None);
 
@@ -28,9 +31,10 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(200m, 0m);
-        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new FundsRepository(session.Context, eventRepo, NullLogger<FundsRepository>.Instance);
 
-        var balances = await repo.DepositFundsAsync(session.UserId, 50m, CancellationToken.None);
+        var balances = await repo.DepositFundsAsync(session.UserId, new DepositFundsCommand(50m), CancellationToken.None);
 
         Assert.That(balances.CashBalance, Is.EqualTo(250m));
         Assert.That(balances.TotalValue, Is.EqualTo(250m));
@@ -41,9 +45,10 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(200m, 0m);
-        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new FundsRepository(session.Context, eventRepo, NullLogger<FundsRepository>.Instance);
 
-        var balances = await repo.WithdrawFundsAsync(session.UserId, 50m, CancellationToken.None);
+        var balances = await repo.WithdrawFundsAsync(session.UserId, new WithdrawFundsCommand(50m), CancellationToken.None);
 
         Assert.That(balances.CashBalance, Is.EqualTo(150m));
         Assert.That(balances.TotalValue, Is.EqualTo(150m));
@@ -56,7 +61,8 @@ public class FundsRepositoryTests
         {
             await using var session = await SqliteTestSession.CreateAsync();
             await session.SetupUser();
-            var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
+            var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+            var repo = new FundsRepository(session.Context, eventRepo, NullLogger<FundsRepository>.Instance);
             await repo.GetFundsAsync(Guid.NewGuid(), CancellationToken.None);
         });
     }

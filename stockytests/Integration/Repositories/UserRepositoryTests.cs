@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.User;
 using stockytests.Helpers;
 
@@ -14,7 +15,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var user = await repo.GetUserByEmailAsync(session.UserEmail);
 
@@ -28,7 +30,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var user = await repo.GetUserByEmailAsync("nonexistent@example.com");
 
@@ -40,7 +43,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var exists = await repo.UserExistsByEmailAsync(session.UserEmail);
 
@@ -52,7 +56,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var exists = await repo.UserExistsByEmailAsync("other@example.com");
 
@@ -64,7 +69,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var user = await repo.GetUserByIdAsync(session.UserId);
 
@@ -77,7 +83,8 @@ public class UserRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser();
-        var repo = new UserRepository(session.Context, NullLogger<UserRepository>.Instance);
+        var eventRepo = new EventRepository(session.Context, NullLogger<EventRepository>.Instance);
+        var repo = new UserRepository(session.Context, eventRepo, NullLogger<UserRepository>.Instance);
 
         var user = await repo.GetUserByIdAsync(Guid.NewGuid());
 

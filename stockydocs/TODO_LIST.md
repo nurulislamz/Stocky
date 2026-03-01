@@ -63,9 +63,9 @@ Last updated: February 2026
 **File:** `stockyapi/Middleware/IUserContext.cs` (line 9)
 
 **Action items:**
-- [ ] Add `Role`, `FirstName`, `Surname` properties to `IUserContext`
-- [ ] Populate them in `UserContext` from JWT claims
-- [ ] Use `Role` for authorization checks where needed (admin endpoints, premium features)
+- [x] Add `Role`, `FirstName`, `Surname` properties to `IUserContext`
+- [x] Populate them in `UserContext` from JWT claims
+- [x] Use `Role` for authorization checks where needed (admin endpoints, premium features)
 
 ---
 
@@ -76,8 +76,8 @@ Last updated: February 2026
 **File:** `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (line 55)
 
 **Action items:**
-- [ ] Convert `Guid[] requestedIds` to `HashSet<Guid>` for O(1) lookups in `ValidateHoldingsExist`
-- [ ] Same change for `string[] requestedTickers`
+- [x] Convert `Guid[] requestedIds` to `HashSet<Guid>` for O(1) lookups in `ValidateHoldingsExist`
+- [x] Same change for `string[] requestedTickers`
 
 ### 3.2 Implement reimbursement on holding deletion
 **Priority:** P1
@@ -239,3 +239,5 @@ Last updated: February 2026
 2. Then **P1** (feature completeness and quality)
 3. **P2** items can be done as part of regular refactoring sprints
 4. **P3** items can be picked up when touching nearby code
+
+Add a validFrom or validTo endpoint to query portfolio endpoint

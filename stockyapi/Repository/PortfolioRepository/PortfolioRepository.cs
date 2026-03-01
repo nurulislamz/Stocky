@@ -1,8 +1,8 @@
-using System.Runtime.Serialization;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using stockyapi.Application.Portfolio;
-using stockyapi.Application.Portfolio.ZHelperTypes;
+using stockyapi.Application.Commands.Portfolio;
 using stockyapi.Middleware;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.Funds.Types;
 using stockyapi.Repository.PortfolioRepository.Types;
 using stockymodels.Data;
@@ -14,11 +14,16 @@ namespace stockyapi.Repository.PortfolioRepository;
 public class PortfolioRepository : IPortfolioRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IEventRepository _eventRepository;
     private readonly ILogger<PortfolioRepository> _logger;
 
-    public PortfolioRepository(ApplicationDbContext dbContext, ILogger<PortfolioRepository> logger)
+    public PortfolioRepository(
+        ApplicationDbContext dbContext,
+        IEventRepository eventRepository,
+        ILogger<PortfolioRepository> logger)
     {
         _dbContext = dbContext;
+        _eventRepository = eventRepository;
         _logger = logger;
     }
 
@@ -52,7 +57,6 @@ public class PortfolioRepository : IPortfolioRepository
         return new PortfolioWithHoldings(portfolio.CashBalance, portfolio.TotalValue, portfolio.InvestedAmount, allHoldings);
     }
 
-    // TODO: Turn the list<guid> requestedIds to a HashSet
     public async Task<HoldingsValidationResult<Guid>> GetHoldingsByIdAsync(Guid userId, Guid[] requestedIds, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
@@ -87,117 +91,94 @@ public class PortfolioRepository : IPortfolioRepository
         return await ValidateHoldingsExist(portfolioId, requestedTickers.ToHashSet(), ct);
     }
 
-    public async Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> BuyHoldingAsync(Guid userId, BuyOrderCommand command,
-        CancellationToken ct)
+    public async Task<TradeResult> BuyHoldingAsync(Guid userId, StockBoughtCommand command, CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
         if (portfolio is null)
         {
-            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            var exception = new InvalidOperationException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
             _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
         var totalCost = command.Quantity * command.Price;
 
-        // Update portfolio balance
         portfolio.CashBalance -= totalCost;
         portfolio.InvestedAmount += totalCost;
 
-        // Update or create stock holding
-        var existingHolding = _dbContext.StockHoldings.SingleOrDefault(holding => holding.PortfolioId == portfolio.Id && holding.Ticker == command.Ticker);
+        var existingHolding = await _dbContext.StockHoldings
+            .SingleOrDefaultAsync(h => h.PortfolioId == portfolio.Id && h.Ticker == command.Symbol, ct);
 
         decimal newTotalShares = (existingHolding?.Shares ?? 0) + command.Quantity;
         decimal newTotalCost = ((existingHolding?.AverageCost ?? 0) * (existingHolding?.Shares ?? 0)) + totalCost;
         decimal newAverageCost = newTotalShares > 0 ? newTotalCost / newTotalShares : command.Price;
+
         if (existingHolding != null)
         {
-            // Update existing holding
             existingHolding.Shares = newTotalShares;
             existingHolding.AverageCost = newAverageCost;
         }
         else
         {
-            // Create new holding
-            await _dbContext.StockHoldings.AddAsync(new StockHoldingModel
+            _dbContext.StockHoldings.Add(new StockHoldingModel
             {
                 PortfolioId = portfolio.Id,
-                Ticker = command.Ticker,
+                Ticker = command.Symbol,
                 Shares = newTotalShares,
                 AverageCost = newAverageCost,
-            }, ct);
+            });
         }
 
-        // Save transaction and update portfolio
-        var transaction = new AssetTransactionModel
-        {
-            PortfolioId = command.PortfolioId,
-            Ticker = command.Ticker,
-            Type = TransactionType.Buy,
-            Quantity = command.Quantity,
-            NewAverageCost = newAverageCost,
-            Price = command.Price,
-        };
+        var eventId = Guid.NewGuid();
+        var evt = await CreateEvent(AggregateType.PortfolioId, portfolio.Id, EventType.StockBought, command, ct);
 
-        await _dbContext.AssetTransactions.AddAsync(transaction, ct);
+        _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
-        return (transaction, portfolio);
+        return new TradeResult(evt.Id, command.Symbol, command.Quantity, command.Price, totalCost, newAverageCost, portfolio);
     }
 
-    public async Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> SellHoldingAsync(Guid userId, SellOrderCommand command,
-        CancellationToken ct)
+    public async Task<TradeResult> SellHoldingAsync(Guid userId, StockSoldCommand command, CancellationToken ct)
     {
         var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
         if (portfolio is null)
         {
-            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            var exception = new InvalidOperationException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
             _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
         var totalProceeds = command.Quantity * command.Price;
 
-        // Update portfolio balance
         portfolio.CashBalance += totalProceeds;
         portfolio.InvestedAmount -= totalProceeds;
 
-        // Update or create stock holding
-        var holding = await _dbContext.StockHoldings.SingleAsync(holding => holding.PortfolioId == portfolio.Id & holding.Ticker == command.Ticker, ct);
+        var holding = await _dbContext.StockHoldings
+            .SingleAsync(h => h.PortfolioId == portfolio.Id && h.Ticker == command.Symbol, ct);
 
-        // Update holding
-        var newTotalShares =  holding.Shares - command.Quantity;
-        var newTotalCost = ( holding.AverageCost *  holding.Shares);
+        var newTotalShares = holding.Shares - command.Quantity;
+        var newTotalCost = holding.AverageCost * holding.Shares;
         var newAverageCost = newTotalShares == 0 ? 0 : newTotalCost / newTotalShares;
 
-        // Logic to delete holding if newTotalShares == 0
         if (newTotalShares == 0)
         {
-            _dbContext.StockHoldings.Remove( holding);
+            _dbContext.StockHoldings.Remove(holding);
+        }
+        else
+        {
+            holding.Shares = newTotalShares;
+            holding.AverageCost = newAverageCost;
         }
 
-         holding.Shares = newTotalShares;
-         holding.AverageCost = newAverageCost;
+        var evt = await CreateEvent(AggregateType.PortfolioId, portfolio.Id, EventType.StockSold, command, ct);
 
-        // Save transaction and update portfolio
-        var transaction = new AssetTransactionModel
-        {
-            PortfolioId = command.PortfolioId,
-            Ticker = command.Ticker,
-            Type = TransactionType.Sell,
-            Quantity = command.Quantity,
-            NewAverageCost = newAverageCost,
-            Price = command.Price,
-        };
-
-        await _dbContext.AssetTransactions.AddAsync(transaction, ct);
+        _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
-        return (transaction, portfolio);
+        return new TradeResult(evt.Id, command.Symbol, command.Quantity, command.Price, totalProceeds,newAverageCost, portfolio);
     }
 
-    // TODO: Create a parameter and system to allow one to be reimbursed the total funds of the deleted assets
-    public async Task<List<AssetTransactionModel>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken ct)
+    public async Task<List<Guid>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)
@@ -206,30 +187,56 @@ public class PortfolioRepository : IPortfolioRepository
 
         if (portfolioId == Guid.Empty)
         {
-            var exception = new Exception($"PortfolioId not found. UserId {userId} must be wrong or something went wrong during setup.");
+            var exception = new InvalidOperationException($"PortfolioId not found. UserId {userId} must be wrong or something went wrong during setup.");
             _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
+        var tickers = holdings.Select(h => h.Ticker).ToArray();
+        var command = new DeleteHoldingCommand(
+            holdings.Select(h => h.Id).ToArray(),
+            tickers);
 
-        var deletedTransaction = holdings.Select(h => new AssetTransactionModel
-        {
-            PortfolioId = portfolioId,
-            Ticker = h.Ticker,
-            Type = TransactionType.Delete,
-            Quantity = null,
-            NewAverageCost = null,
-            Price = null,
-        }).ToList();
+        var evt = await CreateEvent(AggregateType.PortfolioId, portfolioId, EventType.DeleteHolding, command, ct);
 
         _dbContext.StockHoldings.RemoveRange(holdings);
-        await _dbContext.AssetTransactions.AddRangeAsync(deletedTransaction, ct);
-
+        _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
-        return deletedTransaction;
+
+        return holdings.Select(h => h.Id).ToList();
     }
 
-    // helper function, returns a list of ids found and not found, same for tickers
+    private async Task<EventModel> CreateEvent<TCommand>(
+        AggregateType aggregateType,
+        Guid aggregateId,
+        EventType eventType,
+        TCommand command,
+        CancellationToken ct)
+    {
+        var maxSeq = await _dbContext.EventModels
+            .Where(e => e.AggregateType == aggregateType && e.AggregateId == aggregateId)
+            .MaxAsync(e => (int?)e.SequenceId, ct);
+        var nextSequenceId = (maxSeq ?? 0) + 1;
+
+        var now = DateTimeOffset.UtcNow;
+        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+        return new EventModel
+        {
+            Id = Guid.NewGuid(),
+            AggregateType = aggregateType,
+            AggregateId = aggregateId,
+            SequenceId = nextSequenceId,
+            EventType = eventType,
+            EventPayloadJson = JsonSerializer.Serialize(command),
+            EventPayloadProtobuf = Array.Empty<byte>(),
+            TtStart = now,
+            TtEnd = now,
+            ValidFrom = now,
+            ValidTo = validTo
+        };
+    }
+
     private async Task<HoldingsValidationResult<Guid>> ValidateHoldingsExist(Guid portfolioId, HashSet<Guid> requestedIds, CancellationToken ct)
     {
         var foundHoldings = await _dbContext.StockHoldings

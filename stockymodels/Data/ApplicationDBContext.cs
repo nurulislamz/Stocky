@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using stockymodels.models;
 
 
@@ -9,8 +9,7 @@ public class ApplicationDbContext : DbContext
   public DbSet<UserModel> Users { get; set; } = null!;
   public DbSet<PortfolioModel> Portfolios { get; set; } = null!;
   public DbSet<StockHoldingModel> StockHoldings { get; set; } = null!;
-  public DbSet<AssetTransactionModel> AssetTransactions { get; set; } = null!;
-  public DbSet<FundsTransactionModel> FundsTransactions { get; set; } = null!;
+  public DbSet<EventModel> EventModels { get; set; } = null!;
   public DbSet<WatchlistModel> Watchlist { get; set; } = null!;
   public DbSet<UserPreferencesModel> UserPreferences { get; set; } = null!;
   public DbSet<PriceAlertModel> PriceAlerts { get; set; } = null!;
@@ -22,13 +21,28 @@ public class ApplicationDbContext : DbContext
   public override int SaveChanges()
   {
     ApplyTimestamps();
+    EnforceEventStoreAppendOnly();
     return base.SaveChanges();
   }
 
   public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
   {
     ApplyTimestamps();
+    EnforceEventStoreAppendOnly();
     return base.SaveChangesAsync(cancellationToken);
+  }
+
+  /// <summary>
+  /// Events table is append-only. Reject any update or delete of EventModel.
+  /// </summary>
+  private void EnforceEventStoreAppendOnly()
+  {
+    foreach (var entry in ChangeTracker.Entries<EventModel>())
+    {
+      if (entry.State is EntityState.Modified or EntityState.Deleted)
+        throw new InvalidOperationException(
+          "EventModel is append-only; updates and deletes are not allowed.");
+    }
   }
 
   private void ApplyTimestamps()

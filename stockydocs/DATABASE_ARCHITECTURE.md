@@ -9,9 +9,11 @@
 ```
 UserModel (1)──────(1) PortfolioModel (1)──────(N) StockHoldingModel
     │                       │
-    │                       ├──────(N) AssetTransactionModel
+    │                       ├──────(N) AssetTransactionModel   (legacy / optional)
     │                       │
-    │                       └──────(N) FundsTransactionModel
+    │                       ├──────(N) FundsTransactionModel  (legacy / optional)
+    │                       │
+    ├───────────────────────┴──────(N) EventModel   (single event log; AggregateType + AggregateId point at User or Portfolio)
     │
     ├──────(1) UserPreferencesModel
     │
@@ -29,6 +31,7 @@ UserModel (1)──────(1) PortfolioModel (1)──────(N) Stock
 | `StockHoldingModel` | Current position snapshot | Yes (shares, avg cost) | Ticker, (PortfolioId, Ticker) unique |
 | `AssetTransactionModel` | Buy/sell/delete log | Append-only (init) | (PortfolioId, CreatedAt) |
 | `FundsTransactionModel` | Deposit/withdrawal log | Append-only | PortfolioId |
+| `EventModel` | **Single event log** (user + portfolio + funds + watchlist) | Append-only | (AggregateType, AggregateId, SequenceId), (AggregateId, ValidFrom, ValidTo) for bitemporal queries |
 | `WatchlistModel` | Symbols user is tracking | Yes | (UserId, Symbol) unique |
 | `PriceAlertModel` | Price threshold triggers | Yes (IsTriggered) | (Symbol, IsTriggered), (UserId, Symbol) unique |
 | `UserPreferencesModel` | UI/notification settings | Yes | UserId (unique) |
@@ -178,16 +181,98 @@ Or use `[Timestamp]` with PostgreSQL's `xmin` system column.
 - **No need for event bus / messaging.** This is not a distributed system.
 - **EF Core continues to work** exactly as it does today.
 
-### 4.3 Migration Path
+### 4.3 EventModel: Single Source for Events (Current Implementation)
+
+**EventModel** is the single append-only table for all events: user lifecycle, portfolio (buy/sell/delete), funds (deposit/withdraw), and watchlist. Events are scoped by **AggregateType** + **AggregateId** (so one table supports User, Portfolio, and Funds aggregates). Payload is stored in both **Protobuf** (binary) and **JSON** (queryable). The table is **bitemporal** (transaction time + valid time).
+
+#### 4.3.1 Table: `Events` (EventModel)
+
+| Column | Type | Nullable? | Purpose |
+|--------|------|-----------|---------|
+| `EventId` | `Guid` (PK) | No | Unique event id. |
+| `AggregateType` | enum (`UserId`, `PortfolioId`, `FundsId`) | No | Which aggregate this event belongs to. |
+| `AggregateId` | `Guid` | No | Id of the aggregate instance (e.g. UserId or PortfolioId). Replay/filter by this. |
+| `SequenceId` | `int` | No | Monotonic order per aggregate. Enables `ORDER BY SequenceId` for replay. |
+| `EventType` | enum (see below) | No | Discriminator for the kind of event. |
+| `EventPayloadProtobuf` | `byte[]` (DB: bytea / varbinary) | No | Payload serialized as Protobuf (compact, versionable). |
+| `EventPayloadJson` | `string` (DB: text or jsonb) | No | Same payload as JSON for querying and APIs. |
+| `TtStart` | `DateTimeOffset` | No | **Transaction time start** – when this version was recorded. |
+| `TtEnd` | `DateTimeOffset` | No | **Transaction time end** – when superseded; use for “current view” (e.g. `TtEnd` = max or null). |
+| `ValidFrom` | `DateTimeOffset` | No | **Valid time start** – when the fact became true in the real world. |
+| `ValidTo` | `DateTimeOffset` | No | **Valid time end** – when the fact ceased to be valid (or use sentinel for “still valid”). |
+
+**Indexes (recommended):**
+
+- `(AggregateType, AggregateId, SequenceId)` — replay and “all events for this aggregate”.
+- `(AggregateId, ValidFrom, ValidTo)` — bitemporal “valid at time T” queries: `ValidFrom <= T AND (ValidTo >= T OR ValidTo = sentinel)`.
+
+#### 4.3.2 EventType enum (current)
+
+| Value | Aggregate | Purpose |
+|-------|-----------|---------|
+| `UserCreate`, `UserNameChange`, `UserEmailChange`, `UserPasswordChange`, `UserDelete` | User | User lifecycle. |
+| `StockBought`, `StockSold`, `DeleteHolding` | Portfolio | Holdings. |
+| `DepositFunds`, `WithdrawFunds` | Portfolio / Funds | Cash. |
+| `AddToWatchlist`, `RemoveFromWatchlist` | User | Watchlist. |
+
+#### 4.3.3 EventPayloadJson shape by EventType
+
+One JSON object per event in `EventPayloadJson`; structure varies by `EventType`:
+
+- **UserCreate**: `{ "FirstName", "Surname", "Email" }` (no password in payload).
+- **UserNameChange**: `{ "FirstName", "Surname" }`.
+- **UserEmailChange**: `{ "NewEmail" }`. **UserPasswordChange**: typically no sensitive data in payload.
+- **StockBought / StockSold**: `{ "Symbol", "Quantity", "Price", "NewAverageCost" }`.
+- **DeleteHolding**: `{ "Ticker", "Shares", "AverageCost" }` (or list of holding ids/tickers).
+- **DepositFunds / WithdrawFunds**: `{ "Amount" }`.
+- **AddToWatchlist / RemoveFromWatchlist**: `{ "Symbol" }`.
+
+Use `decimal` for money/shares with sufficient precision (e.g. 4 decimal places).
+
+#### 4.3.4 Bitemporal querying
+
+- **Transaction time (TT):** “What did we believe at time T?” → `TtStart <= T AND TtEnd >= T` (or your convention for “current”).
+- **Valid time (VT):** “What was valid at time T?” → `ValidFrom <= T AND (ValidTo >= T OR ValidTo = end-of-time)`.
+- **Replay for current state:** Filter by `AggregateType`, `AggregateId`, order by `SequenceId`; optionally restrict to valid-at “now” and/or transaction-time “current”.
+
+#### 4.3.5 C# EventModel (current)
+
+```csharp
+public class EventModel
+{
+    [Column("EventId")]
+    public Guid Id { get; set; }
+    public AggregateType AggregateType { get; set; }
+    public Guid AggregateId { get; init; }
+    public int SequenceId { get; init; }
+    public EventType EventType { get; init; }
+    public byte[] EventPayloadProtobuf { get; set; } = null!;
+    public string EventPayloadJson { get; set; } = null!;
+    public DateTimeOffset TtStart { get; init; }
+    public DateTimeOffset TtEnd { get; init; }
+    public DateTimeOffset ValidFrom { get; init; }
+    public DateTimeOffset ValidTo { get; init; }
+}
+```
+
+- Table name: **`Events`**. Configured in **EventConfiguration** (ToTable, HasKey, EventId column, required payload columns).
+
+#### 4.3.6 Relation to existing tables
+
+- **Hybrid:** Keep `PortfolioModel` and `StockHoldingModel` as derived caches. Every mutation writes **one row** to `Events` (with appropriate `AggregateType` + `AggregateId`), then updates caches. Reconciliation replays events by `(AggregateType, AggregateId, SequenceId)` and recomputes state.
+- **User events:** Same table; `AggregateType = UserId`, `AggregateId = UserId`. No separate “UserEvents” table required.
+
+### 4.4 Migration Path
 
 | Phase | Change | Effort |
 |-------|--------|--------|
-| 1 | Fix nullable mismatch in AssetTransactionModel migration | Small |
+| 1 | Fix nullable mismatch in AssetTransactionModel migration (if still used) | Small |
 | 2 | Add concurrency token to PortfolioModel | Small |
-| 3 | Enrich AssetTransactionModel with post-state fields | Medium |
-| 4 | Add reconciliation method | Medium |
-| 5 | Ensure all repository mutations create a transaction record before mutating state | Medium |
-| 6 | Add admin endpoint to trigger reconciliation | Small |
+| 3 | Events table: EventId, AggregateType, AggregateId, SequenceId, EventType, EventPayloadProtobuf, EventPayloadJson, TtStart, TtEnd, ValidFrom, ValidTo | Medium |
+| 4 | Write path: every mutation (user, portfolio, funds, watchlist) appends to Events with correct AggregateType + AggregateId | Medium |
+| 5 | Reconciliation that replays from Events by (AggregateType, AggregateId, SequenceId) and recomputes caches | Medium |
+| 6 | Admin endpoint to trigger reconciliation | Small |
+| 7 | (Optional) Deprecate AssetTransactionModel / FundsTransactionModel after cutover | Medium |
 
 ---
 
@@ -208,8 +293,10 @@ Or use `[Timestamp]` with PostgreSQL's `xmin` system column.
 
 | Table | Suggested Index | Reason |
 |-------|-----------------|--------|
-| `FundsTransactions` | `(PortfolioId, CreatedAt)` | Transaction history queries are always by portfolio + time |
-| `Transactions` | `(PortfolioId, Ticker)` | Finding all transactions for a specific holding |
+| `Events` | `(AggregateType, AggregateId, SequenceId)` | Replay and “all events for this aggregate” |
+| `Events` | `(AggregateId, ValidFrom, ValidTo)` | Bitemporal “valid at time T” queries |
+| `FundsTransactions` | `(PortfolioId, CreatedAt)` | Transaction history queries (if still used) |
+| `Transactions` | `(PortfolioId, Ticker)` | Finding all transactions for a specific holding (if still used) |
 | `Users` | `(Email)` already exists | Good |
 | `Watchlist` | `(UserId)` | Listing all watchlist items for a user |
 
@@ -225,21 +312,24 @@ Or use `[Timestamp]` with PostgreSQL's `xmin` system column.
 
 ## 6. Full Event Sourcing - If You Want to Go All the Way
 
-If you decide in the future that you want full event sourcing, here's what it would look like.
+If you decide in the future that you want full event sourcing, the current **EventModel** (section 4.3) is already the event store table: it has `AggregateType`, `AggregateId`, `SequenceId`, `EventType`, dual payload (Protobuf + JSON), and bitemporal columns. You would add handlers that **replay** events to build read models and optionally stop writing to the legacy caches (PortfolioModel, StockHoldingModel) and treat them as projections only.
 
-### 6.1 Event Store Table
+### 6.1 Event Store Table (already implemented as EventModel)
+
+The existing `EventModel` / `Events` table is the event store. For a hypothetical “pure” event-sourcing variant you might add or rename as follows (optional, not current):
 
 ```csharp
+// Conceptual only; current EventModel already has AggregateId, AggregateType, EventType, payload, bitemporal
 public class DomainEvent
 {
-    public long SequenceNumber { get; set; }        // Auto-increment, global order
-    public Guid AggregateId { get; set; }            // e.g. PortfolioId
-    public string AggregateType { get; set; }        // "Portfolio"
-    public int AggregateVersion { get; set; }        // Per-aggregate version
-    public string EventType { get; set; }            // "StockBought", "FundsDeposited"
-    public string EventData { get; set; }            // JSON payload
-    public DateTime OccurredAt { get; set; }
-    public Guid InitiatedBy { get; set; }
+    public long SequenceNumber { get; set; }        // Could replace SequenceId for global order
+    public Guid AggregateId { get; set; }
+    public string AggregateType { get; set; }
+    public int AggregateVersion { get; set; }      // Optional; for optimistic concurrency
+    public string EventType { get; set; }
+    public string EventData { get; set; }           // Current implementation uses EventPayloadJson + EventPayloadProtobuf
+    public DateTime OccurredAt { get; set; }       // Current: ValidFrom / ValidTo
+    public Guid InitiatedBy { get; set; }          // Could add to EventModel if needed
 }
 ```
 
@@ -294,7 +384,4 @@ public class PortfolioAggregate
 
 **Start with the hybrid approach.** It gives you robust auditability, drift detection, and state reconstruction without requiring a fundamental architectural change. If Stocky grows into a production trading platform with regulatory requirements, you can migrate to full event sourcing later using Marten.
 
-
-Adding in bitemporality
-
-Double accounting method
+**Current implementation:** The **EventModel** (table `Events`) is in place with **AggregateType** + **AggregateId**, **EventPayloadProtobuf** + **EventPayloadJson**, and **bitemporal** columns (`TtStart`, `TtEnd`, `ValidFrom`, `ValidTo`). User, portfolio, funds, and watchlist events are stored in this single log.

@@ -29,7 +29,4 @@ public class PortfolioModel : BaseModel
     public virtual UserModel User { get; set; } = null!;
 
     public virtual ICollection<StockHoldingModel> StockHoldings { get; set; } = new List<StockHoldingModel>();
-
-    public virtual ICollection<AssetTransactionModel> Transactions { get; set; } = new List<AssetTransactionModel>();
-    public virtual ICollection<FundsTransactionModel> Funds { get; set; } = new List<FundsTransactionModel>();
 }

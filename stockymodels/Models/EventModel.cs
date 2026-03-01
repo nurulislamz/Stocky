@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 using stockymodels.Models.Enums;
 
 namespace stockymodels.models;
@@ -12,7 +11,7 @@ public class EventModel
     public Guid Id { get; set; }
 
     [Required]
-    public AggregateType AggregateType;
+    public AggregateType AggregateType { get; init; }
 
     [Required]
     public Guid AggregateId { get; init; }
@@ -42,4 +41,9 @@ public class EventModel
 
     [Required]
     public required DateTimeOffset ValidTo { get; init; }
+
+    public override string ToString() =>
+        $"Id={Id}, AggregateType={AggregateType}, AggregateId={AggregateId}, SequenceId={SequenceId}, EventType={EventType}, " +
+        $"TtStart={TtStart:O}, TtEnd={TtEnd:O}, ValidFrom={ValidFrom:O}, ValidTo={ValidTo:O}, " +
+        $"EventPayloadProtobufLength={EventPayloadProtobuf?.Length ?? 0}, EventPayloadJson={EventPayloadJson}";
 }

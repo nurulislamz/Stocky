@@ -7,6 +7,7 @@ using Polly;
 using stockyapi.Extensions;
 using stockyapi.Middleware;
 using stockyapi.Options;
+using stockyapi.Repository.Event;
 using stockyapi.Repository.Funds;
 using stockyapi.Repository.PortfolioRepository;
 using stockyapi.Repository.User;
@@ -119,6 +120,7 @@ internal class Program
         services.AddScoped<IPortfolioApi, PortfolioApi>();
 
         // Repository DIs
+        services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IFundsRepository, FundsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
