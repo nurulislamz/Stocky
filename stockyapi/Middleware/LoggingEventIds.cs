@@ -25,4 +25,19 @@ public static class LoggingEventIds
 
     /// <summary>User or portfolio persistence failure (e.g. SaveChangesAsync).</summary>
     public static readonly EventId RepositorySaveFailure = new(310, "Repository.SaveFailure");
+
+    /// <summary>Authenticated user is missing user id claim (UserContext).</summary>
+    public static readonly EventId AuthMissingUserIdClaim = new(401, "Auth.MissingUserIdClaim");
+
+    /// <summary>Authenticated user has malformed user id claim - present but not a valid GUID (UserContext).</summary>
+    public static readonly EventId AuthMalformedUserIdClaim = new(4011, "Auth.MalformedUserIdClaim");
+
+    /// <summary>Authenticated user is missing email claim (UserContext).</summary>
+    public static readonly EventId AuthMissingEmailClaim = new(402, "Auth.MissingEmailClaim");
+
+    /// <summary>Authenticated user has malformed email claim - present but not a valid email (UserContext).</summary>
+    public static readonly EventId AuthMalformedEmailClaim = new(4021, "Auth.MalformedEmailClaim");
+
+    /// <summary>Authenticated user is missing a profile claim - FirstName, Surname, or Role (UserContext).</summary>
+    public static readonly EventId AuthMissingProfileClaim = new(403, "Auth.MissingProfileClaim");
 }

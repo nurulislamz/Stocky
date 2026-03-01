@@ -1,11 +1,12 @@
-﻿namespace stockyapi.Middleware;
+namespace stockyapi.Middleware;
 
 public interface IUserContext
 {
     bool IsAuthenticated { get; }
-    Guid UserId { get; } // non-null; web layer guarantees auth
-    string Email { get; } // non-null; web layer guarantees auth
-    
-    // TODO: Add the other claims here
+    Guid UserId { get; }
+    string Email { get; }
+    string FirstName { get; }
+    string Surname { get; }
+    string Role { get; }
 }
 

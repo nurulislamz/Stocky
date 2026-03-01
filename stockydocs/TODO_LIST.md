@@ -55,8 +55,8 @@ Last updated: February 2026
 **Problem:** The email claim is read from the JWT but no format validation is performed before it's used as the user's identity.
 
 **Action items:**
-- [ ] Add email format validation (regex or `MailAddress.TryCreate`)
-- [ ] Log a warning and reject the request if the claim is present but malformed
+- [x] Add email format validation (regex or `MailAddress.TryCreate`)
+- [x] Log a warning and reject the request if the claim is present but malformed
 
 ### 2.2 Add additional claims to IUserContext
 **Priority:** P2

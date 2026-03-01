@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using stockyapi.Services;
-using ClaimTypes = System.Security.Claims.ClaimTypes;
 
 namespace stockyapi.Middleware;
 
@@ -26,9 +25,12 @@ public class DevBypassAuthMiddleware
         {
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
+                new Claim(ClaimTypes.NameIdentifier, "11111111-1111-1111-1111-111111111111"),
                 new Claim(ClaimTypes.Name, "Test User"),
-                new Claim(ClaimTypes.Email, "test@example.com")
+                new Claim(ClaimTypes.Email, "test@example.com"),
+                new Claim(ClaimTypes.GivenName, "Test"),
+                new Claim(ClaimTypes.Surname, "User"),
+                new Claim(ClaimTypes.Role, "User")
             };
 
             var identity = new ClaimsIdentity(claims, "Development");

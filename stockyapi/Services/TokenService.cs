@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
@@ -14,16 +14,6 @@ public interface ITokenService
   string CreateDevelopmentToken(Claim[] claims);
 }
 
-// TODO: Change name to public static class CustomClaimTypes
-public static class CustomClaimTypes
-{
-    public const string UserId = "userId";
-    public const string FirstName = "firstName";
-    public const string Surname = "surname";
-    public const string Role = "role";
-    public const string Email = "email";
-}
-
 public class TokenService : ITokenService
 {
   private readonly JwtSettings _jwtSettings;
@@ -35,14 +25,14 @@ public class TokenService : ITokenService
 
   public string CreateToken(UserModel user)
   {
-    // Create claims (user info)
+    // Create claims (user info) using standard ClaimTypes
     var claims = new[]
     {
-      new Claim(CustomClaimTypes.Email, user.Email),
-      new Claim(CustomClaimTypes.UserId, user.Id.ToString()),
-      new Claim(CustomClaimTypes.FirstName, user.FirstName),
-      new Claim(CustomClaimTypes.Surname, user.Surname),
-      new Claim(CustomClaimTypes.Role, user.Role.ToString())
+      new Claim(ClaimTypes.Email, user.Email),
+      new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+      new Claim(ClaimTypes.GivenName, user.FirstName),
+      new Claim(ClaimTypes.Surname, user.Surname),
+      new Claim(ClaimTypes.Role, user.Role.ToString())
     };
 
     // Create token
