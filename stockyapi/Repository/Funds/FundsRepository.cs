@@ -27,7 +27,6 @@ public class FundsRepository : IFundsRepository
         if (portfolio == null)
             throw new Exception("portfolio not found");
 
-        await _dbContext.SaveChangesAsync(cancellationToken);
         return portfolio;
     }
 
@@ -35,18 +34,18 @@ public class FundsRepository : IFundsRepository
     {
         var portfolio = await _dbContext.Portfolios
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        
+
         if (portfolio == null)
             throw new Exception("portfolio not found.");
-        
+
         var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Deposit);
-        
+
         var updatedCashBalance = portfolio.CashBalance + cashDelta;
         var updatedTotalValue = portfolio.TotalValue + cashDelta;
 
         if (portfolio.CashBalance > updatedCashBalance)
             throw new Exception($"Deposit somehow resulted in cashBalance decreasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
-        
+
         if (portfolio.TotalValue > updatedTotalValue)
             throw new Exception($"Deposit somehow resulted in totalValue decreasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
 
@@ -55,7 +54,7 @@ public class FundsRepository : IFundsRepository
 
         await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
         await _dbContext.SaveChangesAsync(ct);
-        
+
         return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
 
@@ -63,18 +62,18 @@ public class FundsRepository : IFundsRepository
     {
         var portfolio = await _dbContext.Portfolios
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
-        
+
         if (portfolio == null)
             throw new Exception("portfolio not found.");
-        
+
         var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Withdrawal);
-        
+
         var updatedCashBalance = portfolio.CashBalance - cashDelta;
         var updatedTotalValue = portfolio.TotalValue - cashDelta;
 
         if (portfolio.CashBalance < updatedCashBalance)
             throw new Exception($"Withdraw somehow resulted in cashBalance increasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
-        
+
         if (portfolio.TotalValue < updatedTotalValue)
             throw new Exception($"Withdraw somehow resulted in totalValue increasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
 
@@ -83,13 +82,13 @@ public class FundsRepository : IFundsRepository
 
         await _dbContext.FundsTransactions.AddAsync(fundTransaction, ct);
         await _dbContext.SaveChangesAsync(ct);
-        
+
         return new PortfolioBalances(portfolio.CashBalance, portfolio.InvestedAmount, portfolio.TotalValue);
     }
 
     private static FundsTransactionModel CreateFundsTransactionModel(Guid userId, Guid portfolioId, decimal cashDelta,
         FundOperationType operationType)
      => new () { Id = userId, PortfolioId = portfolioId, Type = operationType, CashAmount = Math.Abs(cashDelta) };
-    
-    
+
+
 }

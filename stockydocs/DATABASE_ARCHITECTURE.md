@@ -141,16 +141,16 @@ Add fields to capture the full picture of each event:
 public class AssetTransactionModel : BaseModel
 {
     // Existing fields...
-    
+
     // NEW: Capture the state AFTER the transaction
     public decimal? PortfolioCashBalanceAfter { get; init; }
     public decimal? PortfolioInvestedAmountAfter { get; init; }
     public decimal? HoldingSharesAfter { get; init; }
     public decimal? HoldingAverageCostAfter { get; init; }
-    
+
     // NEW: Who initiated it
     public Guid InitiatedByUserId { get; init; }
-    
+
     // NEW: Optional notes / reason
     public string? Notes { get; init; }
 }
@@ -162,7 +162,7 @@ public class AssetTransactionModel : BaseModel
 public class PortfolioModel : BaseModel
 {
     // Existing fields...
-    
+
     [ConcurrencyCheck]
     public uint RowVersion { get; set; }
 }
@@ -261,7 +261,7 @@ public class PortfolioAggregate
     public decimal CashBalance { get; private set; }
     public decimal InvestedAmount { get; private set; }
     public Dictionary<string, (decimal Shares, decimal AvgCost)> Holdings { get; } = new();
-    
+
     public void Apply(FundsDeposited e) => CashBalance += e.Amount;
     public void Apply(StockBought e) { /* update cash, holdings, invested */ }
     // etc.
@@ -293,3 +293,8 @@ public class PortfolioAggregate
 | Full Event Sourcing | High | Excellent | No - overkill for current scale |
 
 **Start with the hybrid approach.** It gives you robust auditability, drift detection, and state reconstruction without requiring a fundamental architectural change. If Stocky grows into a production trading platform with regulatory requirements, you can migrate to full event sourcing later using Marten.
+
+
+Adding in bitemporality
+
+Double accounting method

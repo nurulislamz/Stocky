@@ -20,7 +20,7 @@ Last updated: February 2026
 ## 1. Error Handling & Logging
 
 ### 1.1 Repository exception handling is raw and inconsistent
-**Priority:** P0  
+**Priority:** P0
 **Files:**
 - `stockyapi/Repository/Funds/FundsRepository.cs` (line 26)
 - `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (multiple locations)
@@ -28,13 +28,13 @@ Last updated: February 2026
 **Problem:** Repositories throw raw `Exception` or `NullReferenceException` with ad-hoc messages. No structured logging. No correlation IDs. Callers cannot distinguish "portfolio not found" from a database failure.
 
 **Action items:**
-- [ ] Replace `throw new Exception(...)` with domain-specific exceptions or return `Result<T>.Fail(...)` so failures flow through the existing failure pipeline
+- [x] Replace `throw new Exception(...)` with domain-specific exceptions or return `Result<T>.Fail(...)` so failures flow through the existing failure pipeline
 - [ ] Add structured `ILogger` calls with event IDs at the repository level (partially done in PortfolioRepository but not FundsRepository)
 - [ ] Consider a `PortfolioNotFoundException` that maps to 404 at the API layer
 - [ ] Remove `await _dbContext.SaveChangesAsync()` from `GetFundsAsync` (read-only query should not call SaveChanges)
 
 ### 1.2 BaseController ProblemDetails is incomplete
-**Priority:** P1  
+**Priority:** P1
 **File:** `stockyapi/Controllers/Helpers/BaseController.cs` (lines 14, 25)
 
 **Problem:** `ProcessFailure` does not populate the RFC 9457 `type` field. A `ProblemTypes` dictionary exists but is unused.
@@ -49,7 +49,7 @@ Last updated: February 2026
 ## 2. Validation & Security
 
 ### 2.1 Email validation missing in UserContext
-**Priority:** P1  
+**Priority:** P1
 **File:** `stockyapi/Middleware/UserContext.cs` (line 43)
 
 **Problem:** The email claim is read from the JWT but no format validation is performed before it's used as the user's identity.
@@ -59,7 +59,7 @@ Last updated: February 2026
 - [ ] Log a warning and reject the request if the claim is present but malformed
 
 ### 2.2 Add additional claims to IUserContext
-**Priority:** P2  
+**Priority:** P2
 **File:** `stockyapi/Middleware/IUserContext.cs` (line 9)
 
 **Action items:**
@@ -72,7 +72,7 @@ Last updated: February 2026
 ## 3. Repository & Data Access
 
 ### 3.1 Use HashSet for holding ID lookups
-**Priority:** P2  
+**Priority:** P2
 **File:** `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (line 55)
 
 **Action items:**
@@ -80,7 +80,7 @@ Last updated: February 2026
 - [ ] Same change for `string[] requestedTickers`
 
 ### 3.2 Implement reimbursement on holding deletion
-**Priority:** P1  
+**Priority:** P1
 **File:** `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (line 199)
 
 **Problem:** `DeleteHoldingsAsync` removes holdings but does not reimburse the portfolio's cash balance. This is a financial correctness issue.
@@ -91,7 +91,7 @@ Last updated: February 2026
 - [ ] Record the reimbursement in an `AssetTransactionModel` with a new `TransactionType.Reimburse`
 
 ### 3.3 UserRepository CreateUser separation
-**Priority:** P2  
+**Priority:** P2
 **File:** `stockyapi/Repository/User/UserRepository.cs` (line 44)
 
 **Problem:** User creation has commented-out code for initializing portfolio and preferences inline. This should be separated.
@@ -102,7 +102,7 @@ Last updated: February 2026
 - [ ] Wrap in a transaction to ensure atomicity
 
 ### 3.4 UserRepository UpdateUser is too broad
-**Priority:** P2  
+**Priority:** P2
 **File:** `stockyapi/Repository/User/UserRepository.cs` (line 83)
 
 **Action items:**
@@ -114,7 +114,7 @@ Last updated: February 2026
 ## 4. Caching
 
 ### 4.1 Implement FusionCache
-**Priority:** P2  
+**Priority:** P2
 **File:** `stockyapi/Services/BaseApiServiceClient.cs` (line 53)
 
 **Problem:** Currently using `IMemoryCache` directly. FusionCache would add cache stampede protection, distributed caching support, and fail-safe stale data.
@@ -129,7 +129,7 @@ Last updated: February 2026
 ## 5. Feature Implementation
 
 ### 5.1 Fund transaction history endpoint
-**Priority:** P1  
+**Priority:** P1
 **File:** `stockyapi/Application/Funds/FundsController.cs` (line 69)
 
 **Action items:**
@@ -138,7 +138,7 @@ Last updated: February 2026
 - [ ] Return `FundsTransactionModel` list with total count for pagination
 
 ### 5.2 SQLite dev mode
-**Priority:** P3  
+**Priority:** P3
 **File:** `stockyapi/Program.cs` (line 67)
 
 **Problem:** Comment says "Add SQLite" but the code already supports SQLite via a dev flag. Verify this TODO is stale and remove it, or finish the implementation if it's incomplete.
@@ -152,7 +152,7 @@ Last updated: February 2026
 ## 6. Code Organisation & Naming
 
 ### 6.1 Fix namespacing everywhere
-**Priority:** P3  
+**Priority:** P3
 **File:** `stockyapi/Application/Portfolio/ZHelperTypes/OrderCommand.cs` (line 5)
 
 **Action items:**
@@ -161,7 +161,7 @@ Last updated: February 2026
 - [ ] Audit all namespaces for consistency (`stockyapi.Application.X`, `stockyapi.Repository.X`, `stockyapi.Services.X`)
 
 ### 6.2 Rename CustomClaimTypes
-**Priority:** P3  
+**Priority:** P3
 **File:** `stockyapi/Services/TokenService.cs` (line 17)
 
 **Problem:** The TODO says "Change name to `public static class CustomClaimTypes`" but the class is already named that. Likely the TODO is stale.
@@ -175,7 +175,7 @@ Last updated: February 2026
 ## 7. Deprecated Code Cleanup
 
 ### 7.1 Remove obsolete Quote and QuoteSummary endpoints
-**Priority:** P2  
+**Priority:** P2
 **Files:**
 - `stockyapi/Application/MarketPricing/MarketPricingController.cs` (lines 90, 108)
 - `stockyapi/Application/MarketPricing/MarketPricingApi.cs` (lines 45, 53)
@@ -195,7 +195,7 @@ Last updated: February 2026
 ## 8. stockymodels Issues (Found During Review)
 
 ### 8.1 Migration / model nullability mismatch
-**Priority:** P1  
+**Priority:** P1
 
 **Problem:** `AssetTransactionModel` declares `Quantity`, `Price`, and `NewAverageCost` as `decimal?` (nullable) but the migration creates them as `NOT NULL`. Delete transactions use `null` for these fields, which will fail against the DB.
 
@@ -204,7 +204,7 @@ Last updated: February 2026
 - [ ] Or change the model to non-nullable and use `0` for delete transactions (less clean)
 
 ### 8.2 Unused `OrderType` enum
-**Priority:** P3  
+**Priority:** P3
 **File:** `stockymodels/Models/Enums/OrderType.cs`
 
 **Action items:**
@@ -212,7 +212,7 @@ Last updated: February 2026
 - [ ] Otherwise remove it to reduce dead code
 
 ### 8.3 `DefaultCurrency` enum has `GDP` instead of `GBP`
-**Priority:** P0  
+**Priority:** P0
 **File:** `stockymodels/Models/Enums/DefaultCurrency.cs`
 
 **Action items:**

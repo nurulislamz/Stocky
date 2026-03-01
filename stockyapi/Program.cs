@@ -25,7 +25,7 @@ namespace stockyapi;
 internal class Program
 {
     private static readonly ILogger Logger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
-    
+
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +45,7 @@ internal class Program
             app.UseSwaggerDocumentation();
         }
 
+        app.UseExceptionHandler();
         app.UseRouting();
         app.UseCors("AllowLocalReactApp");
         app.UseAuthentication();
@@ -55,6 +56,7 @@ internal class Program
 
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
+        services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -64,8 +66,8 @@ internal class Program
         services.AddEndpointsApiExplorer();
         services.AddSwaggerDocumentation();
 
-        // TODO: Add SqlLite 
-        
+        // TODO: Add SqlLite
+
         // Configure database provider (PostgreSQL in production, SQLite when Dev flag is set)
         services.AddDbContext<ApplicationDbContext>(options =>
         {
@@ -108,8 +110,8 @@ internal class Program
             client.DefaultRequestHeaders.Add("User-Agent", UserAgents.GetRandomNewUserAgent());
             client.Timeout = TimeSpan.FromSeconds(10);
         });
-        
-        
+
+
         // Application DIs
         services.AddScoped<IAuthenticationApi, AuthenticationApi>();
         services.AddScoped<IFundsApi, FundsApi>();
