@@ -28,9 +28,9 @@ public class FundsIntegrationTests
     private async Task InitialiseTestAsync(decimal cash = 0m, decimal invested = 0m)
     {
         await _session.SetupUser(cash, invested);
-        _userContext = new TestUserContext(_session.UserId, _session.UserEmail);
+        _userContext = new TestUserContext(true, _session.UserId, _session.UserEmail, "Integration", "Tester", "User");
 
-        var fundsRepo = new FundsRepository(_session.Context);
+        var fundsRepo = new FundsRepository(_session.Context, NullLogger<FundsRepository>.Instance);
         _fundsApi = new FundsApi(_userContext, fundsRepo);
     }
 

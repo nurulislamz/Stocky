@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using stockyapi.Application.Auth;
 using stockyapi.Application.Auth.Login;
@@ -27,7 +28,7 @@ public class AuthIntegrationTests
         var options = Options.Create(jwtSettings);
 
         var tokenService = new TokenService(options);
-        var userRepository = new UserRepository(context);
+        var userRepository = new UserRepository(context, NullLogger<UserRepository>.Instance);
 
         return new AuthenticationApi(tokenService, userRepository);
     }

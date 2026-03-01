@@ -28,7 +28,7 @@ public class PortfolioIntegrationTests
     private async Task InitialiseTestAsync(decimal cash = 0m, decimal invested = 0m)
     {
         await _session.SetupUser(cash, invested);
-        _userContext = new TestUserContext(_session.UserId, _session.UserEmail);
+        _userContext = new TestUserContext(true, _session.UserId, _session.UserEmail, "Integration", "Tester", "User");
 
         var portfolioRepo = new PortfolioRepository(_session.Context, NullLogger<PortfolioRepository>.Instance);
         _portfolioApi = new PortfolioApi(_userContext, portfolioRepo);

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using stockyapi.Repository.Funds;
 using stockytests.Helpers;
@@ -13,7 +14,7 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(100m, 50m);
-        var repo = new FundsRepository(session.Context);
+        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
 
         var balances = await repo.GetFundsAsync(session.UserId, CancellationToken.None);
 
@@ -27,7 +28,7 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(200m, 0m);
-        var repo = new FundsRepository(session.Context);
+        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
 
         var balances = await repo.DepositFundsAsync(session.UserId, 50m, CancellationToken.None);
 
@@ -40,7 +41,7 @@ public class FundsRepositoryTests
     {
         await using var session = await SqliteTestSession.CreateAsync();
         await session.SetupUser(200m, 0m);
-        var repo = new FundsRepository(session.Context);
+        var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
 
         var balances = await repo.WithdrawFundsAsync(session.UserId, 50m, CancellationToken.None);
 
@@ -51,11 +52,11 @@ public class FundsRepositoryTests
     [Test]
     public void GetFundsAsync_WhenPortfolioNotFound_Throws()
     {
-        Assert.ThrowsAsync<Exception>(async () =>
+        Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await using var session = await SqliteTestSession.CreateAsync();
             await session.SetupUser();
-            var repo = new FundsRepository(session.Context);
+            var repo = new FundsRepository(session.Context, NullLogger<FundsRepository>.Instance);
             await repo.GetFundsAsync(Guid.NewGuid(), CancellationToken.None);
         });
     }
