@@ -67,7 +67,7 @@ public class PortfolioRepository : IPortfolioRepository
             throw exception;
         }
 
-        return await ValidateHoldingsExist(portfolioId, requestedIds, ct);
+        return await ValidateHoldingsExist(portfolioId, requestedIds.ToHashSet(), ct);
     }
 
     public async Task<HoldingsValidationResult<string>> GetHoldingsByTickerAsync(Guid userId, string[] requestedTickers, CancellationToken ct)
@@ -84,7 +84,7 @@ public class PortfolioRepository : IPortfolioRepository
             throw exception;
         }
 
-        return await ValidateHoldingsExist(portfolioId, requestedTickers, ct);
+        return await ValidateHoldingsExist(portfolioId, requestedTickers.ToHashSet(), ct);
     }
 
     public async Task<(AssetTransactionModel transaction, PortfolioModel updatedPortfolio)> BuyHoldingAsync(Guid userId, BuyOrderCommand command,
@@ -230,7 +230,7 @@ public class PortfolioRepository : IPortfolioRepository
     }
 
     // helper function, returns a list of ids found and not found, same for tickers
-    private async Task<HoldingsValidationResult<Guid>> ValidateHoldingsExist(Guid portfolioId, Guid[] requestedIds, CancellationToken ct)
+    private async Task<HoldingsValidationResult<Guid>> ValidateHoldingsExist(Guid portfolioId, HashSet<Guid> requestedIds, CancellationToken ct)
     {
         var foundHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolioId)
@@ -243,7 +243,7 @@ public class PortfolioRepository : IPortfolioRepository
         return new HoldingsValidationResult<Guid>(foundHoldings, invalidIds);
     }
 
-    private async Task<HoldingsValidationResult<string>> ValidateHoldingsExist(Guid portfolioId, string[] requestedTickers, CancellationToken ct)
+    private async Task<HoldingsValidationResult<string>> ValidateHoldingsExist(Guid portfolioId, HashSet<string> requestedTickers, CancellationToken ct)
     {
         var foundHoldings = await _dbContext.StockHoldings
             .Where(h => h.PortfolioId == portfolioId)
