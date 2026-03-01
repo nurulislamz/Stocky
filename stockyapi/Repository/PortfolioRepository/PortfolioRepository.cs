@@ -1,4 +1,4 @@
-﻿using System.Runtime.Serialization;
+using System.Runtime.Serialization;
 using Microsoft.EntityFrameworkCore;
 using stockyapi.Application.Portfolio;
 using stockyapi.Application.Portfolio.ZHelperTypes;
@@ -28,7 +28,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolio is null)
         {
             var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
         return portfolio;
@@ -43,7 +43,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolio is null)
         {
             var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
@@ -63,7 +63,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolioId == Guid.Empty)
         {
             var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
@@ -79,8 +79,8 @@ public class PortfolioRepository : IPortfolioRepository
 
         if (portfolioId == Guid.Empty)
         {
-            var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
@@ -94,7 +94,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolio is null)
         {
             var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
@@ -152,7 +152,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolio is null)
         {
             var exception = new Exception($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 
@@ -207,7 +207,7 @@ public class PortfolioRepository : IPortfolioRepository
         if (portfolioId == Guid.Empty)
         {
             var exception = new Exception($"PortfolioId not found. UserId {userId} must be wrong or something went wrong during setup.");
-            _logger.LogError(new EventId(123, "Failed to find Portfolio"), exception, "Failed to find Portfolio");
+            _logger.LogError(LoggingEventIds.PortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
             throw exception;
         }
 

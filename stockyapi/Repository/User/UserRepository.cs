@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using stockyapi.Middleware;
 using stockymodels.Data;
 using stockymodels.models;
@@ -9,10 +9,12 @@ namespace stockyapi.Repository.User;
 public class UserRepository : IUserRepository
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogger<UserRepository> _logger;
 
-    public UserRepository(ApplicationDbContext context)
+    public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<UserModel?> GetUserByIdAsync(Guid id)

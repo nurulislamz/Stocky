@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using stockyapi.Middleware;
 using stockyapi.Repository.Funds.Types;
 using stockymodels.Data;
 using stockymodels.models;
@@ -9,10 +10,12 @@ namespace stockyapi.Repository.Funds;
 public class FundsRepository : IFundsRepository
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly ILogger<FundsRepository> _logger;
 
-    public FundsRepository(ApplicationDbContext dbContext)
+    public FundsRepository(ApplicationDbContext dbContext, ILogger<FundsRepository> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     // Funds repository
@@ -23,9 +26,12 @@ public class FundsRepository : IFundsRepository
             .Select(p => new PortfolioBalances(p.CashBalance, p.InvestedAmount, p.TotalValue))
             .SingleOrDefaultAsync(cancellationToken);
 
-        // TODO: Fix all the exception handling code to also log and do other stuff.
         if (portfolio == null)
-            throw new Exception("portfolio not found");
+        {
+            var exception = new InvalidOperationException("Portfolio not found for user.");
+            _logger.LogError(LoggingEventIds.FundsPortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
+            throw exception;
+        }
 
         return portfolio;
     }
@@ -36,7 +42,11 @@ public class FundsRepository : IFundsRepository
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
 
         if (portfolio == null)
-            throw new Exception("portfolio not found.");
+        {
+            var exception = new InvalidOperationException("Portfolio not found for user.");
+            _logger.LogError(LoggingEventIds.FundsPortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
+            throw exception;
+        }
 
         var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Deposit);
 
@@ -44,10 +54,22 @@ public class FundsRepository : IFundsRepository
         var updatedTotalValue = portfolio.TotalValue + cashDelta;
 
         if (portfolio.CashBalance > updatedCashBalance)
-            throw new Exception($"Deposit somehow resulted in cashBalance decreasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
+        {
+            var exception = new InvalidOperationException("Deposit resulted in cash balance decreasing.");
+            _logger.LogError(LoggingEventIds.FundsDepositInvariantViolation, exception,
+                "Deposit invariant violation: CashBalance {CashBalance}, UpdatedCashBalance {UpdatedCashBalance}, CashDelta {CashDelta}, UserId {UserId}",
+                portfolio.CashBalance, updatedCashBalance, cashDelta, userId);
+            throw exception;
+        }
 
         if (portfolio.TotalValue > updatedTotalValue)
-            throw new Exception($"Deposit somehow resulted in totalValue decreasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
+        {
+            var exception = new InvalidOperationException("Deposit resulted in total value decreasing.");
+            _logger.LogError(LoggingEventIds.FundsDepositInvariantViolation, exception,
+                "Deposit invariant violation: TotalValue {TotalValue}, UpdatedTotalValue {UpdatedTotalValue}, CashDelta {CashDelta}, UserId {UserId}",
+                portfolio.TotalValue, updatedTotalValue, cashDelta, userId);
+            throw exception;
+        }
 
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;
@@ -64,7 +86,11 @@ public class FundsRepository : IFundsRepository
             .SingleOrDefaultAsync(p => p.UserId == userId, ct);
 
         if (portfolio == null)
-            throw new Exception("portfolio not found.");
+        {
+            var exception = new InvalidOperationException("Portfolio not found for user.");
+            _logger.LogError(LoggingEventIds.FundsPortfolioNotFound, exception, "Portfolio not found for UserId {UserId}", userId);
+            throw exception;
+        }
 
         var fundTransaction = CreateFundsTransactionModel(userId, portfolio.Id, cashDelta, FundOperationType.Withdrawal);
 
@@ -72,10 +98,22 @@ public class FundsRepository : IFundsRepository
         var updatedTotalValue = portfolio.TotalValue - cashDelta;
 
         if (portfolio.CashBalance < updatedCashBalance)
-            throw new Exception($"Withdraw somehow resulted in cashBalance increasing??? PortfolioCashBalance: {portfolio.CashBalance}, UpdatedCashDelta: {updatedCashBalance}, CashDelta: {cashDelta}");
+        {
+            var exception = new InvalidOperationException("Withdraw resulted in cash balance increasing.");
+            _logger.LogError(LoggingEventIds.FundsWithdrawInvariantViolation, exception,
+                "Withdraw invariant violation: CashBalance {CashBalance}, UpdatedCashBalance {UpdatedCashBalance}, CashDelta {CashDelta}, UserId {UserId}",
+                portfolio.CashBalance, updatedCashBalance, cashDelta, userId);
+            throw exception;
+        }
 
         if (portfolio.TotalValue < updatedTotalValue)
-            throw new Exception($"Withdraw somehow resulted in totalValue increasing??? TotalValue: {portfolio.TotalValue}, UpdatedTotalValue: {updatedTotalValue}, CashDelta: {cashDelta}");
+        {
+            var exception = new InvalidOperationException("Withdraw resulted in total value increasing.");
+            _logger.LogError(LoggingEventIds.FundsWithdrawInvariantViolation, exception,
+                "Withdraw invariant violation: TotalValue {TotalValue}, UpdatedTotalValue {UpdatedTotalValue}, CashDelta {CashDelta}, UserId {UserId}",
+                portfolio.TotalValue, updatedTotalValue, cashDelta, userId);
+            throw exception;
+        }
 
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;

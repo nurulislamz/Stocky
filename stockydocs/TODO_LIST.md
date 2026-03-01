@@ -29,9 +29,9 @@ Last updated: February 2026
 
 **Action items:**
 - [x] Replace `throw new Exception(...)` with domain-specific exceptions or return `Result<T>.Fail(...)` so failures flow through the existing failure pipeline
-- [ ] Add structured `ILogger` calls with event IDs at the repository level (partially done in PortfolioRepository but not FundsRepository)
-- [ ] Consider a `PortfolioNotFoundException` that maps to 404 at the API layer
-- [ ] Remove `await _dbContext.SaveChangesAsync()` from `GetFundsAsync` (read-only query should not call SaveChanges)
+- [x] Add structured `ILogger` calls with event IDs at the repository level (partially done in PortfolioRepository but not FundsRepository)
+- [~] Consider a `PortfolioNotFoundException` that maps to 404 at the API layer
+- [x] Remove `await _dbContext.SaveChangesAsync()` from `GetFundsAsync` (read-only query should not call SaveChanges)
 
 ### 1.2 BaseController ProblemDetails is incomplete
 **Priority:** P1
