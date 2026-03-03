@@ -20,9 +20,10 @@ public class EventRepository : IEventRepository
     }
 
     /// <inheritdoc />
-    public void Add(EventModel eventModel)
+    public void Add(params EventModel[] events)
     {
-        _context.EventModels.Add(eventModel);
+        foreach (var evt in events)
+            _context.EventModels.Add(evt);
     }
 
     /// <inheritdoc />

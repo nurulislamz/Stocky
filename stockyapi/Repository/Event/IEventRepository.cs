@@ -8,9 +8,10 @@ namespace stockyapi.Repository.Event;
 public interface IEventRepository
 {
     /// <summary>
-    /// Adds an event to the current context without saving. Use when the event must be committed in the same transaction as other changes; the caller must call SaveChanges.
+    /// Adds one or more events to the current context without saving. Use when events must be committed in the same transaction as other changes; the caller must call SaveChanges.
     /// </summary>
-    void Add(EventModel eventModel);
+    /// <param name="events">One or more events to add. Pass as many as needed: Add(evt1, evt2, evt3, ...).</param>
+    void Add(params EventModel[] events);
 
     /// <summary>
     /// Appends a single event and saves immediately. Use for standalone event appends. For event + read-model in one transaction, use Add() and then save from the caller.

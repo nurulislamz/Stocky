@@ -10,9 +10,11 @@ public interface IUserRepository
     Task<UserModel?> GetUserByIdAsync(Guid id);
     Task<bool> UserExistsByEmailAsync(string email);
     Task<UserModel?> GetUserByEmailAsync(string email);
-    /// <summary>Creates a user from the command and appends a UserCreate event to the event store.</summary>
+
     Task<UserModel> CreateUserAsync(UserCreateCommand command, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(UserModel user);
+
+    Task<UserModel> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default);
 
     // // User preferences operations
     // Task<UserPreferencesModel?> GetUserPreferencesAsync(Guid userId);

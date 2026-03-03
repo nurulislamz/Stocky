@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using stockyapi.Application.Commands.Portfolio;
 using stockyapi.Application.Commands.User;
 using stockyapi.Repository.Event;
 using stockyapi.Middleware;
@@ -30,13 +31,13 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .SingleOrDefaultAsync(u => u.Id == id);
     }
-    
+
     public async Task<bool> UserExistsByEmailAsync(string email)
     {
         return await _context.Users
             .AnyAsync(u => u.Email == email);
     }
-    
+
     public async Task<bool> UserExistsByIdAsync(Guid userId)
     {
         return await _context.Users
@@ -49,23 +50,23 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<UserModel> CreateUserAsync(UserCreateCommand command, CancellationToken cancellationToken = default)
+    public async Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand portfolioCreateCommand, CancellationToken cancellationToken = default)
     {
         var userId = Guid.NewGuid();
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(command.Password);
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userCreateCommand.Password);
         var now = DateTimeOffset.UtcNow;
         var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
 
         var payload = new
         {
-            command.FirstName,
-            command.Surname,
-            command.Email,
+            userCreateCommand.FirstName,
+            userCreateCommand.Surname,
+            userCreateCommand.Email,
             PasswordHash = hashedPassword
         };
         var eventPayloadJson = JsonSerializer.Serialize(payload);
 
-        var evt = new EventModel
+        var userCreationEvent = new EventModel
         {
             Id = Guid.NewGuid(),
             AggregateType = AggregateType.UserId,
@@ -83,9 +84,9 @@ public class UserRepository : IUserRepository
         var user = new UserModel
         {
             Id = userId,
-            FirstName = command.FirstName,
-            Surname = command.Surname,
-            Email = command.Email,
+            FirstName = userCreateCommand.FirstName,
+            Surname = userCreateCommand.Surname,
+            Email = userCreateCommand.Email,
             Password = hashedPassword,
             Role = UserRole.User,
             IsActive = true,
@@ -94,29 +95,30 @@ public class UserRepository : IUserRepository
 
         var portfolio = new PortfolioModel
         {
-            Id = userId,
-            UserId = userId,
-            TotalValue = 0,
-            CashBalance = 0,
-            InvestedAmount = 0
+            Id = portfolioCreateCommand.PortfolioId,
+            UserId = portfolioCreateCommand.UserId,
+            TotalValue = portfolioCreateCommand.TotalValue,
+            CashBalance = portfolioCreateCommand.CashBalance,
+            InvestedAmount = portfolioCreateCommand.InvestedAmount
         };
 
+        var preferenceCommand = new UserPreferenceCreationCommand(userId);
         var preferences = new UserPreferencesModel
         {
-            Id = userId,
-            UserId = userId,
-            Theme = Theme.Light,
-            Currency = DefaultCurrency.GDP,
-            Language = Language.English,
-            EmailNotifications = true,
-            PushNotifications = true,
-            PriceAlerts = true,
-            NewsAlerts = true,
-            Timezone = "UTC"
+            Id = preferenceCommand.UserId,
+            UserId = preferenceCommand.UserId,
+            Theme = preferenceCommand.Theme,
+            Currency = preferenceCommand.Currency,
+            Language = preferenceCommand.Language,
+            EmailNotifications = preferenceCommand.EmailNotifications,
+            PushNotifications = preferenceCommand.PushNotifications,
+            PriceAlerts = preferenceCommand.PriceAlerts,
+            NewsAlerts = preferenceCommand.NewsAlerts,
+            Timezone = preferenceCommand.Timezone
         };
 
         // Single transaction: event + user + portfolio + preferences. If any part fails, nothing is committed.
-        _eventRepository.Add(evt);
+        _eventRepository.Add(userCreateCommand);
         _context.Users.Add(user);
         _context.Portfolios.Add(portfolio);
         _context.UserPreferences.Add(preferences);
