@@ -241,3 +241,4 @@ Last updated: February 2026
 4. **P3** items can be picked up when touching nearby code
 
 Add a validFrom or validTo endpoint to query portfolio endpoint
+Lint tests
