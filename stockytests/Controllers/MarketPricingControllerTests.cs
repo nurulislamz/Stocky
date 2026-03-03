@@ -19,7 +19,7 @@ public class MarketPricingControllerTests
     private Mock<IMarketPricingApi> _marketPricingApi;
     private MarketPricingController _controller;
     private static readonly CancellationToken Token = CancellationToken.None;
-    
+
     [SetUp]
     public void Setup()
     {
@@ -68,7 +68,7 @@ public class MarketPricingControllerTests
         Assert.That(objectResult.Value, Is.EqualTo(expectedResponse));
         _marketPricingApi.Verify(api => api.GetCurrentPrice(ticker, Token), Times.Once);
     }
-     
+
     /// <summary>
     /// BLUEPRINT
     /// </summary>
@@ -104,7 +104,7 @@ public class MarketPricingControllerTests
         var symbol = "MSFT";
         var range = YahooRange.OneDay;
         var interval = YahooInterval.OneMinute;
-        var expectedChartData = new YahooChartResponse(); 
+        var expectedChartData = new YahooChartResponse();
 
         _marketPricingApi.Setup(x => x.GetChart(symbol, range, interval, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<YahooChartResponse>.Success(expectedChartData));
@@ -136,7 +136,7 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
@@ -183,12 +183,13 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
     }
 
+    [Obsolete]
     [Test]
     public async Task GetQuotes_WithValidParams_ReturnsOkResult()
     {
@@ -209,6 +210,7 @@ public class MarketPricingControllerTests
         _marketPricingApi.Verify(api => api.GetQuote(symbols, Token), Times.Once);
     }
 
+    [Obsolete]
     [Test]
     public async Task GetQuotes_WhenApiFails_ReturnsErrorResult()
     {
@@ -226,12 +228,13 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
     }
 
+    [Obsolete]
     [Test]
     public async Task GetQuoteSummary_WithValidParams_ReturnsOkResult()
     {
@@ -253,6 +256,7 @@ public class MarketPricingControllerTests
         _marketPricingApi.Verify(api => api.GetQuoteSummary(symbol, modules, Token), Times.Once);
     }
 
+    [Obsolete]
     [Test]
     public async Task GetQuoteSummary_WhenApiFails_ReturnsErrorResult()
     {
@@ -270,7 +274,7 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
@@ -313,7 +317,7 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
@@ -355,9 +359,9 @@ public class MarketPricingControllerTests
         // Assert
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
-        
+
         Assert.That(actionResult.StatusCode, Is.EqualTo((int)HttpStatusCode.InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));
@@ -400,7 +404,7 @@ public class MarketPricingControllerTests
         Assert.That(result, Is.InstanceOf<ObjectResult>());
         var actionResult = (ObjectResult)result;
         Assert.That(actionResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
-        
+
         var problemDetails = actionResult.Value as ProblemDetails;
         Assert.That(problemDetails!.Title, Does.Contain(failure.Title));
         Assert.That(problemDetails!.Detail, Does.Contain(failure.Detail));

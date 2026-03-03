@@ -11,7 +11,7 @@ internal sealed class SqliteTestSession : IAsyncDisposable
 {
     public ApplicationDbContext Context { get; }
     public Guid UserId { get; private set; }
-    public string UserEmail { get; private set; }
+    public string UserEmail { get; private set; } = null!;
     public Guid PortfolioId { get; private set; }
     private readonly SqliteConnection _connection;
 
