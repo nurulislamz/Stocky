@@ -6,15 +6,24 @@ namespace stockymodels.models;
 
 public class EventModel
 {
+
+    [Required]
+    public long SequenceNumber { get; init; }
+
     [Required]
     [Column("EventId")]
     public Guid Id { get; set; }
+
+    public Guid UserId { get; set; }
 
     [Required]
     public AggregateType AggregateType { get; init; }
 
     [Required]
     public Guid AggregateId { get; init; }
+
+    [Required]
+    public int AggregateVersion { get; set; }
 
     [Required]
     public int SequenceId { get; init; }
@@ -41,6 +50,8 @@ public class EventModel
 
     [Required]
     public required DateTimeOffset ValidTo { get; init; }
+
+    public Guid traceId { get; init; }
 
     public override string ToString() =>
         $"Id={Id}, AggregateType={AggregateType}, AggregateId={AggregateId}, SequenceId={SequenceId}, EventType={EventType}, " +
