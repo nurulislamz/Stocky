@@ -25,7 +25,7 @@ public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
         builder.HasIndex(c => c.IssuedAt);
 
         builder.HasMany(c => c.Events)
-            .WithOne()
+            .WithOne(e => e.Command)
             .HasForeignKey(e => e.CommandId)
             .OnDelete(DeleteBehavior.Restrict);
     }

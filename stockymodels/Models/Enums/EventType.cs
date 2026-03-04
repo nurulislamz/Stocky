@@ -2,16 +2,20 @@ namespace stockymodels.Models.Enums;
 
 public enum EventType
 {
-    UserCreate,
-    UserNameChange,
-    UserEmailChange,
-    UserPasswordChange,
-    UserDelete,
-    StockBought,
-    StockSold,
-    DeleteHolding,
-    DepositFunds,
-    WithdrawFunds,
-    AddToWatchlist,
-    RemoveFromWatchlist
+
+    // Rich domain events (payloads hold full context, not deltas)
+    HoldingCreation,
+    HoldingModification,
+    HoldingDeletion,
+    PortfolioCreated,
+    FundsDeposited,
+    FundsWithdrawn,
+    UserCreated,
+    UserNameChanged,
+    UserEmailChanged,
+    UserPasswordChanged,
+    UserDeleted,
+    UserPreferencesCreated,
+    WatchlistItemAdded,
+    WatchlistItemRemoved,
 }
