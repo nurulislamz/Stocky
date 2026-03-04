@@ -10,13 +10,11 @@ namespace stockyapi.Application.Auth;
 
 public class AccountSettingsApi : IAccountSettingsApi
 {
-    private readonly ITokenService _tokenService;
     private readonly IUserRepository _userRepository;
     private readonly IUserContext _userContext;
 
-    public AccountSettingsApi(ITokenService tokenService, IUserRepository userRepository, IUserContext userContext)
+    public AccountSettingsApi(IUserRepository userRepository, IUserContext userContext)
     {
-        _tokenService = tokenService;
         _userRepository = userRepository;
         _userContext = userContext;
     }
@@ -38,7 +36,7 @@ public class AccountSettingsApi : IAccountSettingsApi
             return new ValidationFailure422("");
         }
 
-        _userRepository.ChangeName(request.FirstName, request.Surname);
+        await _userRepository.ChangeName(request.FirstName, request.Surname);
 
     }
 }

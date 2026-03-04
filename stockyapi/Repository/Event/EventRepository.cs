@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using stockymodels.Data;
 using stockymodels.models;
-using Unit = System.ValueTuple;
+using stockymodels.Models.Enums;
 
 namespace stockyapi.Repository.Event;
 
@@ -17,6 +17,35 @@ public class EventRepository : IEventRepository
     {
         _context = context;
         _logger = logger;
+    }
+
+
+    public EventModel CreateEvent<TCommand>(
+        AggregateType aggregateType,
+        Guid aggregateId,
+        EventType eventType,
+        TCommand command,
+        CancellationToken ct = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
+
+        return new EventModel
+        {
+            Id = Guid.NewGuid(),
+            AggregateType = aggregateType,
+            AggregateId = aggregateId,
+            AggregateVersion = 0,
+            SequenceId = 0, // DB assigns via identity when supported (e.g. PostgreSQL); otherwise caller may set
+            EventType = eventType,
+            EventPayloadJson = JsonSerializer.Serialize(command),
+            EventPayloadProtobuf = Array.Empty<byte>(),
+            TtStart = now,
+            TtEnd = now,
+            ValidFrom = now,
+            ValidTo = validTo,
+            traceId = Guid.NewGuid()
+        };
     }
 
     /// <inheritdoc />

@@ -130,7 +130,7 @@ public class PortfolioRepository : IPortfolioRepository
         }
 
         var eventId = Guid.NewGuid();
-        var evt = await CreateEvent(AggregateType.PortfolioId, portfolio.Id, EventType.StockBought, command, ct);
+        var evt = await _eventRepository,CreateEvent(AggregateType.PortfolioId, portfolio.Id, EventType.StockBought, command, ct);
 
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
@@ -206,36 +206,6 @@ public class PortfolioRepository : IPortfolioRepository
         return holdings.Select(h => h.Id).ToList();
     }
 
-    private async Task<EventModel> CreateEvent<TCommand>(
-        AggregateType aggregateType,
-        Guid aggregateId,
-        EventType eventType,
-        TCommand command,
-        CancellationToken ct)
-    {
-        var maxSeq = await _dbContext.EventModels
-            .Where(e => e.AggregateType == aggregateType && e.AggregateId == aggregateId)
-            .MaxAsync(e => (int?)e.SequenceId, ct);
-        var nextSequenceId = (maxSeq ?? 0) + 1;
-
-        var now = DateTimeOffset.UtcNow;
-        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
-
-        return new EventModel
-        {
-            Id = Guid.NewGuid(),
-            AggregateType = aggregateType,
-            AggregateId = aggregateId,
-            SequenceId = nextSequenceId,
-            EventType = eventType,
-            EventPayloadJson = JsonSerializer.Serialize(command),
-            EventPayloadProtobuf = Array.Empty<byte>(),
-            TtStart = now,
-            TtEnd = now,
-            ValidFrom = now,
-            ValidTo = validTo
-        };
-    }
 
     private async Task<HoldingsValidationResult<Guid>> ValidateHoldingsExist(Guid portfolioId, HashSet<Guid> requestedIds, CancellationToken ct)
     {

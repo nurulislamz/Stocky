@@ -6,15 +6,9 @@ namespace stockymodels.models;
 
 public class EventModel
 {
-
-    [Required]
-    public long SequenceNumber { get; init; }
-
     [Required]
     [Column("EventId")]
     public Guid Id { get; set; }
-
-    public Guid UserId { get; set; }
 
     [Required]
     public AggregateType AggregateType { get; init; }
@@ -26,6 +20,7 @@ public class EventModel
     public int AggregateVersion { get; set; }
 
     [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int SequenceId { get; init; }
 
     [Required]
