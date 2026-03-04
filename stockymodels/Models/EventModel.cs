@@ -46,6 +46,9 @@ public class EventModel
     [Required]
     public required DateTimeOffset ValidTo { get; init; }
 
+    /// <summary>FK to the command that produced this event. Nullable for events created before the Commands table existed.</summary>
+    public Guid? CommandId { get; init; }
+
     public Guid traceId { get; init; }
 
     public override string ToString() =>

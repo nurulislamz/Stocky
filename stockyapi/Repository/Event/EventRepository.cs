@@ -20,11 +20,11 @@ public class EventRepository : IEventRepository
     }
 
 
-    public EventModel CreateEvent<TCommand>(
+    public EventModel CreateEvent(
         AggregateType aggregateType,
         Guid aggregateId,
         EventType eventType,
-        TCommand command,
+        BaseCommand command,
         CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;

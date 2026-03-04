@@ -1,0 +1,1 @@
+public record BaseCommand(Guid requestId);

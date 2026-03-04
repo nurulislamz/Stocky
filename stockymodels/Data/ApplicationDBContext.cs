@@ -10,6 +10,7 @@ public class ApplicationDbContext : DbContext
   public DbSet<PortfolioModel> Portfolios { get; set; } = null!;
   public DbSet<StockHoldingModel> StockHoldings { get; set; } = null!;
   public DbSet<EventModel> EventModels { get; set; } = null!;
+  public DbSet<CommandModel> Commands { get; set; } = null!;
   public DbSet<WatchlistModel> Watchlist { get; set; } = null!;
   public DbSet<UserPreferencesModel> UserPreferences { get; set; } = null!;
   public DbSet<PriceAlertModel> PriceAlerts { get; set; } = null!;

@@ -26,7 +26,7 @@ public interface IEventRepository
         Guid aggregateId,
         EventType eventType,
         Command command,
-        CancellationToken ct = default)
+        CancellationToken ct = default);
 
     /// <summary>
     /// Adds one or more events to the current context without saving. Use when events must be committed in the same transaction as other changes; the caller must call SaveChanges.
