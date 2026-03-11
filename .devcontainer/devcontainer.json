@@ -1,0 +1,49 @@
+{
+  "name": "Stocky (.NET 10)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/Stocky",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anysphere.csharp",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "redhat.vscode-yaml",
+        "redhat.vscode-xml",
+        "cweijan.vscode-database-client2",
+        "humao.rest-client",
+        "usernamehw.errorlens",
+        "yzhang.markdown-all-in-one",
+        "mikestead.dotenv-refresh",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "Stocky.sln",
+        "omnisharp.useModernNet": true
+      }
+    }
+  },
+
+  "forwardPorts": [5000, 5001, 5432],
+  "portsAttributes": {
+    "5000": { "label": "API (HTTP)" },
+    "5001": { "label": "API (HTTPS)" },
+    "5432": { "label": "PostgreSQL" }
+  },
+
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends curl wget iputils-ping dnsutils net-tools lsof tcpdump iproute2 procps vim nano jq && sudo apt-get clean && sudo rm -rf /var/lib/apt/lists/* && dotnet restore",
+  "remoteEnv": {
+    "ConnectionStrings__DefaultConnection": "Host=postgres;Port=5432;Database=stocky;Username=postgres;Password=dev123"
+  }
+}
