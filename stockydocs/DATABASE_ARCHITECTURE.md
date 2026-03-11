@@ -4,12 +4,45 @@
 
 ## 1. Current Architecture Overview
 
-### 1.1 Entity Relationship Diagram (Conceptual)
+### 1.1 Two-Prong Command Flow
+
+Every command transaction does two things:
+
+1. **Event path** — Send the event to an event handler that **appends** it to the event store using **Dapper + custom SQL** (efficient, append-only).
+2. **Read-model path** — Apply the command to the **read models** (Portfolio, StockHoldings, Funds-related tables, User, Watchlist, etc.) so queries see the latest state.
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    Command Transaction                    │
+                    └───────────────────────────┬─────────────────────────────┘
+                                                │
+                    ┌───────────────────────────┴───────────────────────────┐
+                    │                                                       │
+                    ▼                                                       ▼
+    ┌───────────────────────────────┐                   ┌───────────────────────────────────┐
+    │  Event handler (Dapper)       │                   │  Read-model updater               │
+    │  • Custom SQL INSERT          │                   │  • UPDATE PortfolioModel         │
+    │  • Append-only Events table   │                   │  • INSERT/UPDATE StockHoldingModel│
+    │  • No EF change tracking      │                   │  • UPDATE UserModel, etc.        │
+    └───────────────┬───────────────┘                   └───────────────────────────────────┘
+                    │                                                       │
+                    ▼                                                       ▼
+    ┌───────────────────────────────┐                   ┌───────────────────────────────────┐
+    │  Events (event store)        │                   │  Portfolios, StockHoldings,       │
+    │  • Single source of truth     │                   │  Users, Watchlist, … (read models)│
+    │  • Replay / audit / temporal  │                   │  • Current state for queries     │
+    └───────────────────────────────┘                   └───────────────────────────────────┘
+```
+
+- **Event store (Events table):** Written only by the event handler using **Dapper + custom SQL** (single INSERT per event). No EF change tracking; optimised for append-only throughput.
+- **Read models:** Updated in the same command transaction (or immediately after) so that Portfolio, StockHoldings, User, Watchlist, etc. reflect the latest state for queries.
+
+### 1.2 Entity Relationship Diagram (Conceptual)
 
 ```
 UserModel (1)──────(1) PortfolioModel (1)──────(N) StockHoldingModel
     │                       │
-    │                       ├──────(N) AssetTransactionModel   (legacy / optional)
+    │                       │  (read models updated by command handlers)
     │                       │
     │                       ├──────(N) FundsTransactionModel  (legacy / optional)
     │                       │
@@ -22,7 +55,7 @@ UserModel (1)──────(1) PortfolioModel (1)──────(N) Stock
     └──────(N) PriceAlertModel
 ```
 
-### 1.2 Current Model Summary
+### 1.3 Current Model Summary
 
 | Entity | Purpose | Mutable? | Indexed Columns |
 |--------|---------|----------|-----------------|
@@ -36,7 +69,7 @@ UserModel (1)──────(1) PortfolioModel (1)──────(N) Stock
 | `PriceAlertModel` | Price threshold triggers | Yes (IsTriggered) | (Symbol, IsTriggered), (UserId, Symbol) unique |
 | `UserPreferencesModel` | UI/notification settings | Yes | UserId (unique) |
 
-### 1.3 Architecture Style
+### 1.4 Architecture Style
 
 The current design is a **State-Sourced (CRUD)** architecture:
 
@@ -257,9 +290,11 @@ public class EventModel
 
 - Table name: **`Events`**. Configured in **EventConfiguration** (ToTable, HasKey, EventId column, required payload columns).
 
-#### 4.3.6 Relation to existing tables
+#### 4.3.6 Relation to existing tables (two-prong flow)
 
-- **Hybrid:** Keep `PortfolioModel` and `StockHoldingModel` as derived caches. Every mutation writes **one row** to `Events` (with appropriate `AggregateType` + `AggregateId`), then updates caches. Reconciliation replays events by `(AggregateType, AggregateId, SequenceId)` and recomputes state.
+- **Event path:** Every command transaction invokes an event handler that appends **one row** to `Events` via **Dapper + custom SQL** (no EF). Payload is serialised (e.g. rich event JSON) and inserted with `AggregateType`, `AggregateId`, `EventType`, etc.
+- **Read-model path:** The same command transaction (or handler) updates `PortfolioModel`, `StockHoldingModel`, `UserModel`, `WatchlistModel`, etc. (via EF or Dapper) so read models reflect the latest state.
+- **Reconciliation:** Can replay from `Events` by `(AggregateType, AggregateId, SequenceId)` to recompute read models if needed.
 - **User events:** Same table; `AggregateType = UserId`, `AggregateId = UserId`. No separate “UserEvents” table required.
 
 ### 4.4 Migration Path

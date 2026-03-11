@@ -7,6 +7,7 @@ namespace stockyapi.Repository.Event;
 
 /// <summary>
 /// Append-only event repository. Only adds events; no update or delete operations.
+/// Two-prong: CreateEvent + Add(evt); caller commits with read-model changes in one transaction.
 /// </summary>
 public class EventRepository : IEventRepository
 {
@@ -19,12 +20,14 @@ public class EventRepository : IEventRepository
         _logger = logger;
     }
 
-
+    /// <inheritdoc />
     public EventModel CreateEvent(
         AggregateType aggregateType,
         Guid aggregateId,
+        int sequenceId,
         EventType eventType,
-        BaseCommand command,
+        object payload,
+        Guid? traceId = null,
         CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
@@ -36,15 +39,15 @@ public class EventRepository : IEventRepository
             AggregateType = aggregateType,
             AggregateId = aggregateId,
             AggregateVersion = 0,
-            SequenceId = 0, // DB assigns via identity when supported (e.g. PostgreSQL); otherwise caller may set
+            SequenceId = sequenceId,
             EventType = eventType,
-            EventPayloadJson = JsonSerializer.Serialize(command),
+            EventPayloadJson = JsonSerializer.Serialize(payload),
             EventPayloadProtobuf = Array.Empty<byte>(),
             TtStart = now,
             TtEnd = now,
             ValidFrom = now,
             ValidTo = validTo,
-            traceId = Guid.NewGuid()
+            TraceId = traceId ?? Guid.NewGuid()
         };
     }
 

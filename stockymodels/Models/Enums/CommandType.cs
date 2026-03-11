@@ -1,19 +1,23 @@
 public enum CommandType
 {
-  // User events
+  // User Commands
   UserCreate,
   UserNameChange,
   UserEmailChange,
   UserPasswordChange,
   UserDelete,
 
-  // Portfolio Events
+  // Portfolio Commands
   StockBought,
   StockSold,
   UpdateHolding,
   DeleteHolding,
+
+  // Fund Commands
   DepositFunds,
   WithdrawFunds,
+
+  // Watchlist Commands
   AddToWatchlist,
   RemoveFromWatchlist
 }

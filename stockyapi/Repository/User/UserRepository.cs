@@ -50,9 +50,10 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand portfolioCreateCommand, CancellationToken cancellationToken = default)
+    public async Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default)
     {
         var userId = Guid.NewGuid();
+        var portfolioId = portfolioCreateCommand?.PortfolioId ?? Guid.NewGuid();
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userCreateCommand.Password);
         var now = DateTimeOffset.UtcNow;
         var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
@@ -95,11 +96,11 @@ public class UserRepository : IUserRepository
 
         var portfolio = new PortfolioModel
         {
-            Id = portfolioCreateCommand.PortfolioId,
-            UserId = portfolioCreateCommand.UserId,
-            TotalValue = portfolioCreateCommand.TotalValue,
-            CashBalance = portfolioCreateCommand.CashBalance,
-            InvestedAmount = portfolioCreateCommand.InvestedAmount
+            Id = portfolioId,
+            UserId = userId,
+            TotalValue = portfolioCreateCommand?.TotalValue ?? 0m,
+            CashBalance = portfolioCreateCommand?.CashBalance ?? 0m,
+            InvestedAmount = portfolioCreateCommand?.InvestedAmount ?? 0m
         };
 
         var preferenceCommand = new UserPreferenceCreationCommand(userId);
@@ -118,13 +119,18 @@ public class UserRepository : IUserRepository
         };
 
         // Single transaction: event + user + portfolio + preferences. If any part fails, nothing is committed.
-        _eventRepository.Add(userCreateCommand);
+        _eventRepository.Add(userCreationEvent);
         _context.Users.Add(user);
         _context.Portfolios.Add(portfolio);
         _context.UserPreferences.Add(preferences);
         await _context.SaveChangesAsync(cancellationToken);
 
         return user;
+    }
+
+    public Task<UserModel> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default)
+    {
+        return Task.FromException<UserModel>(new NotImplementedException("ChangeName is not yet implemented."));
     }
 
     public async Task UpdateUserAsync(UserModel user)

@@ -48,7 +48,7 @@ public class AuthenticationApi : IAuthenticationApi
             request.Email,
             request.Password);
 
-        var user = await _userRepository.CreateUserAsync(command, cancellationToken);
+        var user = await _userRepository.CreateUserAsync(command, null, cancellationToken);
 
         var token = _tokenService.CreateToken(user);
         return Result<RegisterResponse>.Success(new RegisterResponse(token, user.Email, user.Id.ToString()));

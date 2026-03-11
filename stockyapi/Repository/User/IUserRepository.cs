@@ -1,17 +1,16 @@
+using stockyapi.Application.Commands.Portfolio;
 using stockyapi.Application.Commands.User;
-using stockyapi.Middleware;
 using stockymodels.models;
 
 namespace stockyapi.Repository.User;
 
 public interface IUserRepository
 {
-    // Basic CRUD operations
     Task<UserModel?> GetUserByIdAsync(Guid id);
     Task<bool> UserExistsByEmailAsync(string email);
     Task<UserModel?> GetUserByEmailAsync(string email);
 
-    Task<UserModel> CreateUserAsync(UserCreateCommand command, CancellationToken cancellationToken = default);
+    Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default);
     Task DeleteUserAsync(UserModel user);
 
     Task<UserModel> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default);

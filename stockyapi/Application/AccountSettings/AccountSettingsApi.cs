@@ -36,7 +36,7 @@ public class AccountSettingsApi : IAccountSettingsApi
             return new ValidationFailure422("");
         }
 
-        await _userRepository.ChangeName(request.FirstName, request.Surname);
-
+        var updated = await _userRepository.ChangeName(request.FirstName!, request.Surname!, cancellationToken);
+        return Result<string>.Success(updated.FirstName + " " + updated.Surname);
     }
 }

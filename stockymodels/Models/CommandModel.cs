@@ -30,9 +30,6 @@ public class CommandModel
     [Required]
     public Guid RequestId { get; set; }
 
-    [Required]
-    public DateTimeOffset IssuedAt { get; set; }
-
     /// <summary>Events produced by this command.</summary>
     public virtual ICollection<EventModel> Events { get; set; } = new List<EventModel>();
 }
