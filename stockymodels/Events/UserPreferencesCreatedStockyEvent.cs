@@ -2,7 +2,7 @@ using stockymodels.Models.Enums;
 
 namespace stockymodels.Events;
 
-public record UserPreferencesCreatedEvent : Event
+public record UserPreferencesCreatedStockyEvent : StockyEvent
 {
     public required Guid UserPreferencesId { get; init; }
     public required Theme Theme { get; init; }

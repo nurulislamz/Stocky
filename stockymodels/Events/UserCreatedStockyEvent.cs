@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record UserCreatedEvent : Event
+public record UserCreatedStockyEvent : StockyEvent
 {
     public required string FirstName { get; init; }
     public required string Surname { get; init; }

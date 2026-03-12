@@ -1,6 +1,6 @@
 ﻿namespace stockyapi.Middleware;
 
-public sealed class Result<T>
+public readonly struct Result<T>
 {
     public readonly bool IsSuccess;
     public readonly T Value;

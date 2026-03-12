@@ -25,7 +25,7 @@ public class EventModel
     [Required]
     public required EventType EventType { get; init; }
 
-    /// <summary>Event payload as JSON for querying and APIs.</summary>
+    /// <summary>StockyEvent payload as JSON for querying and APIs.</summary>
     [Required]
     [StringLength(400)]
     public required string EventPayloadJson { get; init; }
