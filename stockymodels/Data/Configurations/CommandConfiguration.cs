@@ -10,8 +10,8 @@ public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
     {
         builder.ToTable("Commands", "stockydb");
 
-        builder.HasKey(c => c.Id);
-        builder.Property(c => c.Id).HasColumnName("CommandId");
+        builder.HasKey(c => c.CommandId);
+        builder.Property(c => c.CommandId).HasColumnName("CommandId");
 
         builder.Property(c => c.CommandType)
             .IsRequired()

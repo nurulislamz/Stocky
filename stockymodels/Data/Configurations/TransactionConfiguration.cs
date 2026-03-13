@@ -10,8 +10,8 @@ public class EventConfiguration : IEntityTypeConfiguration<EventModel>
     {
         builder.ToTable("Events", "stockydb");
 
-        builder.HasKey(e => e.Id);
-        builder.Property(e => e.Id).HasColumnName("EventId").ValueGeneratedOnAdd();
+        builder.HasKey(e => e.EventId);
+        builder.Property(e => e.EventId).HasColumnName("EventId").ValueGeneratedOnAdd();
 
         builder.Property(e => e.EventPayloadJson)
             .IsRequired()

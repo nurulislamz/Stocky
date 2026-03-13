@@ -7,6 +7,8 @@ CREATE TABLE "Commands" (
     "UserId" UUID NOT NULL,
     "CommandType" VARCHAR(128) NOT NULL,
     "CommandPayloadJson" JSONB NOT NULL,
+    "TtStart" TIMESTAMPTZ NOT NULL,
+    "TtEnd" TIMESTAMPTZ NOT NULL,
     "RequestId" UUID NOT NULL,
     "TraceId" UUID NULL
 );
@@ -15,7 +17,7 @@ CREATE INDEX "ix_commands_user_id" ON "Commands" ("UserId");
 CREATE INDEX "ix_commands_request_id" ON "Commands" ("RequestId");
 
 CREATE TABLE "Events" (
-    "EventId" BIGSERIAL PRIMARY KEY,
+    "EventId" UUID PRIMARY KEY,
     "UserId" UUID NOT NULL,
     "AggregateType" INTEGER NOT NULL,
     "AggregateTypeDesc" VARCHAR(32) NOT NULL,

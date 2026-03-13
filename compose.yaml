@@ -1,0 +1,13 @@
+﻿services:
+  stockyevents:
+    image: stockyevents
+    build:
+      context: .
+      dockerfile: stockyevents/Dockerfile
+
+  stockymigrator:
+    image: stockymigrator
+    build:
+      context: .
+      dockerfile: stockymigrator/Dockerfile
+

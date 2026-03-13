@@ -134,7 +134,7 @@ public class PortfolioRepository : IPortfolioRepository
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
-        return new TradeResult(evt.Id, command.Symbol, command.Quantity, command.Price, totalCost, newAverageCost, portfolio);
+        return new TradeResult(evt.EventId, command.Symbol, command.Quantity, command.Price, totalCost, newAverageCost, portfolio);
     }
 
     public async Task<TradeResult> SellHoldingAsync(Guid userId, StockSoldCommand command, CancellationToken ct)
@@ -174,7 +174,7 @@ public class PortfolioRepository : IPortfolioRepository
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
-        return new TradeResult(evt.Id, command.Symbol, command.Quantity, command.Price, totalProceeds, newAverageCost, portfolio);
+        return new TradeResult(evt.EventId, command.Symbol, command.Quantity, command.Price, totalProceeds, newAverageCost, portfolio);
     }
 
     public async Task<List<Guid>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken ct)

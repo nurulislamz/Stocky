@@ -1,3 +1,6 @@
 namespace stockymodels.Events;
 
-public abstract record StockyEvent;
+public record StockyEvent
+{
+    public required Guid AggregateId { get; init; }
+}

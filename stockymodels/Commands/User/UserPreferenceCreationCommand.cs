@@ -6,7 +6,7 @@ namespace stockyapi.Application.Commands.User;
 public record UserPreferenceCreationCommand(
     Guid UserId,
     Theme Theme = Theme.Light,
-    DefaultCurrency Currency = DefaultCurrency.GDP,
+    DefaultCurrency Currency = DefaultCurrency.GBP,
     Language Language = Language.English,
     bool EmailNotifications = true,
     bool PushNotifications = true,

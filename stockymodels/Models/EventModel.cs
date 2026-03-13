@@ -1,20 +1,18 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using stockymodels.Models.Enums;
 
 namespace stockymodels.models;
 
 public class EventModel
 {
     [Required]
-    [Column("EventId")]
-    public long Id { get; set; }
+    public Guid EventId { get; set; }
 
     [Required]
     public Guid UserId { get; set; }
 
     [Required]
-    public AggregateType AggregateType { get; set; }
+    [MaxLength(32)]
+    public required string AggregateType { get; set; }
 
     [Required]
     [MaxLength(32)]
@@ -24,13 +22,14 @@ public class EventModel
     public Guid AggregateId { get; set; }
 
     [Required]
-    public int AggregateVersion { get; set; }
-
-    [Required]
     public int SequenceId { get; set; }
 
     [Required]
-    public EventType EventType { get; set; }
+    public int AggregateVersion { get; set; }
+
+    [Required]
+    [MaxLength(128)]
+    public required string EventType { get; set; }
 
     /// <summary>StockyEvent payload as JSON for querying and APIs.</summary>
     [Required]
@@ -51,9 +50,6 @@ public class EventModel
     /// <summary>FK to the command that produced this event.</summary>
     public Guid? CommandId { get; set; }
 
-    /// <summary>Navigation to the command that produced this event.</summary>
-    public CommandModel? Command { get; set; }
-
     /// <summary>Correlation id for distributed tracing. Null when not tracked.</summary>
     public Guid? TraceId { get; set; }
 
@@ -62,7 +58,7 @@ public class EventModel
         var jsonPreview = EventPayloadJson?.Length > 200
             ? EventPayloadJson[..200] + "..."
             : EventPayloadJson ?? "";
-        return $"Id={Id}, AggregateType={AggregateType}, AggregateId={AggregateId}, SequenceId={SequenceId}, EventType={EventType}, " +
+        return $"Id={EventId}, AggregateType={AggregateType}, AggregateId={AggregateId}, SequenceId={SequenceId}, EventType={EventType}, " +
             $"TtStart={TtStart:O}, TtEnd={TtEnd:O}, ValidFrom={ValidFrom:O}, ValidTo={ValidTo:O}, " +
             $"EventPayloadJson={jsonPreview}";
     }

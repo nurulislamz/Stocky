@@ -1,87 +1,129 @@
 using System.Text.Json;
 using Dapper;
 using Npgsql;
+using stockymodels.Events;
+using stockymodels.EventStore;
 using stockymodels.models;
-using stockymodels.Models.Enums;
 
 namespace stockymodels.Data;
 
 /// <summary>
-/// Dapper-based append-only event store. Inserts events into the Events table per 001CreateEventStore.sql.
+/// Dapper-based append-only event store. Inserts commands and events per 001CreateEventStore.sql.
 /// Use for high-throughput event appends; read models are updated separately (two-prong flow).
 /// </summary>
 public class PostgresEventStore : IDisposable, IAsyncDisposable
 {
-	private readonly string _connectionString;
-	public readonly NpgsqlConnection Connection;
+	private readonly NpgsqlConnection _connection;
 
 	public PostgresEventStore(string connectionString)
 	{
-		_connectionString = connectionString;
-		Connection = new NpgsqlConnection(_connectionString);
-		Connection.Open();
+		_connection = new NpgsqlConnection(connectionString);
+		_connection.Open();
 	}
 
-	/// <summary>Appends an event to the Events table. EventId is auto-generated (BIGSERIAL).</summary>
-	public async Task<long> InsertEventAsync(
-		Guid userId,
-		AggregateType aggregateType,
-		Guid aggregateId,
+	/// <summary>Appends a command and one event in a single transaction.</summary>
+	public async Task<(CommandModel, EventModel)> InsertEventAsync(
+		Command command,
+		StockyEvent @event,
+		AppendContext context,
 		int sequenceId,
-		int aggregateVersion,
-		EventType eventType,
-		object payload,
-		DateTimeOffset ttStart,
-		DateTimeOffset ttEnd,
-		DateTimeOffset validFrom,
-		DateTimeOffset validTo,
-		Guid? commandId = null,
-		Guid? traceId = null,
 		CancellationToken ct = default)
 	{
-		var aggregateTypeDesc = aggregateType.ToString();
-		var eventPayloadJson = JsonSerializer.Serialize(payload);
+		var commandId = Guid.NewGuid();
+		var eventId = Guid.NewGuid();
+		var now = DateTimeOffset.UtcNow;
+		var ttEnd = DateTimeOffset.MaxValue;
 
-		const string sql = """
+		var commandModel = CreateCommandModel(command, commandId, context, now, ttEnd);
+		var eventModel = CreateEventModel(@event, eventId, commandId, context, 0, 0, now, ttEnd);
+		// need to edit aggregate version logic
+
+		const string commandSql = """
+			INSERT INTO stockydb."Commands" (
+				"CommandId", "UserId", "CommandType", "CommandPayloadJson", "TtStart", "TtEnd", "RequestId", "TraceId")
+			VALUES (
+				@CommandId, @UserId, @CommandType, @CommandPayloadJson, @TtStart, @TtEnd, @RequestId, @TraceId);
+			""";
+
+		const string eventSql = """
 			INSERT INTO stockydb."Events" (
-				"UserId", "AggregateType", "AggregateTypeDesc", "AggregateId", "SequenceId",
+				"EventId", "UserId", "AggregateType", "AggregateTypeDesc", "AggregateId", "SequenceId",
 				"AggregateVersion", "EventType", "EventPayloadJson", "TtStart", "TtEnd",
 				"ValidFrom", "ValidTo", "CommandId", "TraceId")
 			VALUES (
-				@UserId, @AggregateType, @AggregateTypeDesc, @AggregateId, @SequenceId,
+				@EventId, @UserId, @AggregateType, @AggregateTypeDesc, @AggregateId, @SequenceId,
 				@AggregateVersion, @EventType, @EventPayloadJson, @TtStart, @TtEnd,
-				@ValidFrom, @ValidTo, @CommandId, @TraceId)
-			RETURNING "EventId";
+				@ValidFrom, @ValidTo, @CommandId, @TraceId);
 			""";
 
-		var eventId = await Connection.ExecuteScalarAsync<long>(new Dapper.CommandDefinition(sql, new
+		using var transaction = await _connection.BeginTransactionAsync(ct);
+		try
 		{
-			UserId = userId,
-			AggregateType = (int)aggregateType,
-			AggregateTypeDesc = aggregateTypeDesc,
-			AggregateId = aggregateId,
-			SequenceId = sequenceId,
-			AggregateVersion = aggregateVersion,
-			EventType = (int)eventType,
-			EventPayloadJson = eventPayloadJson,
+			await _connection.ExecuteAsync(new CommandDefinition(commandSql, commandModel, transaction, cancellationToken: ct));
+			await _connection.ExecuteAsync(new CommandDefinition(eventSql, eventModel, transaction, cancellationToken: ct));
+			await transaction.CommitAsync(ct);
+		}
+		catch
+		{
+			await transaction.RollbackAsync(ct);
+			throw;
+		}
+
+		return (commandModel, eventModel);
+	}
+
+	private static CommandModel CreateCommandModel(Command command, Guid commandId, AppendContext ctx, DateTimeOffset ttStart, DateTimeOffset ttEnd)
+		=> new CommandModel
+		{
+			CommandId = commandId,
+			UserId = ctx.UserId,
+			CommandType = command.GetType().Name,
+			CommandPayloadJson = JsonSerializer.Serialize(command),
 			TtStart = ttStart,
 			TtEnd = ttEnd,
+			RequestId = Guid.NewGuid(),
+			TraceId = ctx.TraceId,
+		};
+
+	private static EventModel CreateEventModel(
+		StockyEvent @event,
+		Guid eventId,
+		Guid commandId,
+		AppendContext ctx,
+		int sequenceId,
+		int aggregateVersion,
+		DateTimeOffset validFrom,
+		DateTimeOffset validTo)
+	{
+		var aggregateTypeDesc = @event.GetType().Name;
+
+		return new EventModel
+		{
+			EventId = eventId,
+			UserId = ctx.UserId,
+			AggregateType = aggregateTypeDesc,
+			AggregateTypeDesc = aggregateTypeDesc,
+			AggregateId = @event.AggregateId,
+			SequenceId = sequenceId,
+			AggregateVersion = aggregateVersion,
+			EventType = @event.GetType().Name,
+			EventPayloadJson = JsonSerializer.Serialize(@event),
+			TtStart = validFrom,
+			TtEnd = validTo,
 			ValidFrom = validFrom,
 			ValidTo = validTo,
 			CommandId = commandId,
-			TraceId = traceId
-		}, cancellationToken: ct));
-
-		return eventId;
+			TraceId = ctx.TraceId,
+		};
 	}
 
 	public void Dispose()
 	{
-		Connection.Dispose();
+		_connection.Dispose();
 	}
 
 	public async ValueTask DisposeAsync()
 	{
-		await Connection.DisposeAsync();
+		await _connection.DisposeAsync();
 	}
 }
