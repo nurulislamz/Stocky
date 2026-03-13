@@ -33,9 +33,7 @@ public class ApplicationDbContext : DbContext
     return base.SaveChangesAsync(cancellationToken);
   }
 
-  /// <summary>
-  /// Events table is append-only. Reject any update or delete of EventModel.
-  /// </summary>
+  /// <summary>Events table is append-only. Reject any update or delete of EventModel.</summary>
   private void EnforceEventStoreAppendOnly()
   {
     foreach (var entry in ChangeTracker.Entries<EventModel>())

@@ -8,7 +8,7 @@ public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPrefere
 {
     public void Configure(EntityTypeBuilder<UserPreferencesModel> builder)
     {
-        builder.ToTable("UserPreferences");
+        builder.ToTable("UserPreferences", "stockydb");
 
         builder.HasIndex(e => e.UserId)
             .IsUnique();

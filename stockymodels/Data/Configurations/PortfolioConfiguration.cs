@@ -8,7 +8,7 @@ public class PortfolioConfiguration : IEntityTypeConfiguration<PortfolioModel>
 {
     public void Configure(EntityTypeBuilder<PortfolioModel> builder)
     {
-        builder.ToTable("Portfolios");
+        builder.ToTable("Portfolios", "stockydb");
 
         builder.HasIndex(e => e.UserId)
             .IsUnique();

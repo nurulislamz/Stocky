@@ -8,7 +8,7 @@ public class StockHoldingConfiguration : IEntityTypeConfiguration<StockHoldingMo
 {
     public void Configure(EntityTypeBuilder<StockHoldingModel> builder)
     {
-        builder.ToTable("StockHoldings");
+        builder.ToTable("StockHoldings", "stockydb");
 
         builder.Property(e => e.Ticker)
             .HasMaxLength(20);

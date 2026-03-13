@@ -8,7 +8,7 @@ public class PriceAlertConfiguration : IEntityTypeConfiguration<PriceAlertModel>
 {
     public void Configure(EntityTypeBuilder<PriceAlertModel> builder)
     {
-        builder.ToTable("PriceAlerts");
+        builder.ToTable("PriceAlerts", "stockydb");
 
         builder.Property(p => p.Condition)
             .HasMaxLength(10);

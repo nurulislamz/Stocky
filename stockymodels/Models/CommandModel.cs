@@ -5,7 +5,7 @@ namespace stockymodels.models;
 
 /// <summary>
 /// Append-only log of every command issued against the system.
-/// Each command produces one or more events; the relationship is tracked via EventModel.CommandId.
+/// Each command produces one or more events; the relationship is tracked via StockyEventModel.CommandId.
 /// </summary>
 public class CommandModel
 {
@@ -29,6 +29,9 @@ public class CommandModel
     /// <summary>Correlation id from the originating HTTP request / message.</summary>
     [Required]
     public Guid RequestId { get; set; }
+
+    /// <summary>Correlation id for distributed tracing. Null when not tracked.</summary>
+    public Guid? TraceId { get; set; }
 
     /// <summary>Events produced by this command.</summary>
     public virtual ICollection<EventModel> Events { get; set; } = new List<EventModel>();

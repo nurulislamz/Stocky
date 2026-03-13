@@ -55,8 +55,6 @@ public class UserRepository : IUserRepository
         var userId = Guid.NewGuid();
         var portfolioId = portfolioCreateCommand?.PortfolioId ?? Guid.NewGuid();
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(userCreateCommand.Password);
-        var now = DateTimeOffset.UtcNow;
-        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
 
         var payload = new
         {
@@ -65,22 +63,16 @@ public class UserRepository : IUserRepository
             userCreateCommand.Email,
             PasswordHash = hashedPassword
         };
-        var eventPayloadJson = JsonSerializer.Serialize(payload);
-
-        var userCreationEvent = new EventModel
-        {
-            Id = Guid.NewGuid(),
-            AggregateType = AggregateType.UserId,
-            AggregateId = userId,
-            SequenceId = 1,
-            EventType = EventType.UserCreate,
-            EventPayloadJson = eventPayloadJson,
-            EventPayloadProtobuf = Array.Empty<byte>(),
-            TtStart = now,
-            TtEnd = now,
-            ValidFrom = now,
-            ValidTo = validTo
-        };
+        var userCreationEvent = _eventRepository.CreateEvent(
+            userId,
+            AggregateType.UserId,
+            userId,
+            sequenceId: 1,
+            EventType.UserCreateEvent,
+            payload,
+            traceId: null,
+            commandId: null,
+            cancellationToken);
 
         var user = new UserModel
         {

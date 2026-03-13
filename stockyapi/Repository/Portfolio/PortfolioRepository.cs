@@ -130,7 +130,7 @@ public class PortfolioRepository : IPortfolioRepository
         }
 
         var nextSeq = await GetNextSequenceIdAsync(AggregateType.PortfolioId, portfolio.Id, ct);
-        var evt = _eventRepository.CreateEvent(AggregateType.PortfolioId, portfolio.Id, nextSeq, EventType.StockBought, command, null, ct);
+        var evt = _eventRepository.CreateEvent(userId, AggregateType.PortfolioId, portfolio.Id, nextSeq, EventType.StockBought, command, null, null, ct);
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
@@ -170,7 +170,7 @@ public class PortfolioRepository : IPortfolioRepository
         }
 
         var nextSeq = await GetNextSequenceIdAsync(AggregateType.PortfolioId, portfolio.Id, ct);
-        var evt = _eventRepository.CreateEvent(AggregateType.PortfolioId, portfolio.Id, nextSeq, EventType.StockSold, command, null, ct);
+        var evt = _eventRepository.CreateEvent(userId, AggregateType.PortfolioId, portfolio.Id, nextSeq, EventType.StockSold, command, null, null, ct);
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);
 
@@ -197,7 +197,7 @@ public class PortfolioRepository : IPortfolioRepository
             tickers);
 
         var nextSeq = await GetNextSequenceIdAsync(AggregateType.PortfolioId, portfolioId, ct);
-        var evt = _eventRepository.CreateEvent(AggregateType.PortfolioId, portfolioId, nextSeq, EventType.DeleteHolding, command, null, ct);
+        var evt = _eventRepository.CreateEvent(userId, AggregateType.PortfolioId, portfolioId, nextSeq, EventType.DeleteHolding, command, null, null, ct);
         _dbContext.StockHoldings.RemoveRange(holdings);
         _eventRepository.Add(evt);
         await _dbContext.SaveChangesAsync(ct);

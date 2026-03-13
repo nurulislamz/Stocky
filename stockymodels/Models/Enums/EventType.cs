@@ -4,6 +4,7 @@ public enum EventType
 {
     // Legacy (command as payload); can later map to rich event types
     UserCreateEvent,
+    UserCreate = UserCreateEvent,
     UserNameChangeEvent,
     UserEmailChangeEvent,
     UserPasswordChangeEvent,
@@ -14,9 +15,15 @@ public enum EventType
     HoldingCreationEvent,
     HoldingModificationEvent,
     HoldingDeletionEvent,
+    // Legacy aliases used by PortfolioRepository
+    StockBought,
+    StockSold,
+    DeleteHolding,
     //
     FundsDepositedEvent,
     FundsWithdrawnEvent,
+    DepositFunds = FundsDepositedEvent,
+    WithdrawFunds = FundsWithdrawnEvent,
     //
     WatchlistAddEvent,
     WatchlistRemoveEvent,

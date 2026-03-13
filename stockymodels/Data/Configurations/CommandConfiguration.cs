@@ -8,7 +8,7 @@ public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
 {
     public void Configure(EntityTypeBuilder<CommandModel> builder)
     {
-        builder.ToTable("Commands");
+        builder.ToTable("Commands", "stockydb");
 
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Id).HasColumnName("CommandId");
@@ -22,7 +22,6 @@ public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
 
         builder.HasIndex(c => c.UserId);
         builder.HasIndex(c => c.RequestId);
-        builder.HasIndex(c => c.IssuedAt);
 
         builder.HasMany(c => c.Events)
             .WithOne(e => e.Command)

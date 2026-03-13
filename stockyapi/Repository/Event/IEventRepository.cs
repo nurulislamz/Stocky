@@ -12,21 +12,25 @@ public interface IEventRepository
     /// <summary>
     /// Creates a new event ready for persistence. Payload is serialized as JSON (command or rich event).
     /// </summary>
+    /// <param name="userId">The user who owns/triggered this event (for RLS and audit).</param>
     /// <param name="aggregateType">Aggregate domain type the event belongs to (e.g. User or Portfolio).</param>
     /// <param name="aggregateId">Aggregate identifier this event applies to.</param>
     /// <param name="sequenceId">Per-aggregate sequence number for ordering.</param>
     /// <param name="eventType">Domain event type.</param>
     /// <param name="payload">Command or rich event; will be serialized to EventPayloadJson.</param>
     /// <param name="traceId">Optional correlation id for tracing.</param>
+    /// <param name="commandId">Optional command that produced this event.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>An <see cref="EventModel"/> with Id and timestamps set; not yet persisted until Add + SaveChanges.</returns>
+    /// <returns>An <see cref="EventModel"/> with timestamps set; Id is auto-generated on insert.</returns>
     EventModel CreateEvent(
+        Guid userId,
         AggregateType aggregateType,
         Guid aggregateId,
         int sequenceId,
         EventType eventType,
         object payload,
         Guid? traceId = null,
+        Guid? commandId = null,
         CancellationToken ct = default);
 
     /// <summary>

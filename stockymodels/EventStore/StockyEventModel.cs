@@ -4,58 +4,49 @@ using stockymodels.Models.Enums;
 
 namespace stockymodels.models;
 
-public class EventModel
+public class StockyEventModel
 {
     [Required]
     [Column("EventId")]
-    public long Id { get; set; }
+    public Int64 Id { get; set; }
 
     [Required]
-    public Guid UserId { get; set; }
+    public AggregateType AggregateType { get; init; }
 
     [Required]
-    public AggregateType AggregateType { get; set; }
-
-    [Required]
-    [MaxLength(32)]
-    public required string AggregateTypeDesc { get; set; }
-
-    [Required]
-    public Guid AggregateId { get; set; }
+    public Guid AggregateId { get; init; }
 
     [Required]
     public int AggregateVersion { get; set; }
 
     [Required]
-    public int SequenceId { get; set; }
+    public int SequenceId { get; init; }
 
     [Required]
-    public EventType EventType { get; set; }
+    public required EventType EventType { get; init; }
 
     /// <summary>StockyEvent payload as JSON for querying and APIs.</summary>
     [Required]
-    public required string EventPayloadJson { get; set; }
+    [StringLength(400)]
+    public required string EventPayloadJson { get; init; }
 
     [Required]
-    public DateTimeOffset TtStart { get; set; }
+    public required DateTimeOffset TtStart { get; init; }
 
     [Required]
-    public DateTimeOffset TtEnd { get; set; }
+    public required DateTimeOffset TtEnd { get; init; }
 
     [Required]
-    public DateTimeOffset ValidFrom { get; set; }
+    public required DateTimeOffset ValidFrom { get; init; }
 
     [Required]
-    public DateTimeOffset ValidTo { get; set; }
-
-    /// <summary>FK to the command that produced this event.</summary>
-    public Guid? CommandId { get; set; }
+    public required DateTimeOffset ValidTo { get; init; }
 
     /// <summary>Navigation to the command that produced this event.</summary>
-    public CommandModel? Command { get; set; }
+    public CommandModel? Command { get; init; }
 
     /// <summary>Correlation id for distributed tracing. Null when not tracked.</summary>
-    public Guid? TraceId { get; set; }
+    public Guid? TraceId { get; init; }
 
     public override string ToString()
     {

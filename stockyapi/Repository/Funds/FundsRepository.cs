@@ -84,24 +84,16 @@ public class FundsRepository : IFundsRepository
             .MaxAsync(e => (int?)e.SequenceId, ct);
         var nextSequenceId = (maxSeq ?? 0) + 1;
 
-        var now = DateTimeOffset.UtcNow;
-        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
-        var eventPayloadJson = JsonSerializer.Serialize(command);
-
-        var evt = new EventModel
-        {
-            Id = Guid.NewGuid(),
-            AggregateType = AggregateType.PortfolioId,
-            AggregateId = portfolio.Id,
-            SequenceId = nextSequenceId,
-            EventType = EventType.DepositFunds,
-            EventPayloadJson = eventPayloadJson,
-            EventPayloadProtobuf = Array.Empty<byte>(),
-            TtStart = now,
-            TtEnd = now,
-            ValidFrom = now,
-            ValidTo = validTo
-        };
+        var evt = _eventRepository.CreateEvent(
+            userId,
+            AggregateType.PortfolioId,
+            portfolio.Id,
+            nextSequenceId,
+            EventType.FundsDepositedEvent,
+            command,
+            traceId: null,
+            commandId: null,
+            ct);
 
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;
@@ -152,24 +144,16 @@ public class FundsRepository : IFundsRepository
             .MaxAsync(e => (int?)e.SequenceId, ct);
         var nextSequenceId = (maxSeq ?? 0) + 1;
 
-        var now = DateTimeOffset.UtcNow;
-        var validTo = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero);
-        var eventPayloadJson = JsonSerializer.Serialize(command);
-
-        var evt = new EventModel
-        {
-            Id = Guid.NewGuid(),
-            AggregateType = AggregateType.PortfolioId,
-            AggregateId = portfolio.Id,
-            SequenceId = nextSequenceId,
-            EventType = EventType.WithdrawFunds,
-            EventPayloadJson = eventPayloadJson,
-            EventPayloadProtobuf = Array.Empty<byte>(),
-            TtStart = now,
-            TtEnd = now,
-            ValidFrom = now,
-            ValidTo = validTo
-        };
+        var evt = _eventRepository.CreateEvent(
+            userId,
+            AggregateType.PortfolioId,
+            portfolio.Id,
+            nextSequenceId,
+            EventType.FundsWithdrawnEvent,
+            command,
+            traceId: null,
+            commandId: null,
+            ct);
 
         portfolio.CashBalance = updatedCashBalance;
         portfolio.TotalValue = updatedTotalValue;

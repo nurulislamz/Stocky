@@ -22,12 +22,14 @@ public class EventRepository : IEventRepository
 
     /// <inheritdoc />
     public EventModel CreateEvent(
+        Guid userId,
         AggregateType aggregateType,
         Guid aggregateId,
         int sequenceId,
         EventType eventType,
         object payload,
         Guid? traceId = null,
+        Guid? commandId = null,
         CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
@@ -35,19 +37,20 @@ public class EventRepository : IEventRepository
 
         return new EventModel
         {
-            Id = Guid.NewGuid(),
+            UserId = userId,
             AggregateType = aggregateType,
+            AggregateTypeDesc = aggregateType.ToString(),
             AggregateId = aggregateId,
             AggregateVersion = 0,
             SequenceId = sequenceId,
             EventType = eventType,
             EventPayloadJson = JsonSerializer.Serialize(payload),
-            EventPayloadProtobuf = Array.Empty<byte>(),
             TtStart = now,
             TtEnd = now,
             ValidFrom = now,
             ValidTo = validTo,
-            TraceId = traceId ?? Guid.NewGuid()
+            CommandId = commandId,
+            TraceId = traceId
         };
     }
 
@@ -63,6 +66,6 @@ public class EventRepository : IEventRepository
     {
         Add(eventModel);
         await _context.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Added event {EventId} {EventType}", eventModel.Id, eventModel.EventType);
+        _logger.LogInformation("Added event {EventType} for aggregate {AggregateId}", eventModel.EventType, eventModel.AggregateId);
     }
 }

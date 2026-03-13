@@ -3,7 +3,7 @@ using stockymodels.models;
 namespace stockyapi.Repository.PortfolioRepository.Types;
 
 public record TradeResult(
-    Guid EventId,
+    long EventId,
     string Ticker,
     decimal Quantity,
     decimal Price,

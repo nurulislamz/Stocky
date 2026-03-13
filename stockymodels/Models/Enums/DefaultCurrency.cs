@@ -3,6 +3,6 @@ namespace stockymodels.Models.Enums;
 
 public enum DefaultCurrency
 {
-  GDP,
+  GBP,
   USD
 }

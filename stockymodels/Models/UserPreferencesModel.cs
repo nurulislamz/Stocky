@@ -19,7 +19,7 @@ public class UserPreferencesModel : BaseModel
 
     [Required]
     [MaxLength(10)]
-    public DefaultCurrency Currency { get; set; } = DefaultCurrency.GDP;
+    public DefaultCurrency Currency { get; set; } = DefaultCurrency.GBP;
 
     [Required]
     [MaxLength(10)]

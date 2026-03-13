@@ -8,7 +8,7 @@ public class WatchlistConfiguration : IEntityTypeConfiguration<WatchlistModel>
 {
     public void Configure(EntityTypeBuilder<WatchlistModel> builder)
     {
-        builder.ToTable("Watchlist");
+        builder.ToTable("Watchlist", "stockydb");
 
         builder.Property(w => w.Notes)
             .HasMaxLength(500);
