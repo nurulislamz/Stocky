@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Data;
 using System.Text.Json;
 using Dapper;
@@ -23,21 +22,34 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 
 	private const string CommandSql = """
 	                                  INSERT INTO stockydb."Commands" (
-	                                  "CommandId", "UserId", "CommandType", "CommandPayloadJson", "TtStart", "TtEnd", "RequestId", "TraceId")
+	                                      "CommandId", "UserId", "CommandType", "CommandPayloadJson",
+	                                      "TtStart", "TtEnd", "RequestId", "TraceId")
 	                                  VALUES (
-	                                  @CommandId, @UserId, @CommandType, @CommandPayloadJson, @TtStart, @TtEnd, @RequestId, @TraceId);
+	                                      @CommandId, @UserId, @CommandType, @CommandPayloadJson,
+	                                      @TtStart, @TtEnd, @RequestId, @TraceId);
 	                                  """;
 
 	private const string EventSql = """
 	                                INSERT INTO stockydb."Events" (
-	                                	"EventId", "UserId", "AggregateType", "AggregateId",
-	                                	"AggregateSequenceId", "EventType", "EventPayloadJson", "TtStart", "TtEnd",
-	                                	"ValidFrom", "ValidTo", "CommandId", "TraceId")
+	                                    "EventId", "UserId", "AggregateType", "AggregateId",
+	                                    "AggregateSequenceId", "EventType", "EventPayloadJson",
+	                                    "TtStart", "TtEnd", "ValidFrom", "ValidTo", "CommandId", "TraceId")
 	                                VALUES (
-	                                	@EventId, @UserId, @AggregateType, @AggregateId,
-	                                	@AggregateSequenceId, @EventType, @EventPayloadJson, @TtStart, @TtEnd,
-	                                	@ValidFrom, @ValidTo, @CommandId, @TraceId);
+	                                    @EventId, @UserId, @AggregateType, @AggregateId,
+	                                    @AggregateSequenceId, @EventType, @EventPayloadJson,
+	                                    @TtStart, @TtEnd, @ValidFrom, @ValidTo, @CommandId, @TraceId);
 	                                """;
+
+	private const string MaxSeqSql = """
+	                                 SELECT COALESCE(MAX("AggregateSequenceId"), 0)
+	                                 FROM stockydb."Events"
+	                                 WHERE "AggregateType" = @aggregateType
+	                                   AND "AggregateId" = @aggregateId
+	                                 """;
+
+	private const string AdvisoryLockSql = """
+	                                       SELECT pg_advisory_xact_lock(@aggregateType, hashtext(@aggregateId::text))
+	                                       """;
 
 	public PostgresEventStore(string connectionString, ILogger<PostgresEventStore> logger, int retryAttempts = 5, int commandTimeout = 30, ConcurrencyLevel? concurrencyLevel = null)
 	{
@@ -57,94 +69,206 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		CancellationToken ct = default)
 	{
 		var commandId = Guid.NewGuid();
-		var eventId = Guid.NewGuid();
 		var now = DateTimeOffset.UtcNow;
 		var ttEnd = DateTimeOffset.MaxValue;
 
-		// check if aggregate of that type already exists
 		var commandModel = CreateCommandModel(command, commandId, context, now, ttEnd);
-		var eventModel = CreateEventModel(@event, eventId, commandId, context, now, ttEnd);
+		var eventModel = CreateEventModel(@event, Guid.NewGuid(), commandId, context, now, ttEnd);
 
 		return _concurrencyLevel switch
 		{
-			ConcurrencyLevel.OptimisticConcurrency => await RegisterEventOptimisticLock(commandModel, eventModel, @event, ct),
-			ConcurrencyLevel.LockOnAggregate => await RegisterEventWithLockOnAggregate(commandModel, eventModel, @event, ct),
+			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetry(commandModel, eventModel, ct),
+			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLock(commandModel, eventModel, ct),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
 
-	/// <summary>Appends a command and one event in a single transaction.</summary>
-	private async Task<(CommandModel, EventModel)> RegisterEventOptimisticLock(
-		CommandModel commandModel,
-		EventModel eventModel,
-		StockyEvent @event,
-		CancellationToken ct = default)
+	private async Task<(CommandModel, EventModel)> WithOptimisticRetry(
+		CommandModel commandModel, EventModel eventModel, CancellationToken ct)
 	{
-		int retryAttempts = 0;
-		while (retryAttempts < _retryAttempts)
+		for (int attempt = 0; attempt < _retryAttempts; attempt++)
 		{
-			await using var transaction = await _connection.BeginTransactionAsync(ct);
+			await using var tx = await _connection.BeginTransactionAsync(ct);
 			try
 			{
-				var nextAggregateSequenceId =
-					await QueryMaxAggregateSequenceIdAsync(@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
-
-				await _connection.ExecuteAsync(new CommandDefinition(CommandSql, commandModel, transaction,
-					commandTimeout: _commandTimeout, cancellationToken: ct));
-				await _connection.ExecuteAsync(new CommandDefinition(EventSql,
-					eventModel with { AggregateSequenceId = nextAggregateSequenceId }, transaction,
-					commandTimeout: _commandTimeout, cancellationToken: ct));
-				await transaction.CommitAsync(ct);
+				var nextSeq = await QueryMaxSequenceAsync(eventModel, tx, ct) + 1;
+				await InsertCommandAsync(commandModel, tx, ct);
+				var inserted = await InsertEventAsync(eventModel, nextSeq, tx, ct);
+				await tx.CommitAsync(ct);
+				return (commandModel, inserted);
 			}
 			catch (PostgresException ex) when (ex.SqlState == "23505")
 			{
-				retryAttempts++;
-				_logger.LogWarning($"Failed to registerEvent, {retryAttempts}/{_retryAttempts} retrying..."); 
+				_logger.LogWarning("Sequence conflict, attempt {Attempt}/{Max}",
+					attempt + 1, _retryAttempts);
 			}
 			catch
 			{
-				await transaction.RollbackAsync(ct);
+				await tx.RollbackAsync(ct);
 				throw;
 			}
-			
-			return (commandModel, eventModel);
 		}
 
-		throw new InvalidOperationException($"Unable to registerEvents after {_retryAttempts}");
+		throw new InvalidOperationException(
+			$"Unable to register event after {_retryAttempts} retries");
 	}
-	
-	private async Task<(CommandModel, EventModel)> RegisterEventWithLockOnAggregate(CommandModel commandModel, EventModel eventModel, StockyEvent @event, CancellationToken ct)
+
+	private async Task<(CommandModel, EventModel)> WithAdvisoryLock(
+		CommandModel commandModel, EventModel eventModel, CancellationToken ct)
 	{
-		await using var transaction = await _connection.BeginTransactionAsync(ct);
+		await using var tx = await _connection.BeginTransactionAsync(ct);
 		try
 		{
-			const string sqlLock =
-				"""select * from pg_advisory_xact_lock(@aggregateType, hashtext(@aggregateId::text));""";
-			
-			await _connection.ExecuteAsync(new CommandDefinition(sqlLock, new {eventModel.AggregateType, eventModel.AggregateId}, transaction,
-				commandTimeout: _commandTimeout, cancellationToken: ct));
-			var nextAggregateSequenceId =
-				await QueryMaxAggregateSequenceIdAsync(@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
-			await _connection.ExecuteAsync(new CommandDefinition(CommandSql, commandModel, transaction,
-				commandTimeout: _commandTimeout, cancellationToken: ct));
-			await _connection.ExecuteAsync(new CommandDefinition(EventSql,
-				eventModel with { AggregateSequenceId = nextAggregateSequenceId }, transaction,
-				commandTimeout: _commandTimeout, cancellationToken: ct));
-			await transaction.CommitAsync(ct);
+			await AcquireAdvisoryLockAsync(eventModel, tx, ct);
+			var nextSeq = await QueryMaxSequenceAsync(eventModel, tx, ct) + 1;
+			await InsertCommandAsync(commandModel, tx, ct);
+			var inserted = await InsertEventAsync(eventModel, nextSeq, tx, ct);
+			await tx.CommitAsync(ct);
+			return (commandModel, inserted);
 		}
 		catch
 		{
-			await transaction.RollbackAsync(ct);
+			await tx.RollbackAsync(ct);
 			throw;
 		}
+	}
+	
+	/// <summary>Appends a command and multiple event in a single transaction.</summary>
+	public async Task<(CommandModel, EventModel[])> RegisterMultipleEventsAsync(
+		Command command,
+		StockyEvent[] events,
+		AppendContext context,
+		CancellationToken ct = default)
+	{
+		var commandId = Guid.NewGuid();
+		var now = DateTimeOffset.UtcNow;
+		var ttEnd = DateTimeOffset.MaxValue;
+
+		var commandModel = CreateCommandModel(command, commandId, context, now, ttEnd);
+		var eventModel = events.Select(e => CreateEventModel(e, Guid.NewGuid(), commandId, context, now, ttEnd)).ToArray();
+
+		return _concurrencyLevel switch
+		{
+			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetryMulti(commandModel, eventModel, ct),
+			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLockMulti(commandModel, eventModel, ct),
+			_ => throw new ArgumentOutOfRangeException()
+		};
+	}
+
+	private async Task<(CommandModel, EventModel[])> WithOptimisticRetryMulti(
+		CommandModel commandModel, EventModel[] eventModel, CancellationToken ct)
+	{
+		for (int attempt = 0; attempt < _retryAttempts; attempt++)
+		{
+			await using var tx = await _connection.BeginTransactionAsync(ct);
+			try
+			{
+				await InsertCommandAsync(commandModel, tx, ct);
+				var inserted = await InsertMultipleEventsWithSequencing(eventModel, tx, ct);
+				await tx.CommitAsync(ct);
+				return (commandModel, inserted);
+			}
+			catch (PostgresException ex) when (ex.SqlState == "23505")
+			{
+				_logger.LogWarning("Sequence conflict, attempt {Attempt}/{Max}",
+					attempt + 1, _retryAttempts);
+			}
+			catch
+			{
+				await tx.RollbackAsync(ct);
+				throw;
+			}
+		}
+
+		throw new InvalidOperationException(
+			$"Unable to register event after {_retryAttempts} retries");
+	}
+
+	private async Task<(CommandModel, EventModel[])> WithAdvisoryLockMulti(
+		CommandModel commandModel, EventModel[] eventModels, CancellationToken ct)
+	{
+		await using var tx = await _connection.BeginTransactionAsync(ct);
+		try
+		{
+			var distinctAggregates = eventModels
+				.Select(e => (e.AggregateType, e.AggregateId))
+				.Distinct()
+				.OrderBy(a => a.AggregateType)
+				.ThenBy(a => a.AggregateId);
 			
-		return (commandModel, eventModel);
+			foreach (var (aggType, aggId) in distinctAggregates)
+			{
+				await AcquireAdvisoryLockAsync(
+					eventModels.First(e => e.AggregateType == aggType && e.AggregateId == aggId),
+					tx, ct);
+			}
+			await InsertCommandAsync(commandModel, tx, ct);
+			var inserted = await InsertMultipleEventsWithSequencing(eventModels, tx, ct);
+			await tx.CommitAsync(ct);
+			return (commandModel, inserted);
+		}
+		catch
+		{
+			await tx.RollbackAsync(ct);
+			throw;
+		}
+	}
+
+	private async Task InsertCommandAsync(CommandModel model, IDbTransaction tx, CancellationToken ct)
+	{
+		await _connection.ExecuteAsync(new CommandDefinition(
+			CommandSql, model, tx,
+			commandTimeout: _commandTimeout, cancellationToken: ct));
+	}
+
+	private async Task<EventModel> InsertEventAsync(EventModel model, int sequenceId, IDbTransaction tx, CancellationToken ct)
+	{
+		var toInsert = model with { AggregateSequenceId = sequenceId };
+		await _connection.ExecuteAsync(new CommandDefinition(
+			EventSql, toInsert, tx,
+			commandTimeout: _commandTimeout, cancellationToken: ct));
+		return toInsert;
+	}
+	
+	private async Task<EventModel[]> InsertMultipleEventsWithSequencing(EventModel[] eventModels, IDbTransaction tx, CancellationToken ct)
+	{
+		var sequenceTracker = new Dictionary<(string, Guid), int>();
+		var insertList = new List<EventModel>();
+		
+		foreach (var model in eventModels)
+		{
+			var key = (model.AggregateType, model.AggregateId);
+			if (!sequenceTracker.TryGetValue(key, out var nextSeq))
+			{
+				nextSeq = await QueryMaxSequenceAsync(model, tx, ct) + 1;
+			}
+			var insert = await InsertEventAsync(model, nextSeq, tx, ct);
+			insertList.Add(insert);
+			sequenceTracker[key] = nextSeq + 1;
+		}
+		return insertList.ToArray();
+	}
+
+	private async Task<int> QueryMaxSequenceAsync(EventModel model, IDbTransaction tx, CancellationToken ct)
+	{
+		return await _connection.ExecuteScalarAsync<int>(new CommandDefinition(
+			MaxSeqSql,
+			new { aggregateType = model.AggregateType, aggregateId = model.AggregateId },
+			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
+	}
+
+	private async Task AcquireAdvisoryLockAsync(EventModel model, IDbTransaction tx, CancellationToken ct)
+	{
+		await _connection.ExecuteAsync(new CommandDefinition(
+			AdvisoryLockSql,
+			new { aggregateType = model.AggregateType, aggregateId = model.AggregateId },
+			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
 	}
 
 	public async Task<StockyEventPayload[]?> QueryAllAggregatedEventsAsync(int aggregateType, Guid aggregateId, CancellationToken ct = default)
 	{
 		const string sql = """
-		                   SELECT e."EventType" ,e."EventPayloadJson" FROM stockydb."Events" e
+		                   SELECT e."EventType", e."EventPayloadJson" FROM stockydb."Events" e
 		                   WHERE e."AggregateType" = @aggregateType
 		                   AND e."AggregateId" = @aggregateId
 		                   ORDER BY e."AggregateSequenceId"
@@ -195,23 +319,6 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<StockyEventPayload>(json);
 	}
 
-	private async Task<int> QueryMaxAggregateSequenceIdAsync(string aggregateType, Guid aggregateId, IDbTransaction? transaction = null,
-		CancellationToken ct = default)
-	{
-		const string sql = """
-		                   SELECT COALESCE(MAX("AggregateSequenceId"), 0) FROM STOCKYDB."EVENTS" E
-		                   WHERE E."AggregateType" = @aggregateType
-		                   AND E."AggregateId" = @aggregateId
-		                   """;
-
-		var maxSequenceId = await _connection.ExecuteScalarAsync<int>(new CommandDefinition(sql,
-			new {aggregateType,aggregateId},
-			transaction: transaction,
-			commandTimeout: _commandTimeout,
-			cancellationToken: ct));
-		return maxSequenceId;
-	}
-
 	private static CommandModel CreateCommandModel(Command command, Guid commandId, AppendContext ctx, DateTimeOffset ttStart, DateTimeOffset ttEnd)
 		=> new CommandModel
 		{
@@ -259,7 +366,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 	{
 		await _connection.DisposeAsync();
 	}
-};
+}
 
 public enum ConcurrencyLevel
 {

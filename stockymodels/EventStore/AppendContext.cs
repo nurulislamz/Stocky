@@ -6,5 +6,5 @@ namespace stockymodels.EventStore;
 /// </summary>
 public record AppendContext(
     Guid UserId,
-    Guid? TraceId
+    Guid TraceId
 );
