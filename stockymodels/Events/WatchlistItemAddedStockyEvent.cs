@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record WatchlistItemAddedStockyEvent : StockyEvent
+public record WatchlistItemAddedStockyEventPayload : StockyEventPayload
 {
     public required string Symbol { get; init; }
     public required DateTimeOffset OccurredAt { get; init; }

@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record HoldingCreationStockyEvent : StockyEvent
+public record HoldingCreationStockyEventPayload : StockyEventPayload
 {
     public required Guid HoldingId { get; init; }
     public required string Symbol { get; init; }

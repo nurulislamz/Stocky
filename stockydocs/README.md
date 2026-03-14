@@ -30,12 +30,12 @@ For example, the `PortfolioApi` handles the logic for buying a ticker by first v
 
 ### c. Repositories (Data Access)
 
-The repository layer abstracts the database and data access logic. It provides a clean, strongly-typed interface for querying and manipulating data, completely hiding the underlying data source (Entity Framework Core) from the business logic layer.
+The repository layer abstracts the database and data access logic. It provides a clean, strongly-typed interface for querying and manipulating data, completely hiding the underlying data source (Dapper + SQL) from the business logic layer.
 
 Key characteristics:
 
 -   Exposes methods for data operations (e.g., `GetPortfolioFromUserIdAsync`, `BuyHoldingAsync`).
--   Contains all the `DbContext` interactions and LINQ queries.
+-   Contains all SQL execution paths (currently Dapper for command/query flows).
 -   Ensures that the business logic is not directly tied to a specific database technology.
 
 ## 2. Core Principles

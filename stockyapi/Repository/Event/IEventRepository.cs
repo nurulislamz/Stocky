@@ -15,7 +15,7 @@ public interface IEventRepository
     /// <param name="userId">The user who owns/triggered this event (for RLS and audit).</param>
     /// <param name="aggregateType">Aggregate domain type the event belongs to (e.g. User or Portfolio).</param>
     /// <param name="aggregateId">Aggregate identifier this event applies to.</param>
-    /// <param name="sequenceId">Per-aggregate sequence number for ordering.</param>
+    /// <param name="aggregateSequenceId">Per-aggregate sequence number for ordering.</param>
     /// <param name="eventType">Domain event type.</param>
     /// <param name="payload">Command or rich event; will be serialized to EventPayloadJson.</param>
     /// <param name="traceId">Optional correlation id for tracing.</param>
@@ -26,7 +26,7 @@ public interface IEventRepository
         Guid userId,
         AggregateType aggregateType,
         Guid aggregateId,
-        int sequenceId,
+        int aggregateSequenceId,
         EventType eventType,
         object payload,
         Guid? traceId = null,

@@ -1,6 +1,7 @@
+using stockymodels.Models.Enums;
+
 namespace stockymodels.Events;
 
-public record StockyEvent
-{
-    public required Guid AggregateId { get; init; }
-}
+public record StockyEvent(AggregateType AggregateType, Guid AggregateId, StockyEventPayload Payload);
+
+public abstract record StockyEventPayload;

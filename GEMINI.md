@@ -6,7 +6,7 @@ This is a full-stack application for stock portfolio tracking. It consists of a 
 
 **Backend:**
 *   **.NET 10** ASP.NET Core Web API
-*   **Database:** PostgreSQL (production) / SQLite (development) with Entity Framework Core
+*   **Database:** PostgreSQL (production) / SQLite (development) with Dapper
 *   **Authentication:** JWT
 *   **Testing:** NUnit
 *   **API Documentation:** Swagger
@@ -63,7 +63,7 @@ The backend follows a clean, multi-layered architecture:
 
 *   **Controllers:** Thin layer for handling HTTP requests.
 *   **Application Services:** Contain the core business logic.
-*   **Repositories:** Abstract data access logic using Entity Framework Core.
+*   **Repositories:** Abstract data access logic using Dapper and custom SQL.
 
 This architecture is guided by **SOLID principles** and uses a **Result Pattern** for handling operation outcomes, which avoids using exceptions for control flow.
 
@@ -78,4 +78,4 @@ npm run generate-api
 
 ### Database
 
-The application uses **PostgreSQL** in production and **SQLite** for development. The connection string is configured in `stockyapi/appsettings.json`. Entity Framework Core is used for data access, and migrations are managed with `dotnet ef`.
+The application uses **PostgreSQL** in production and **SQLite** for development. The connection string is configured in `stockyapi/appsettings.json`. Dapper is used for data access with custom SQL.

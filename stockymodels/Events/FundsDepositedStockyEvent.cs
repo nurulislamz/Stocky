@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record FundsDepositedStockyEvent : StockyEvent
+public record FundsDepositedStockyEventPayload : StockyEventPayload
 {
     public required decimal Amount { get; init; }
     public required decimal CashBalanceBefore { get; init; }

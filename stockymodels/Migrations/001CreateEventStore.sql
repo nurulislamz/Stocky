@@ -13,7 +13,6 @@ CREATE TABLE "Commands" (
     "TraceId" UUID NULL
 );
 
-CREATE INDEX "ix_commands_user_id" ON "Commands" ("UserId");
 CREATE INDEX "ix_commands_request_id" ON "Commands" ("RequestId");
 
 CREATE TABLE "Events" (
@@ -22,8 +21,7 @@ CREATE TABLE "Events" (
     "AggregateType" INTEGER NOT NULL,
     "AggregateTypeDesc" VARCHAR(32) NOT NULL,
     "AggregateId" UUID NOT NULL,
-    "SequenceId" INTEGER NOT NULL,
-    "AggregateVersion" INTEGER NOT NULL,
+    "AggregateSequenceId" INTEGER NOT NULL,
     "EventType" INTEGER NOT NULL,
     "EventPayloadJson" JSONB NOT NULL,
     "TtStart" TIMESTAMPTZ NOT NULL,
@@ -33,12 +31,11 @@ CREATE TABLE "Events" (
     "CommandId" UUID NULL,
     "TraceId" UUID NULL,
     CONSTRAINT "uq_events_aggregate_type_id_sequence"
-        UNIQUE ("AggregateType", "AggregateId", "SequenceId"),
+        UNIQUE ("AggregateType", "AggregateId", "AggregateSequenceId"),
     CONSTRAINT "fk_events_commands_command_id"
         FOREIGN KEY ("CommandId") REFERENCES "Commands" ("CommandId")
         ON DELETE restrict,
-    CHECK ("SequenceId" > 0),
-	CHECK ("AggregateVersion" >= 0),
+    CHECK ("AggregateSequenceId" > 0),
 	CHECK ("TtStart" <= "TtEnd"),
 	CHECK ("ValidFrom" <= "ValidTo")
 );
