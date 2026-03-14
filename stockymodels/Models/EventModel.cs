@@ -8,17 +8,12 @@ public record EventModel
 
     public required Guid UserId { get; set; }
 
-    [MaxLength(32)]
-    public required int AggregateType { get; set; }
-
-    [MaxLength(32)]
-    public required string AggregateTypeDesc { get; set; }
+    public required string AggregateType { get; set; }
 
     public required Guid AggregateId { get; set; }
 
     public int AggregateSequenceId { get; set; }
 
-    [MaxLength(128)]
     public required string EventType { get; set; }
 
     /// <summary>StockyEvent payload as JSON for querying and APIs.</summary>

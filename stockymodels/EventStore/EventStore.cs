@@ -1,13 +1,13 @@
+using System.Collections.Immutable;
 using System.Data;
 using System.Text.Json;
 using Dapper;
-using Microsoft.Testing.Platform.Logging;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using stockymodels.Events;
-using stockymodels.EventStore;
 using stockymodels.models;
 
-namespace stockymodels.Data;
+namespace stockymodels.EventStore;
 
 /// <summary>
 /// Dapper-based append-only event store. Inserts commands and events per 001CreateEventStore.sql.
@@ -30,11 +30,11 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 
 	private const string EventSql = """
 	                                INSERT INTO stockydb."Events" (
-	                                	"EventId", "UserId", "AggregateType", "AggregateTypeDesc", "AggregateId",
+	                                	"EventId", "UserId", "AggregateType", "AggregateId",
 	                                	"AggregateSequenceId", "EventType", "EventPayloadJson", "TtStart", "TtEnd",
 	                                	"ValidFrom", "ValidTo", "CommandId", "TraceId")
 	                                VALUES (
-	                                	@EventId, @UserId, @AggregateType, @AggregateTypeDesc, @AggregateId,
+	                                	@EventId, @UserId, @AggregateType, @AggregateId,
 	                                	@AggregateSequenceId, @EventType, @EventPayloadJson, @TtStart, @TtEnd,
 	                                	@ValidFrom, @ValidTo, @CommandId, @TraceId);
 	                                """;
@@ -87,7 +87,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			try
 			{
 				var nextAggregateSequenceId =
-					await QueryMaxAggregateSequenceIdAsync((int)@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
+					await QueryMaxAggregateSequenceIdAsync(@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
 
 				await _connection.ExecuteAsync(new CommandDefinition(CommandSql, commandModel, transaction,
 					commandTimeout: _commandTimeout, cancellationToken: ct));
@@ -99,7 +99,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			catch (PostgresException ex) when (ex.SqlState == "23505")
 			{
 				retryAttempts++;
-				await _logger.LogWarningAsync($"Failed to registerEvent, {retryAttempts}/{_retryAttempts} retrying..."); 
+				_logger.LogWarning($"Failed to registerEvent, {retryAttempts}/{_retryAttempts} retrying..."); 
 			}
 			catch
 			{
@@ -124,7 +124,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			await _connection.ExecuteAsync(new CommandDefinition(sqlLock, new {eventModel.AggregateType, eventModel.AggregateId}, transaction,
 				commandTimeout: _commandTimeout, cancellationToken: ct));
 			var nextAggregateSequenceId =
-				await QueryMaxAggregateSequenceIdAsync((int)@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
+				await QueryMaxAggregateSequenceIdAsync(@event.AggregateType, @event.AggregateId, transaction, ct) + 1;
 			await _connection.ExecuteAsync(new CommandDefinition(CommandSql, commandModel, transaction,
 				commandTimeout: _commandTimeout, cancellationToken: ct));
 			await _connection.ExecuteAsync(new CommandDefinition(EventSql,
@@ -144,33 +144,58 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 	public async Task<StockyEventPayload[]?> QueryAllAggregatedEventsAsync(int aggregateType, Guid aggregateId, CancellationToken ct = default)
 	{
 		const string sql = """
-		                   SELECT e."EventPayloadJson" FROM stockydb."Events" e
+		                   SELECT e."EventType" ,e."EventPayloadJson" FROM stockydb."Events" e
 		                   WHERE e."AggregateType" = @aggregateType
 		                   AND e."AggregateId" = @aggregateId
 		                   ORDER BY e."AggregateSequenceId"
 		                   """;
 
-		var events = await _connection.ExecuteScalarAsync<StockyEventPayload[]>(new CommandDefinition(sql, new {aggregateType, aggregateId}, commandTimeout: 10, cancellationToken: ct));
-		return events;
+		var rows = await _connection.QueryAsync<(string, string)>(new CommandDefinition(sql, new { aggregateType, aggregateId }, commandTimeout: 10, cancellationToken: ct));
+		var list = new List<StockyEventPayload>();
+		foreach (var (eventType, json) in rows)
+		{
+			if (string.IsNullOrEmpty(json))
+			{
+				_logger.LogWarning("Empty payload, this shouldn't happen");
+				throw new InvalidOperationException("Empty payload, this shouldn't happen");
+			}
+
+			try
+			{
+				var type = Type.GetType(eventType);
+				if (type == null || !typeof(StockyEventPayload).IsAssignableFrom(type))
+				{
+					throw new InvalidOperationException($"Invalid event payload type '{eventType}'");
+				}
+
+				if (JsonSerializer.Deserialize(json, type) is StockyEventPayload payload) list.Add(payload);
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Failed to deserialize payload for event type {EventType}", eventType);
+				throw;
+			}
+		}
+		return list.Count > 0 ? list.ToArray() : null;
 	}
 
 	public async Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, CancellationToken ct = default)
 	{
 		const string sql = """
-		                   SELECT e."EventPayloadJson" FROM STOCKYDB."EVENTS" E
-		                   WHERE E."AggregateType" = @aggregateType
-		                   AND E."AggregateId" = @aggregateId
-		                   AND E."AggregateSequenceId" = @aggregateSequenceId;
+		                   SELECT e."EventPayloadJson" FROM stockydb."Events" e
+		                   WHERE e."AggregateType" = @aggregateType
+		                   AND e."AggregateId" = @aggregateId
+		                   AND e."AggregateSequenceId" = @aggregateSequenceId
 		                   """;
 
-		var @event = await _connection.ExecuteScalarAsync<StockyEventPayload>(new CommandDefinition(sql,
-			new {aggregateType,aggregateId,aggregateSequenceId},
+		var json = await _connection.QuerySingleOrDefaultAsync<string>(new CommandDefinition(sql,
+			new { aggregateType, aggregateId, aggregateSequenceId },
 			commandTimeout: _commandTimeout,
 			cancellationToken: ct));
-		return @event;
+		return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<StockyEventPayload>(json);
 	}
 
-	public async Task<int> QueryMaxAggregateSequenceIdAsync(int aggregateType, Guid aggregateId, IDbTransaction? transaction = null,
+	private async Task<int> QueryMaxAggregateSequenceIdAsync(string aggregateType, Guid aggregateId, IDbTransaction? transaction = null,
 		CancellationToken ct = default)
 	{
 		const string sql = """
@@ -212,8 +237,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		{
 			EventId = eventId,
 			UserId = ctx.UserId,
-			AggregateType = (int)eventPayload.AggregateType,
-			AggregateTypeDesc = eventPayload.AggregateType.ToString(),
+			AggregateType = eventPayload.AggregateType,
 			AggregateId = eventPayload.AggregateId,
 			EventType = eventPayload.GetType().Name,
 			EventPayloadJson = JsonSerializer.Serialize(eventPayload),
