@@ -1,6 +1,8 @@
+using stockymodels.models;
+
 namespace stockymodels.Events;
 
-public record HoldingDeletionStockyEventPayload : StockyEventPayload
+public record HoldingDeletionStockyEvent : PortfolioEvent
 {
     public required Guid HoldingId { get; init; }
     public required string Symbol { get; init; }
@@ -21,4 +23,15 @@ public record HoldingDeletionStockyEventPayload : StockyEventPayload
 
     public required DateTimeOffset OccurredAt { get; init; }
     public required Guid RequestId { get; init; }
+
+    public override void Apply(PortfolioModel portfolio)
+    {
+        portfolio.CashBalance = CashBalanceAfter;
+        portfolio.TotalValue = PortfolioTotalValueAfter;
+        portfolio.InvestedAmount = PortfolioInvestedAmountAfter;
+        portfolio.UpdatedAt = OccurredAt.UtcDateTime;
+        var toRemove = portfolio.StockHoldings.FirstOrDefault(h => h.Id == HoldingId);
+        if (toRemove is not null)
+            portfolio.StockHoldings.Remove(toRemove);
+    }
 }

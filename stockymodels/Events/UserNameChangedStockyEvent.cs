@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record UserNameChangedStockyEventPayload : StockyEventPayload
+public record UserNameChangedStockyEvent : StockyEventPayload
 {
     public required string FirstNameBefore { get; init; }
     public required string FirstNameAfter { get; init; }

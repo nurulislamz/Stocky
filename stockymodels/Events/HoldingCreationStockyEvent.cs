@@ -1,6 +1,8 @@
+using stockymodels.models;
+
 namespace stockymodels.Events;
 
-public record HoldingCreationStockyEventPayload : StockyEventPayload
+public record HoldingCreationStockyEvent : PortfolioEvent
 {
     public required Guid HoldingId { get; init; }
     public required string Symbol { get; init; }
@@ -18,4 +20,22 @@ public record HoldingCreationStockyEventPayload : StockyEventPayload
 
     public required DateTimeOffset OccurredAt { get; init; }
     public required Guid RequestId { get; init; }
+
+    public override void Apply(PortfolioModel portfolio)
+    {
+        portfolio.StockHoldings.Add(new StockHoldingModel
+        {
+            Id = HoldingId,
+            PortfolioId = portfolio.Id,
+            Ticker = Symbol,
+            Shares = Quantity,
+            AverageCost = AverageCost,
+            CreatedAt = OccurredAt.UtcDateTime,
+            UpdatedAt = OccurredAt.UtcDateTime
+        });
+        portfolio.CashBalance = CashBalanceAfter;
+        portfolio.TotalValue = PortfolioTotalValueAfter;
+        portfolio.InvestedAmount = PortfolioInvestedAmountAfter;
+        portfolio.UpdatedAt = OccurredAt.UtcDateTime;
+    }
 }

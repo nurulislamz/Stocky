@@ -10,7 +10,7 @@ This document outlines the current test coverage, gaps, and a prioritized plan f
 - **Framework:** NUnit 4.x
 - **Mocking:** Moq
 - **Coverage:** coverlet.collector
-- **Integration DB:** SQLite in-memory via `SqliteTestSession` + EF Core
+- **Integration DB:** SQLite in-memory via `SqliteTestSession` + Dapper SQL execution
 
 ### 1.2 What Is Tested
 

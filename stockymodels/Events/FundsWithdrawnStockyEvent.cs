@@ -1,6 +1,8 @@
+using stockymodels.models;
+
 namespace stockymodels.Events;
 
-public record FundsWithdrawnStockyEventPayload : StockyEventPayload
+public record FundsWithdrawnStockyEvent : FundsEvent
 {
     public required decimal Amount { get; init; }
     public required decimal CashBalanceBefore { get; init; }
@@ -9,4 +11,11 @@ public record FundsWithdrawnStockyEventPayload : StockyEventPayload
     public required decimal PortfolioTotalValueAfter { get; init; }
     public required DateTimeOffset OccurredAt { get; init; }
     public required Guid RequestId { get; init; }
+
+    public override void Apply(PortfolioModel portfolio)
+    {
+        portfolio.CashBalance = CashBalanceAfter;
+        portfolio.TotalValue = PortfolioTotalValueAfter;
+        portfolio.UpdatedAt = OccurredAt.UtcDateTime;
+    }
 }

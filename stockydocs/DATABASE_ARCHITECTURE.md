@@ -9,7 +9,7 @@
 Every command transaction does two things:
 
 1. **Event path** — Send the event to an event handler that **appends** it to the event store using **Dapper + custom SQL** (efficient, append-only).
-2. **Read-model path** — Apply the command to the **read models** (Portfolio, StockHoldings, Funds-related tables, User, Watchlist, etc.) so queries see the latest state.
+2. **Read-model path** — Apply the command to the **read models** (Portfolio, StockHoldings, Funds-related tables, User, Watchlist, etc.) via Dapper so queries see the latest state.
 
 ```
                     ┌─────────────────────────────────────────────────────────┐
@@ -23,7 +23,7 @@ Every command transaction does two things:
     │  Event handler (Dapper)       │                   │  Read-model updater               │
     │  • Custom SQL INSERT          │                   │  • UPDATE PortfolioModel         │
     │  • Append-only Events table   │                   │  • INSERT/UPDATE StockHoldingModel│
-    │  • No EF change tracking      │                   │  • UPDATE UserModel, etc.        │
+    │  • No EF change tracking      │                   │  • UPDATE PortfolioModel, etc. using Dapper        │
     └───────────────┬───────────────┘                   └───────────────────────────────────┘
                     │                                                       │
                     ▼                                                       ▼
@@ -139,7 +139,7 @@ Event Sourced:
 | **Query difficulty** | You can't just `SELECT * FROM Portfolios WHERE CashBalance > 1000`. You need read-model projections (CQRS). |
 | **Schema evolution** | Changing event shapes requires versioning and upcasting logic. |
 | **Overkill for Stocky's scale** | A personal stock tracker with simple buy/sell operations may not benefit enough to justify the complexity. |
-| **EF Core is not ideal** | EF Core is designed for CRUD. True event sourcing typically uses a dedicated event store (EventStoreDB, Marten, or a custom append-only table). |
+| **ORM-backed relational models can be noisy** | Traditional ORMs are good for CRUD and can feel awkward for raw event-store workloads. Dedicated event stores (EventStoreDB, Marten, or a custom append-only table) align better for true ES workflows. |
 
 ### 3.4 Verdict
 
@@ -157,7 +157,7 @@ Event Sourced:
 
 ### 4.1 Strategy: "Transaction Log as Source of Truth" (Lightweight Event Sourcing)
 
-Keep your current EF Core / relational setup. Make these targeted changes:
+Keep your current relational setup with Dapper-based access. Make these targeted changes:
 
 #### Step 1: Make transaction logs the authoritative source
 
@@ -212,7 +212,7 @@ Or use `[Timestamp]` with PostgreSQL's `xmin` system column.
 - **No need for CQRS** or separate read/write databases.
 - **No need for an event store** (EventStoreDB, etc.). Your existing relational DB is fine.
 - **No need for event bus / messaging.** This is not a distributed system.
-- **EF Core continues to work** exactly as it does today.
+- The persistence layer for this architecture is Dapper + custom SQL, with no EF Core dependency in command/event flows.
 
 ### 4.3 EventModel: Single Source for Events (Current Implementation)
 
@@ -293,7 +293,7 @@ public class EventModel
 #### 4.3.6 Relation to existing tables (two-prong flow)
 
 - **Event path:** Every command transaction invokes an event handler that appends **one row** to `Events` via **Dapper + custom SQL** (no EF). Payload is serialised (e.g. rich event JSON) and inserted with `AggregateType`, `AggregateId`, `EventType`, etc.
-- **Read-model path:** The same command transaction (or handler) updates `PortfolioModel`, `StockHoldingModel`, `UserModel`, `WatchlistModel`, etc. (via EF or Dapper) so read models reflect the latest state.
+- **Read-model path:** The same command transaction (or handler) updates `PortfolioModel`, `StockHoldingModel`, `UserModel`, `WatchlistModel`, etc. via Dapper so read models reflect the latest state.
 - **Reconciliation:** Can replay from `Events` by `(AggregateType, AggregateId, SequenceId)` to recompute read models if needed.
 - **User events:** Same table; `AggregateType = UserId`, `AggregateId = UserId`. No separate “UserEvents” table required.
 
@@ -401,7 +401,7 @@ public class PortfolioAggregate
 
 ### 6.5 Libraries for .NET
 
-- **Marten** (PostgreSQL-based, excellent with EF Core, supports both event store + document store)
+- **Marten** (PostgreSQL-based, supports both event store + document store)
 - **EventStoreDB** (dedicated event store, gRPC protocol, more operational overhead)
 - **Custom** (append-only table in your existing DB, simplest but you build everything yourself)
 

@@ -1,6 +1,6 @@
 namespace stockymodels.Events;
 
-public record UserDeletedStockyEventPayload : StockyEventPayload
+public record UserDeletedStockyEvent : StockyEventPayload
 {
     public string? LastKnownEmail { get; init; }
     public string? LastKnownFirstName { get; init; }
