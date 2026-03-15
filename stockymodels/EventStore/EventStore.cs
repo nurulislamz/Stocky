@@ -265,7 +265,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
 	}
 
-	public async Task<StockyEventPayload[]?> QueryAllAggregatedEventsAsync(int aggregateType, Guid aggregateId, CancellationToken ct = default)
+	public async Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, CancellationToken ct = default) where T : StockyEventPayload
 	{
 		const string sql = """
 		                   SELECT e."EventType", e."EventPayloadJson" FROM stockydb."Events" e
@@ -275,7 +275,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		                   """;
 
 		var rows = await _connection.QueryAsync<(string, string)>(new CommandDefinition(sql, new { aggregateType, aggregateId }, commandTimeout: 10, cancellationToken: ct));
-		var list = new List<StockyEventPayload>();
+		var list = new List<T>();
 		foreach (var (eventType, json) in rows)
 		{
 			if (string.IsNullOrEmpty(json))
@@ -292,7 +292,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 					throw new InvalidOperationException($"Invalid event payload type '{eventType}'");
 				}
 
-				if (JsonSerializer.Deserialize(json, type) is StockyEventPayload payload) list.Add(payload);
+				if (JsonSerializer.Deserialize(json, type) is T payload) list.Add(payload);
 			}
 			catch (Exception ex)
 			{

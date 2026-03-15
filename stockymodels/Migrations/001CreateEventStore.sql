@@ -18,9 +18,8 @@ CREATE INDEX "ix_commands_request_id" ON "Commands" ("RequestId");
 CREATE TABLE "Events" (
     "EventId" UUID PRIMARY KEY,
     "UserId" UUID NOT NULL,
-    "AggregateType" INTEGER NOT NULL,
-    "AggregateTypeDesc" VARCHAR(32) NOT NULL,
-    "AggregateId" UUID NOT NULL,
+    "AggregateType" VARCHAR(32) NOT NULL,
+    "AggregateId" VARCHAR(32) NOT NULL,
     "AggregateSequenceId" INTEGER NOT NULL,
     "EventType" INTEGER NOT NULL,
     "EventPayloadJson" JSONB NOT NULL,
