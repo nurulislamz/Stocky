@@ -2,13 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using stockymodels.Data;
 
 #nullable disable
 
 namespace stockymodels.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260311000000_001CreateEventStore")]
     partial class _001CreateEventStore
     {

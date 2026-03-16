@@ -10,7 +10,7 @@ namespace stockymodels.EventStore;
 /// </summary>
 public class UserBuilder : EventStreamBuilder<UserEvent, UserAggregate, UserCreatedStockyEvent>
 {
-	public UserBuilder(PostgresEventStore eventStore, ILogger<PostgresEventStore> logger)
+	public UserBuilder(PostgresEventStoreReader eventStore, ILogger<PostgresEventStore> logger)
 		: base(eventStore, logger)
 	{
 	}

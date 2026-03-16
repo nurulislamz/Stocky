@@ -19,7 +19,6 @@ using stockyapi.Application.MarketPricing;
 using stockyapi.Application.Portfolio;
 using stockyapi.Controllers.Helpers;
 using stockyapi.Services.YahooFinance.Helper;
-using stockymodels.Data;
 
 namespace stockyapi;
 
@@ -120,7 +119,6 @@ internal class Program
         services.AddScoped<IPortfolioApi, PortfolioApi>();
 
         // Repository DIs
-        services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IFundsRepository, FundsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
