@@ -21,8 +21,8 @@ public interface IEventRepository
     /// <param name="traceId">Optional correlation id for tracing.</param>
     /// <param name="commandId">Optional command that produced this event.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>An <see cref="EventModel"/> with timestamps set; Id is auto-generated on insert.</returns>
-    EventModel CreateEvent(
+    /// <returns>An <see cref="EventAggregate"/> with timestamps set; Id is auto-generated on insert.</returns>
+    EventAggregate CreateEvent(
         Guid userId,
         AggregateType aggregateType,
         Guid aggregateId,
@@ -36,10 +36,10 @@ public interface IEventRepository
     /// <summary>
     /// Adds one or more events to the current context. Caller must call SaveChanges to commit; use same transaction as read-model updates.
     /// </summary>
-    void Add(params EventModel[] events);
+    void Add(params EventAggregate[] events);
 
     /// <summary>
     /// Appends a single event and saves immediately. For event + read-model in one transaction, use Add() then SaveChanges from the caller.
     /// </summary>
-    Task AppendAsync(EventModel eventModel, CancellationToken cancellationToken = default);
+    Task AppendAsync(EventAggregate eventModel, CancellationToken cancellationToken = default);
 }

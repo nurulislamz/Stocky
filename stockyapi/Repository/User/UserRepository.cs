@@ -26,7 +26,7 @@ public class UserRepository : IUserRepository
         _logger = logger;
     }
 
-    public async Task<UserModel?> GetUserByIdAsync(Guid id)
+    public async Task<UserAggregate?> GetUserByIdAsync(Guid id)
     {
         return await _context.Users
             .SingleOrDefaultAsync(u => u.Id == id);
@@ -44,13 +44,13 @@ public class UserRepository : IUserRepository
             .AnyAsync(u => u.Id == userId);
     }
 
-    public async Task<UserModel?> GetUserByEmailAsync(string email)
+    public async Task<UserAggregate?> GetUserByEmailAsync(string email)
     {
         return await _context.Users
             .SingleOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default)
+    public async Task<UserAggregate> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default)
     {
         var userId = Guid.NewGuid();
         var portfolioId = portfolioCreateCommand?.PortfolioId ?? Guid.NewGuid();
@@ -74,7 +74,7 @@ public class UserRepository : IUserRepository
             commandId: null,
             cancellationToken);
 
-        var user = new UserModel
+        var user = new UserAggregate
         {
             Id = userId,
             FirstName = userCreateCommand.FirstName,
@@ -86,7 +86,7 @@ public class UserRepository : IUserRepository
             CreatedAt = DateTime.UtcNow
         };
 
-        var portfolio = new PortfolioModel
+        var portfolio = new PortfolioAggregate
         {
             Id = portfolioId,
             UserId = userId,
@@ -96,7 +96,7 @@ public class UserRepository : IUserRepository
         };
 
         var preferenceCommand = new UserPreferenceCreationCommand(userId);
-        var preferences = new UserPreferencesModel
+        var preferences = new UserPreferencesAggregate
         {
             Id = preferenceCommand.UserId,
             UserId = preferenceCommand.UserId,
@@ -120,19 +120,19 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public Task<UserModel> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default)
+    public Task<UserAggregate> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default)
     {
-        return Task.FromException<UserModel>(new NotImplementedException("ChangeName is not yet implemented."));
+        return Task.FromException<UserAggregate>(new NotImplementedException("ChangeName is not yet implemented."));
     }
 
-    public async Task UpdateUserAsync(UserModel user)
+    public async Task UpdateUserAsync(UserAggregate user)
     {
         // TODO: Need to modify this so it doesn't update everything, make it so it updates a specific parameter like email or password
         _context.Users.Update(user);
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteUserAsync(UserModel user)
+    public async Task DeleteUserAsync(UserAggregate user)
     {
         _context.Users.Remove(user);
         await _context.SaveChangesAsync();

@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class PortfolioConfiguration : IEntityTypeConfiguration<PortfolioModel>
+[Obsolete]
+public class PortfolioConfiguration : IEntityTypeConfiguration<PortfolioAggregate>
 {
-    public void Configure(EntityTypeBuilder<PortfolioModel> builder)
+    public void Configure(EntityTypeBuilder<PortfolioAggregate> builder)
     {
         builder.ToTable("Portfolios", "stockydb");
 

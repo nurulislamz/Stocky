@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class StockHoldingConfiguration : IEntityTypeConfiguration<StockHoldingModel>
+[Obsolete]
+public class StockHoldingConfiguration : IEntityTypeConfiguration<StockHoldingAggregate>
 {
-    public void Configure(EntityTypeBuilder<StockHoldingModel> builder)
+    public void Configure(EntityTypeBuilder<StockHoldingAggregate> builder)
     {
         builder.ToTable("StockHoldings", "stockydb");
 

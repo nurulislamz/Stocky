@@ -14,14 +14,14 @@ public record RepositoryResult;
 public abstract class CommandToEventPipeline
 {
     public IEventRepository EventRepository { get; set; } = null!;
-    public abstract stockymodels.Events.StockyEvent[] CommandToEvents(Command command);
-    public abstract BaseModel UpdateProjection(IEnumerable<stockymodels.Events.StockyEvent> events);
-    public abstract RepositoryResult ToRepositoryResult(IEnumerable<stockymodels.Events.StockyEvent> events, BaseModel model);
+    public abstract stockymodels.Events.StockyEventPayload[] CommandToEvents(Command command);
+    public abstract BaseAggregate UpdateProjection(IEnumerable<stockymodels.Events.StockyEventPayload> events);
+    public abstract RepositoryResult ToRepositoryResult(IEnumerable<stockymodels.Events.StockyEventPayload> events, BaseAggregate model);
 
     /// <summary>
     /// Builds the full transaction work (events + updated projection) without persisting. Use for SQL generation or to run in one transaction.
     /// </summary>
-    public (stockymodels.Events.StockyEvent[], BaseModel) HandleCommand(Command command)
+    public (stockymodels.Events.StockyEventPayload[], BaseAggregate) HandleCommand(Command command)
     {
         var events = CommandToEvents(command);
         var updatedProjection = UpdateProjection(events);
@@ -29,8 +29,8 @@ public abstract class CommandToEventPipeline
     }
 
     /// <summary>
-    /// Runs CommandToEvents → ToEventModels → Add events → UpdateProjection in one database transaction, then returns the result.
-    /// Override in derived classes to convert StockyEvent to EventModel and add via EventRepository.
+    /// Runs CommandToEvents → ToEventAggregates → Add events → UpdateProjection in one database transaction, then returns the result.
+    /// Override in derived classes to convert StockyEvent to EventAggregate and add via EventRepository.
     /// </summary>
     public async Task<Result<RepositoryResult>> ExecuteInTransactionAsync(Command command, ApplicationDbContext db, CancellationToken ct = default)
     {
@@ -39,7 +39,7 @@ public abstract class CommandToEventPipeline
         await using var transaction = await db.Database.BeginTransactionAsync(ct);
         try
         {
-            // Derived classes should add EventModels via EventRepository.Add() before calling base
+            // Derived classes should add EventAggregates via EventRepository.Add() before calling base
             db.Update(projection);
             await db.SaveChangesAsync(ct);
             await transaction.CommitAsync(ct);

@@ -17,7 +17,7 @@ public class FundsIntegrationTests
     private SqliteTestSession _session;
     private FundsApi _fundsApi = null!;
     private TestUserContext _userContext = null!;
-    
+
     [OneTimeSetUp]
     public async Task GlobalSetup()
     {
@@ -46,7 +46,7 @@ public class FundsIntegrationTests
     {
         // Arrange
         await InitialiseTestAsync(100, 50);
-        
+
         // Act
         var result = await _fundsApi.GetFunds(CancellationToken.None);
 

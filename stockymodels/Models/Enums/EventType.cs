@@ -20,8 +20,11 @@ public enum EventType
     StockSold,
     DeleteHolding,
     //
+    FundAccountCreatedEvent,
     FundsDepositedEvent,
     FundsWithdrawnEvent,
+    FundsAddedEvent,
+    FundsRemovedEvent,
     DepositFunds = FundsDepositedEvent,
     WithdrawFunds = FundsWithdrawnEvent,
     //

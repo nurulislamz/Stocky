@@ -27,9 +27,12 @@ public class PortfolioRepository : IPortfolioRepository
         _logger = logger;
     }
 
-    public async Task<PortfolioModel> GetPortfolioFromUserIdAsync(Guid userId, CancellationToken ct)
+    public async Task<PortfolioAggregate> GetPortfolioFromUserIdAsync(Guid userId, CancellationToken ct)
     {
-        var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
+        var portfolio = await _dbContext.TradingAccounts
+            .Where(ta => ta.UserId == userId)
+            .SelectMany(ta => ta.Portfolios)
+            .FirstOrDefaultAsync(ct);
         if (portfolio is null)
         {
             var exception = new NullReferenceException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
@@ -93,7 +96,10 @@ public class PortfolioRepository : IPortfolioRepository
 
     public async Task<TradeResult> BuyHoldingAsync(Guid userId, StockBoughtCommand command, CancellationToken ct)
     {
-        var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
+        var portfolio = await _dbContext.TradingAccounts
+            .Where(ta => ta.UserId == userId)
+            .SelectMany(ta => ta.Portfolios)
+            .FirstOrDefaultAsync(ct);
         if (portfolio is null)
         {
             var exception = new InvalidOperationException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
@@ -120,7 +126,7 @@ public class PortfolioRepository : IPortfolioRepository
         }
         else
         {
-            _dbContext.StockHoldings.Add(new StockHoldingModel
+            _dbContext.StockHoldings.Add(new StockHoldingAggregate
             {
                 PortfolioId = portfolio.Id,
                 Ticker = command.Symbol,
@@ -139,7 +145,10 @@ public class PortfolioRepository : IPortfolioRepository
 
     public async Task<TradeResult> SellHoldingAsync(Guid userId, StockSoldCommand command, CancellationToken ct)
     {
-        var portfolio = await _dbContext.Portfolios.SingleOrDefaultAsync(p => p.UserId == userId, ct);
+        var portfolio = await _dbContext.TradingAccounts
+            .Where(ta => ta.UserId == userId)
+            .SelectMany(ta => ta.Portfolios)
+            .FirstOrDefaultAsync(ct);
         if (portfolio is null)
         {
             var exception = new InvalidOperationException($"Portfolio not found. UserId {userId} must be wrong or something went wrong during setup.");
@@ -177,7 +186,7 @@ public class PortfolioRepository : IPortfolioRepository
         return new TradeResult(evt.EventId, command.Symbol, command.Quantity, command.Price, totalProceeds, newAverageCost, portfolio);
     }
 
-    public async Task<List<Guid>> DeleteHoldingsAsync(Guid userId, List<StockHoldingModel> holdings, CancellationToken ct)
+    public async Task<List<Guid>> DeleteHoldingsAsync(Guid userId, List<StockHoldingAggregate> holdings, CancellationToken ct)
     {
         var portfolioId = await _dbContext.Portfolios
             .Where(p => p.UserId == userId)

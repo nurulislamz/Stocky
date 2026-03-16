@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class WatchlistConfiguration : IEntityTypeConfiguration<WatchlistModel>
+[Obsolete]
+public class WatchlistConfiguration : IEntityTypeConfiguration<WatchlistAggregate>
 {
-    public void Configure(EntityTypeBuilder<WatchlistModel> builder)
+    public void Configure(EntityTypeBuilder<WatchlistAggregate> builder)
     {
         builder.ToTable("Watchlist", "stockydb");
 

@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class UserConfiguration : IEntityTypeConfiguration<UserModel>
+[Obsolete]
+public class UserConfiguration : IEntityTypeConfiguration<UserAggregate>
 {
-    public void Configure(EntityTypeBuilder<UserModel> builder)
+    public void Configure(EntityTypeBuilder<UserAggregate> builder)
     {
         builder.ToTable("Users", "stockydb");
 
@@ -15,12 +16,12 @@ public class UserConfiguration : IEntityTypeConfiguration<UserModel>
 
         builder.HasOne(u => u.Portfolio)
             .WithOne(p => p.User)
-            .HasForeignKey<PortfolioModel>(p => p.UserId)
+            .HasForeignKey<PortfolioAggregate>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(u => u.Preferences)
             .WithOne(p => p.User)
-            .HasForeignKey<UserPreferencesModel>(p => p.UserId)
+            .HasForeignKey<UserPreferencesAggregate>(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(u => u.Watchlist)

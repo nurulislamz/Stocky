@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPreferencesModel>
+[Obsolete]
+public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPreferencesAggregate>
 {
-    public void Configure(EntityTypeBuilder<UserPreferencesModel> builder)
+    public void Configure(EntityTypeBuilder<UserPreferencesAggregate> builder)
     {
         builder.ToTable("UserPreferences", "stockydb");
 

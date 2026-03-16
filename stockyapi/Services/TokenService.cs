@@ -10,7 +10,7 @@ namespace stockyapi.Services;
 
 public interface ITokenService
 {
-  string CreateToken(UserModel user);
+  string CreateToken(UserAggregate user);
   string CreateDevelopmentToken(Claim[] claims);
 }
 
@@ -23,7 +23,7 @@ public class TokenService : ITokenService
     _jwtSettings = jwtSettings.Value;
   }
 
-  public string CreateToken(UserModel user)
+  public string CreateToken(UserAggregate user)
   {
     // Create claims (user info) using standard ClaimTypes
     var claims = new[]

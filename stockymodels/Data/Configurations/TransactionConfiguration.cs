@@ -4,9 +4,9 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class EventConfiguration : IEntityTypeConfiguration<EventModel>
+public class EventConfiguration : IEntityTypeConfiguration<EventAggregate>
 {
-    public void Configure(EntityTypeBuilder<EventModel> builder)
+    public void Configure(EntityTypeBuilder<EventAggregate> builder)
     {
         builder.ToTable("Events", "stockydb");
 
@@ -18,11 +18,6 @@ public class EventConfiguration : IEntityTypeConfiguration<EventModel>
             .HasColumnType("jsonb");
 
         builder.HasIndex(e => e.UserId);
-        builder.HasIndex(e => new { e.AggregateType, e.AggregateId, e.SequenceId }).IsUnique();
-
-        builder.HasOne(e => e.Command)
-            .WithMany(c => c.Events)
-            .HasForeignKey(e => e.CommandId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(e => new { e.AggregateType, e.AggregateId, e.AggregateSequenceId }).IsUnique();
     }
 }

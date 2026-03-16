@@ -62,7 +62,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 	}
 
 	/// <summary>Appends a command and one event in a single transaction.</summary>
-	public async Task<(CommandModel, EventModel)> RegisterEventAsync(
+	public async Task<(CommandAggregate, EventAggregate)> RegisterEventAsync(
 		Command command,
 		StockyEvent @event,
 		AppendContext context,
@@ -72,8 +72,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		var now = DateTimeOffset.UtcNow;
 		var ttEnd = DateTimeOffset.MaxValue;
 
-		var commandModel = CreateCommandModel(command, commandId, context, now, ttEnd);
-		var eventModel = CreateEventModel(@event, Guid.NewGuid(), commandId, context, now, ttEnd);
+		var commandModel = CreateCommandAggregate(command, commandId, context, now, ttEnd);
+		var eventModel = CreateEventAggregate(@event, Guid.NewGuid(), commandId, context, now, ttEnd);
 
 		return _concurrencyLevel switch
 		{
@@ -83,8 +83,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		};
 	}
 
-	private async Task<(CommandModel, EventModel)> WithOptimisticRetry(
-		CommandModel commandModel, EventModel eventModel, CancellationToken ct)
+	private async Task<(CommandAggregate, EventAggregate)> WithOptimisticRetry(
+		CommandAggregate commandModel, EventAggregate eventModel, CancellationToken ct)
 	{
 		for (int attempt = 0; attempt < _retryAttempts; attempt++)
 		{
@@ -113,8 +113,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			$"Unable to register event after {_retryAttempts} retries");
 	}
 
-	private async Task<(CommandModel, EventModel)> WithAdvisoryLock(
-		CommandModel commandModel, EventModel eventModel, CancellationToken ct)
+	private async Task<(CommandAggregate, EventAggregate)> WithAdvisoryLock(
+		CommandAggregate commandModel, EventAggregate eventModel, CancellationToken ct)
 	{
 		await using var tx = await _connection.BeginTransactionAsync(ct);
 		try
@@ -134,7 +134,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 	}
 	
 	/// <summary>Appends a command and multiple event in a single transaction.</summary>
-	public async Task<(CommandModel, EventModel[])> RegisterMultipleEventsAsync(
+	public async Task<(CommandAggregate, EventAggregate[])> RegisterMultipleEventsAsync(
 		Command command,
 		StockyEvent[] events,
 		AppendContext context,
@@ -144,8 +144,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		var now = DateTimeOffset.UtcNow;
 		var ttEnd = DateTimeOffset.MaxValue;
 
-		var commandModel = CreateCommandModel(command, commandId, context, now, ttEnd);
-		var eventModel = events.Select(e => CreateEventModel(e, Guid.NewGuid(), commandId, context, now, ttEnd)).ToArray();
+		var commandModel = CreateCommandAggregate(command, commandId, context, now, ttEnd);
+		var eventModel = events.Select(e => CreateEventAggregate(e, Guid.NewGuid(), commandId, context, now, ttEnd)).ToArray();
 
 		return _concurrencyLevel switch
 		{
@@ -155,8 +155,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		};
 	}
 
-	private async Task<(CommandModel, EventModel[])> WithOptimisticRetryMulti(
-		CommandModel commandModel, EventModel[] eventModel, CancellationToken ct)
+	private async Task<(CommandAggregate, EventAggregate[])> WithOptimisticRetryMulti(
+		CommandAggregate commandModel, EventAggregate[] eventModel, CancellationToken ct)
 	{
 		for (int attempt = 0; attempt < _retryAttempts; attempt++)
 		{
@@ -184,8 +184,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			$"Unable to register event after {_retryAttempts} retries");
 	}
 
-	private async Task<(CommandModel, EventModel[])> WithAdvisoryLockMulti(
-		CommandModel commandModel, EventModel[] eventModels, CancellationToken ct)
+	private async Task<(CommandAggregate, EventAggregate[])> WithAdvisoryLockMulti(
+		CommandAggregate commandModel, EventAggregate[] eventModels, CancellationToken ct)
 	{
 		await using var tx = await _connection.BeginTransactionAsync(ct);
 		try
@@ -214,14 +214,14 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		}
 	}
 
-	private async Task InsertCommandAsync(CommandModel model, IDbTransaction tx, CancellationToken ct)
+	private async Task InsertCommandAsync(CommandAggregate model, IDbTransaction tx, CancellationToken ct)
 	{
 		await _connection.ExecuteAsync(new CommandDefinition(
 			CommandSql, model, tx,
 			commandTimeout: _commandTimeout, cancellationToken: ct));
 	}
 
-	private async Task<EventModel> InsertEventAsync(EventModel model, int sequenceId, IDbTransaction tx, CancellationToken ct)
+	private async Task<EventAggregate> InsertEventAsync(EventAggregate model, int sequenceId, IDbTransaction tx, CancellationToken ct)
 	{
 		var toInsert = model with { AggregateSequenceId = sequenceId };
 		await _connection.ExecuteAsync(new CommandDefinition(
@@ -230,10 +230,10 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		return toInsert;
 	}
 	
-	private async Task<EventModel[]> InsertMultipleEventsWithSequencing(EventModel[] eventModels, IDbTransaction tx, CancellationToken ct)
+	private async Task<EventAggregate[]> InsertMultipleEventsWithSequencing(EventAggregate[] eventModels, IDbTransaction tx, CancellationToken ct)
 	{
 		var sequenceTracker = new Dictionary<(string, Guid), int>();
-		var insertList = new List<EventModel>();
+		var insertList = new List<EventAggregate>();
 		
 		foreach (var model in eventModels)
 		{
@@ -249,7 +249,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		return insertList.ToArray();
 	}
 
-	private async Task<int> QueryMaxSequenceAsync(EventModel model, IDbTransaction tx, CancellationToken ct)
+	private async Task<int> QueryMaxSequenceAsync(EventAggregate model, IDbTransaction tx, CancellationToken ct)
 	{
 		return await _connection.ExecuteScalarAsync<int>(new CommandDefinition(
 			MaxSeqSql,
@@ -257,7 +257,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
 	}
 
-	private async Task AcquireAdvisoryLockAsync(EventModel model, IDbTransaction tx, CancellationToken ct)
+	private async Task AcquireAdvisoryLockAsync(EventAggregate model, IDbTransaction tx, CancellationToken ct)
 	{
 		await _connection.ExecuteAsync(new CommandDefinition(
 			AdvisoryLockSql,
@@ -319,8 +319,8 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<StockyEventPayload>(json);
 	}
 
-	private static CommandModel CreateCommandModel(Command command, Guid commandId, AppendContext ctx, DateTimeOffset ttStart, DateTimeOffset ttEnd)
-		=> new CommandModel
+	private static CommandAggregate CreateCommandAggregate(Command command, Guid commandId, AppendContext ctx, DateTimeOffset ttStart, DateTimeOffset ttEnd)
+		=> new CommandAggregate
 		{
 			CommandId = commandId,
 			UserId = ctx.UserId,
@@ -332,7 +332,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			TraceId = ctx.TraceId,
 		};
 
-	private static EventModel CreateEventModel(
+	private static EventAggregate CreateEventAggregate(
 		StockyEvent eventPayload,
 		Guid eventId,
 		Guid commandId,
@@ -340,7 +340,7 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		DateTimeOffset validFrom,
 		DateTimeOffset validTo)
 	{
-		return new EventModel
+		return new EventAggregate
 		{
 			EventId = eventId,
 			UserId = ctx.UserId,

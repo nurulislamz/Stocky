@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class PriceAlertConfiguration : IEntityTypeConfiguration<PriceAlertModel>
+[Obsolete]
+public class PriceAlertConfiguration : IEntityTypeConfiguration<PriceAlertAggregate>
 {
-    public void Configure(EntityTypeBuilder<PriceAlertModel> builder)
+    public void Configure(EntityTypeBuilder<PriceAlertAggregate> builder)
     {
         builder.ToTable("PriceAlerts", "stockydb");
 

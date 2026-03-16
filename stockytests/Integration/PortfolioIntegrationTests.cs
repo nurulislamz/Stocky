@@ -24,7 +24,7 @@ public class PortfolioIntegrationTests
     {
         _session = await SqliteTestSession.CreateAsync();
     }
-    
+
     private async Task InitialiseTestAsync(decimal cash = 0m, decimal invested = 0m)
     {
         await _session.SetupUser(cash, invested);
@@ -51,7 +51,7 @@ public class PortfolioIntegrationTests
         Assert.That(result.IsSuccess, Is.True);
         Assert.That(result.Value.Items, Is.Empty);
     }
-    
+
     [Test]
     public async Task BuyTicker_ValidPurchase_CreatesHoldingAndEvent()
     {
@@ -82,8 +82,8 @@ public class PortfolioIntegrationTests
     public async Task SellTicker_ValidSale_UpdatesHoldingAndCreatesEvent()
     {
         await InitialiseTestAsync(cash: 500m);
-        
-        var initialHolding = new StockHoldingModel
+
+        var initialHolding = new StockHoldingAggregate
         {
             PortfolioId = _session.PortfolioId,
             Ticker = "MSFT",
@@ -110,17 +110,17 @@ public class PortfolioIntegrationTests
 
         var evt = _session.Context.EventModels.FirstOrDefault(e => e.EventType == EventType.StockSold);
         Assert.That(evt, Is.Not.Null);
-        
+
         var portfolio = await _session.Context.Portfolios.FindAsync(_session.PortfolioId);
         Assert.That(portfolio!.CashBalance, Is.EqualTo(500m + 3 * 110));
     }
-    
+
     [Test]
     public async Task GetHoldingsById_ExistingHolding_ReturnsHolding()
     {
         await InitialiseTestAsync();
         var holdingId = Guid.NewGuid();
-        var initialHolding = new StockHoldingModel
+        var initialHolding = new StockHoldingAggregate
         {
             Id = holdingId,
             PortfolioId = _session.PortfolioId,
@@ -143,7 +143,7 @@ public class PortfolioIntegrationTests
     public async Task GetHoldingsByTicker_ExistingHolding_ReturnsHolding()
     {
         await InitialiseTestAsync();
-        var initialHolding = new StockHoldingModel
+        var initialHolding = new StockHoldingAggregate
         {
             PortfolioId = _session.PortfolioId,
             Ticker = "AMD",
@@ -166,7 +166,7 @@ public class PortfolioIntegrationTests
     {
         await InitialiseTestAsync();
         var holdingId = Guid.NewGuid();
-        var initialHolding = new StockHoldingModel
+        var initialHolding = new StockHoldingAggregate
         {
             Id = holdingId,
             PortfolioId = _session.PortfolioId,
@@ -186,12 +186,12 @@ public class PortfolioIntegrationTests
         var evt = _session.Context.EventModels.FirstOrDefault(e => e.EventType == EventType.DeleteHolding);
         Assert.That(evt, Is.Not.Null);
     }
-    
+
     [Test]
     public async Task DeleteHoldingByTicker_ExistingHolding_DeletesSuccessfully()
     {
         await InitialiseTestAsync();
-        var initialHolding = new StockHoldingModel
+        var initialHolding = new StockHoldingAggregate
         {
             PortfolioId = _session.PortfolioId,
             Ticker = "TSLA",

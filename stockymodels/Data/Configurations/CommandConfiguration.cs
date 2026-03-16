@@ -4,9 +4,10 @@ using stockymodels.models;
 
 namespace stockymodels.Data.Configurations;
 
-public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
+[Obsolete]
+public class CommandConfiguration : IEntityTypeConfiguration<CommandAggregate>
 {
-    public void Configure(EntityTypeBuilder<CommandModel> builder)
+    public void Configure(EntityTypeBuilder<CommandAggregate> builder)
     {
         builder.ToTable("Commands", "stockydb");
 
@@ -22,10 +23,5 @@ public class CommandConfiguration : IEntityTypeConfiguration<CommandModel>
 
         builder.HasIndex(c => c.UserId);
         builder.HasIndex(c => c.RequestId);
-
-        builder.HasMany(c => c.Events)
-            .WithOne(e => e.Command)
-            .HasForeignKey(e => e.CommandId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

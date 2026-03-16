@@ -40,7 +40,7 @@ internal sealed class SqliteTestSession : IAsyncDisposable
         PortfolioId = Guid.NewGuid();
         UserEmail = $"integration+{Guid.NewGuid():N}@example.com";
 
-        await Context.Users.AddAsync(new UserModel
+        await Context.Users.AddAsync(new UserAggregate
         {
             Id = UserId,
             FirstName = "Integration",
@@ -50,7 +50,7 @@ internal sealed class SqliteTestSession : IAsyncDisposable
             Role = UserRole.User
         });
 
-        await Context.Portfolios.AddAsync(new PortfolioModel
+        await Context.Portfolios.AddAsync(new PortfolioAggregate
         {
             Id = PortfolioId,
             UserId = UserId,

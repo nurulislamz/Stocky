@@ -6,27 +6,27 @@ namespace stockyapi.Repository.User;
 
 public interface IUserRepository
 {
-    Task<UserModel?> GetUserByIdAsync(Guid id);
+    Task<UserAggregate?> GetUserByIdAsync(Guid id);
     Task<bool> UserExistsByEmailAsync(string email);
-    Task<UserModel?> GetUserByEmailAsync(string email);
+    Task<UserAggregate?> GetUserByEmailAsync(string email);
 
-    Task<UserModel> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default);
-    Task DeleteUserAsync(UserModel user);
+    Task<UserAggregate> CreateUserAsync(UserCreateCommand userCreateCommand, PortfolioCreationCommand? portfolioCreateCommand = null, CancellationToken cancellationToken = default);
+    Task DeleteUserAsync(UserAggregate user);
 
-    Task<UserModel> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default);
+    Task<UserAggregate> ChangeName(string firstName, string surName, CancellationToken cancellationToken = default);
 
     // // User preferences operations
-    // Task<UserPreferencesModel?> GetUserPreferencesAsync(Guid userId);
-    // Task<UserPreferencesModel> CreateUserPreferencesAsync(UserPreferencesModel preferences);
-    // Task<UserPreferencesModel> UpdateUserPreferencesAsync(UserPreferencesModel preferences);
+    // Task<UserPreferencesAggregate?> GetUserPreferencesAsync(Guid userId);
+    // Task<UserPreferencesAggregate> CreateUserPreferencesAsync(UserPreferencesAggregate preferences);
+    // Task<UserPreferencesAggregate> UpdateUserPreferencesAsync(UserPreferencesAggregate preferences);
     //
     // // User watchlist operations
-    // Task<IEnumerable<WatchlistModel>> GetUserWatchlistAsync(Guid userId);
-    // Task<WatchlistModel> AddToWatchlistAsync(Guid userId, string ticker);
+    // Task<IEnumerable<WatchlistAggregate>> GetUserWatchlistAsync(Guid userId);
+    // Task<WatchlistAggregate> AddToWatchlistAsync(Guid userId, string ticker);
     // Task RemoveFromWatchlistAsync(Guid userId, string ticker);
     //
     // // User price alerts operations
-    // Task<IEnumerable<PriceAlertModel>> GetUserPriceAlertsAsync(Guid userId);
-    // Task<PriceAlertModel> AddPriceAlertAsync(Guid userId, string ticker, decimal targetPrice);
+    // Task<IEnumerable<PriceAlertAggregate>> GetUserPriceAlertsAsync(Guid userId);
+    // Task<PriceAlertAggregate> AddPriceAlertAsync(Guid userId, string ticker, decimal targetPrice);
     // Task RemovePriceAlertAsync(Guid userId, string ticker);
 }
