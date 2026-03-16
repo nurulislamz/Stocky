@@ -4,6 +4,7 @@ using stockyapi.Application.Commands.User;
 using stockyapi.Middleware;
 using stockyapi.Repository.User;
 using stockyapi.Services;
+using stockymodels.Data.Configurations;
 
 namespace stockyapi.Application.Auth;
 

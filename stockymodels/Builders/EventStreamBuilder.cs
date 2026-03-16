@@ -16,10 +16,10 @@ public abstract class EventStreamBuilder<TEvent, TModel, TCreateEvent>
 	where TModel : class
 	where TCreateEvent : TEvent
 {
-	protected readonly PostgresEventStoreReader EventStore;
+	protected readonly PostgresEventStore EventStore;
 	protected readonly ILogger Logger;
 
-	protected EventStreamBuilder(PostgresEventStoreReader eventStore, ILogger logger)
+	protected EventStreamBuilder(PostgresEventStore eventStore, ILogger logger)
 	{
 		EventStore = eventStore;
 		Logger = logger;
