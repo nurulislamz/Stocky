@@ -5,7 +5,7 @@ SET search_path TO stockydb;
 CREATE TABLE "Commands" (
     "CommandId" UUID PRIMARY KEY,
     "UserId" UUID NOT NULL,
-    "CommandType" VARCHAR(128) NOT NULL,
+    "CommandType" VARCHAR(32) NOT NULL,
     "CommandPayloadJson" JSONB NOT NULL,
     "TtStart" TIMESTAMPTZ NOT NULL,
     "TtEnd" TIMESTAMPTZ NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE "Events" (
     "AggregateType" VARCHAR(32) NOT NULL,
     "AggregateId" VARCHAR(32) NOT NULL,
     "AggregateSequenceId" INTEGER NOT NULL,
-    "EventType" INTEGER NOT NULL,
+    "EventType" VARCHAR(32) NOT NULL,
     "EventPayloadJson" JSONB NOT NULL,
     "TtStart" TIMESTAMPTZ NOT NULL,
     "TtEnd" TIMESTAMPTZ NOT NULL,
