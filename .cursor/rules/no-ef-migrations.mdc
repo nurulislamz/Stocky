@@ -1,0 +1,13 @@
+---
+description: Do not change EF Core migrations or Entity Framework; they are being removed
+alwaysApply: true
+---
+
+# Migrations and Entity Framework — do not modify
+
+- **Do not** add, edit, or refactor **EF Core migrations** (`*Migration*.cs`, embedded migration SQL wired through EF, `DbContext` migration flows) in this repo.
+- **Do not** make **Entity Framework**–related changes (new `DbContext` usage, EF configurations for persistence that assume EF stays).
+
+The project is **moving away from EF/migrations** for this area. Prefer **raw SQL / Dapper**, **schema scripts**, or whatever replacement the team is adopting—without extending the legacy EF migration path.
+
+If the user explicitly asks only to delete or strip EF/migrations, that is the exception.

@@ -1,15 +1,17 @@
 services:
   postgres:
-    image: 15.17-trixie
+    image: postgres:latest
     container_name: stockydb
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: stocky
     ports:
       - "5433:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # PG 18+ (postgres:latest): mount here, not /var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
 volumes:
   postgres_data:
