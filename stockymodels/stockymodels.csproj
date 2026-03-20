@@ -23,10 +23,42 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="Migrations\001CreateEventStore.sql" />
-      <EmbeddedResource Include="Migrations\001CreateEventStoreRevert.sql" />
-      <EmbeddedResource Include="Migrations\002CreateProjections.sql" />
-      <EmbeddedResource Include="Migrations\002CreateProjectionsRevert.sql" />
+      <EmbeddedResource Include="Schemas\Migrations\001CreateEventStore.sql">
+        <LogicalName>stockymodels.Migrations.001CreateEventStore.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Migrations\001CreateEventStoreRevert.sql">
+        <LogicalName>stockymodels.Migrations.001CreateEventStoreRevert.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Migrations\002CreateProjections.sql">
+        <LogicalName>stockymodels.Migrations.002CreateProjections.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Migrations\002CreateProjectionsRevert.sql">
+        <LogicalName>stockymodels.Migrations.002CreateProjectionsRevert.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\command_insert_type.sql">
+        <LogicalName>stockymodels.Functions.command_insert_type.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\event_insert_type.sql">
+        <LogicalName>stockymodels.Functions.event_insert_type.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command_and_event.sql">
+        <LogicalName>stockymodels.Functions.insert_command_and_event.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command_and_event_with_advisory_lock.sql">
+        <LogicalName>stockymodels.Functions.insert_command_and_event_with_advisory_lock.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command_and_event_with_row_versioning.sql">
+        <LogicalName>stockymodels.Functions.insert_command_and_event_with_row_versioning.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command.sql">
+        <LogicalName>stockymodels.Functions.insert_command.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_event.sql">
+        <LogicalName>stockymodels.Functions.insert_event.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\get_max_aggregate_sequence.sql">
+        <LogicalName>stockymodels.Functions.get_max_aggregate_sequence.sql</LogicalName>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

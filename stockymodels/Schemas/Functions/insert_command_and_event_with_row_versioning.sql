@@ -6,8 +6,7 @@ SET search_path TO stockydb;
 
 CREATE OR REPLACE FUNCTION insert_command_and_event_with_row_versioning(
     p_command stockydb.command_insert,
-    p_event stockydb.event_insert,
-    p_expected_next_sequence INTEGER
+    p_event stockydb.event_insert_with_seq_id,
 )
 RETURNS INTEGER
 LANGUAGE plpgsql
@@ -16,7 +15,7 @@ DECLARE
     v_max_now INTEGER;
     v_next_now INTEGER;
 BEGIN
-    IF p_expected_next_sequence < 1 THEN
+    IF p_event.expected_next_sequence < 1 THEN
         RAISE EXCEPTION 'p_expected_next_sequence must be >= 1'
             USING ERRCODE = '22023';
     END IF;
@@ -24,9 +23,9 @@ BEGIN
     v_max_now := get_max_aggregate_sequence(p_event.aggregate_type, p_event.aggregate_id);
     v_next_now := v_max_now + 1;
 
-    IF v_next_now IS DISTINCT FROM p_expected_next_sequence THEN
+    IF v_next_now IS DISTINCT FROM p_event.expected_next_sequence THEN
         RAISE EXCEPTION 'row version conflict: expected next sequence %, actual next % (aggregate % / %)',
-            p_expected_next_sequence, v_next_now, p_event.aggregate_type, p_event.aggregate_id
+            p_event.expected_next_sequence, v_next_now, p_event.aggregate_type, p_event.aggregate_id
             USING ERRCODE = 'P0001';
     END IF;
 

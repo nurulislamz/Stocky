@@ -1,5 +1,6 @@
 SET search_path TO stockydb;
 
+DROP TYPE IF EXISTS event_insert_with_seq_id CASCADE;
 DROP TYPE IF EXISTS event_insert CASCADE;
 
 CREATE TYPE event_insert AS (
@@ -16,6 +17,11 @@ CREATE TYPE event_insert AS (
     valid_to timestamptz,
     command_id uuid,
     trace_id uuid
+);
+
+CREATE TYPE event_insert_with_seq_id AS (
+    event stockydb.event_insert,
+    expected_next_sequence integer
 );
 
 DROP TYPE IF EXISTS command_insert CASCADE;
