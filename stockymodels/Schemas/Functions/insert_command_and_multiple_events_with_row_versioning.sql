@@ -1,5 +1,5 @@
 -- Row-version append: each array element pairs event_insert with expected_next_sequence for that row.
--- Before each insert, get_max + 1 must match expected_next_sequence (prior rows in this batch are visible).
+-- Before each insert, get_aggregate_version + 1 must match expected_next_sequence (prior rows in this batch are visible).
 -- No advisory lock (optimistic / compare-and-append).
 SET search_path TO stockydb;
 
@@ -51,7 +51,7 @@ BEGIN
                 USING ERRCODE = '22023';
         END IF;
 
-        v_max_now := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id::text);
+        v_max_now := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id);
         v_next_now := v_max_now + 1;
 
         IF v_next_now IS DISTINCT FROM v_exp THEN

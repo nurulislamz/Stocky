@@ -30,7 +30,7 @@ BEGIN
         raise exception 'Command and event trace IDs do not match';
     end if;
 
-    v_max_now := get_aggregate_version((p_event).event.aggregate_type, (p_event).event.aggregate_id::text);
+    v_max_now := get_aggregate_version((p_event).event.aggregate_type, (p_event).event.aggregate_id);
     v_next_now := v_max_now + 1;
 
     IF v_next_now IS DISTINCT FROM p_event.expected_next_sequence THEN

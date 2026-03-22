@@ -40,7 +40,7 @@ BEGIN
 
     FOREACH v_event IN ARRAY p_events
     LOOP
-        v_next_seq := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id::text) + 1;
+        v_next_seq := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id) + 1;
 
         if p_command.command_id != v_event.command_id then
             raise exception 'Command and event command IDs do not match';

@@ -2,7 +2,7 @@ SET search_path TO stockydb;
 
 CREATE OR REPLACE FUNCTION get_max_aggregate_sequence_from_events(
     p_aggregate_type VARCHAR(32),
-    p_aggregate_id TEXT
+    p_aggregate_id uuid
 )
 RETURNS INTEGER
 LANGUAGE sql

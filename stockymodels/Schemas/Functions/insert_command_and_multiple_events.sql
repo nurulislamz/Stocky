@@ -27,7 +27,7 @@ BEGIN
 
     FOREACH v_event IN ARRAY p_events
     LOOP
-        v_next_seq := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id::text) + 1;
+        v_next_seq := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id) + 1;
 
         v_event_result := insert_event_and_update_stream_version(v_event, v_next_seq);
 

@@ -13,7 +13,7 @@ DECLARE
     v_payload jsonb;
 BEGIN
     FOR i IN 1..p_iterations LOOP
-        PERFORM pg_advisory_xact_lock(v_aggregate_type, hashtext(v_aggregate_id::text));
+        PERFORM pg_advisory_xact_lock(v_aggregate_type, hashtext(v_aggregate_id));
 
         cmd_id := gen_random_uuid();
         v_payload := jsonb_build_object('bar', 2, 'attempt', i);

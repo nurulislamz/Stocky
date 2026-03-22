@@ -14,7 +14,7 @@ DECLARE
     v_command_result RECORD;
     v_event_result RECORD;
 BEGIN
-    v_max_seq := get_aggregate_version(p_event.aggregate_type, p_event.aggregate_id::text);
+    v_max_seq := get_aggregate_version(p_event.aggregate_type, p_event.aggregate_id);
 
     if p_command.command_id != p_event.command_id then
         raise exception 'Command and event command IDs do not match';

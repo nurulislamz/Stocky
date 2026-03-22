@@ -38,64 +38,57 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 
 		// Map the Event composite type
 		dataSourceBuilder.MapComposite<InsertEventAggregate>("stockydb.event_insert");
+
+		// Map the Event composite type with expected next sequence
+		dataSourceBuilder.MapComposite<InsertEventAggregateWithExpectedNextSequence>("stockydb.event_insert_with_seq_id");
+
+		// Map the CommandAndEventResult composite type
+		dataSourceBuilder.MapComposite<CommandAndEventResult>("stockydb.command_and_event_result");
+
 		using var dataSource = dataSourceBuilder.Build();
 	}
 
 	/// <summary>Appends a command and one event in a single transaction.</summary>
-	public async Task<(CommandAggregate, InsertEventAggregate)> RegisterEventAsync(
+	public async Task<CommandAndEventResult> RegisterEventAsync(
 		Command command,
 		StockyEvent @event,
 		Guid userId,
 		Guid traceId,
 		CancellationToken ct = default)
 	{
-		var commandId = Guid.NewGuid();
+		var commandId = Guid.CreateVersion7();
+		var eventId = Guid.CreateVersion7();
 		var now = DateTimeOffset.UtcNow;
 		var ttEnd = DateTimeOffset.MaxValue;
 
-		var commandModel = CreateCommandAggregate(command, commandId, userId, traceId, now, ttEnd);
-		var eventModel = CreateInsertEventAggregate(@event, Guid.NewGuid(), commandId, userId, traceId, now, ttEnd);
+		var insertCommand = CreateCommandAggregate(command, commandId, userId, traceId, now, ttEnd);
+		var insertEvent = CreateInsertEventAggregate(@event, eventId, commandId, userId, traceId, now, ttEnd);
 
 		return _concurrencyLevel switch
 		{
-			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetry(commandModel, eventModel, ct),
-			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLock(commandModel, eventModel, ct),
-			ConcurrencyLevel.RowVersion => await WithRowVersioning(commandModel, eventModel, ct),
+			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetry(insertCommand, insertEvent, ct),
+			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLock(insertCommand, insertEvent, ct),
+			ConcurrencyLevel.RowVersion => await WithRowVersioning(insertCommand, insertEvent, ct),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
 
-	private async Task<(CommandAggregate, InsertEventAggregate)> WithRowVersioning(CommandAggregate commandModel, InsertEventAggregate eventModel, CancellationToken ct)
-	{
 
-		await _connection.ExecuteAsync(StockySqlFunctions.GetMaxAggregateSequence,
-			(eventModel.AggregateType, eventModel.AggregateId));
-		await _connection.ExecuteAsync(StockySqlFunctions.InsertCommandAndEventWithRowVersioning,
-			(commandModel, eventModel));
-
-		return (commandModel, eventModel);
-	}
-
-	private async Task<(CommandAggregate, InsertEventAggregate)> WithOptimisticRetry(CommandAggregate commandModel, InsertEventAggregate eventModel, CancellationToken ct)
+	private async Task<CommandAndEventResult> WithOptimisticRetry(CommandAggregate insertCommand, InsertEventAggregate insertEvent, CancellationToken ct)
 	{
 		for (int attempt = 0; attempt < _retryAttempts; attempt++)
 		{
-			await using var tx = await _connection.BeginTransactionAsync(ct);
 			try
 			{
-				await _connection.ExecuteAsync(StockySqlFunctions.InsertCommandAndEvent,
-					(commandModel, eventModel), commandType: System.Data.CommandType.StoredProcedure);
-				return (commandModel, eventModel);
+				var result = await _connection.QuerySingleAsync<CommandAndEventResult>(StockySqlFunctions.InsertCommandAndEvent,
+					new { p_command = insertCommand, p_event = insertEvent }, commandType: System.Data.CommandType.StoredProcedure);
+				_logger.LogInformation("Command and event inserted successfully. Result: {Result}", result);
+				return result;
 			}
 			catch (PostgresException ex) when (ex.SqlState == "23505")
 			{
 				_logger.LogWarning("Sequence conflict, attempt {Attempt}/{Max}",
 					attempt + 1, _retryAttempts);
-			}
-			catch
-			{
-				await tx.RollbackAsync(ct);
-				throw;
 			}
 		}
 
@@ -103,32 +96,55 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			$"Unable to register event after {_retryAttempts} retries");
 	}
 
-	private async Task<(CommandAggregate, EventAggregate)> WithAdvisoryLock(
-		CommandAggregate commandModel, InsertEventAggregate eventModel, CancellationToken ct)
+	private async Task<CommandAndEventResult> WithAdvisoryLock(
+		CommandAggregate insertCommand, InsertEventAggregate insertEvent, CancellationToken ct)
 	{
-		await _connection.ExecuteAsync(StockySqlFunctions.InsertCommandAndEventWithAdvisoryLock,
-			(commandModel, eventModel), commandType: System.Data.CommandType.StoredProcedure);
-		return (commandModel, eventModel);
+		var result = await _connection.QuerySingleAsync<CommandAndEventResult>(
+			StockySqlFunctions.InsertCommandAndEventWithAdvisoryLock,
+			new { p_command = insertCommand, p_event = insertEvent },
+			commandType: System.Data.CommandType.StoredProcedure);
+
+		_logger.LogInformation("Command and event inserted successfully. Result: {Result}", result);
+		return result;
+	}
+
+	private async Task<CommandAndEventResult> WithRowVersioning(CommandAggregate insertCommand, InsertEventAggregate insertEvent, CancellationToken ct)
+	{
+		var currentVersion = await _connection.QuerySingleAsync<int>(
+			StockySqlFunctions.GetAggregateVersion,
+			new { p_aggregate_type = insertEvent.AggregateType, p_aggregate_id = insertEvent.AggregateId },
+			commandType: System.Data.CommandType.StoredProcedure);
+
+		var insertEventWithSeqId = new InsertEventAggregateWithExpectedNextSequence
+		{
+			Event = insertEvent,
+			ExpectedNextSequence = currentVersion + 1,
+		};
+
+		var result = await _connection.QuerySingleAsync<CommandAndEventResult>(
+			StockySqlFunctions.InsertCommandAndEventWithRowVersioning,
+			new { p_command = insertCommand, p_event = insertEventWithSeqId },
+			commandType: System.Data.CommandType.StoredProcedure);
+
+		_logger.LogInformation("Command and event inserted successfully. Result: {Result}", result);
+		return result;
 	}
 
 	/// <summary>Appends a command and multiple event in a single transaction.</summary>
-	public async Task<(CommandAggregate, EventAggregate[])> RegisterMultipleEventsAsync(
+	public async Task<CommandAndEventResult[]> RegisterMultipleEventsAsync(
 		Command command,
 		StockyEvent[] events,
 		Guid userId,
 		Guid traceId,
 		CancellationToken ct = default)
 	{
-		var commandId = Guid.NewGuid();
+		var commandId = Guid.CreateVersion7();
+		var eventId = Guid.CreateVersion7();
 		var now = DateTimeOffset.UtcNow;
 		var ttEnd = DateTimeOffset.MaxValue;
 
-		var commandModel = CreateCommandAggregate(command, commandId, context, now, ttEnd);
-
-		var dataSourceBuilder = new NpgsqlDataSourceBuilder("Your_Connection_String");
-		dataSourceBuilder.MapComposite<EventModel>("stockydb.event_insert");
-		var dataSource = dataSourceBuilder.Build();
-		var eventModels = events.Select(e => CreateInsertEventAggregate(e, Guid.NewGuid(), commandId, context, now, ttEnd)).ToArray();
+		var commandModel = CreateCommandAggregate(command, commandId, userId, traceId, now, ttEnd);
+		var eventModels = events.Select(e => CreateInsertEventAggregate(e, eventId, commandId, userId, traceId, now, ttEnd)).ToArray();
 
 		return _concurrencyLevel switch
 		{
@@ -139,46 +155,23 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 		};
 	}
 
-	private async Task<(CommandAggregate, EventAggregate[])> WithRowVersioningMulti(CommandAggregate commandModel, EventAggregate[] eventModels, CancellationToken ct)
-	{
-		await _connection.ExecuteScalarAsync(StockySqlFunctions.InsertCommandAndEventWithRowVersioning, (commandModel, eventModels))
-		await using var tx = await _connection.BeginTransactionAsync(ct);
-		try
-		{
-			await InsertCommandAsync(commandModel, tx, ct);
-			var inserted = await InsertMultipleEventsWithSequencing(eventModels, tx, ct);
-			await tx.CommitAsync(ct);
-			return (commandModel, inserted);
-		}
-		catch
-		{
-			await tx.RollbackAsync(ct);
-			throw;
-		}
-	}
-
-	private async Task<(CommandAggregate, EventAggregate[])> WithOptimisticRetryMulti(
-		CommandAggregate commandModel, EventAggregate[] eventModel, CancellationToken ct)
+	private async Task<CommandAndEventResult[]> WithOptimisticRetryMulti(
+		CommandAggregate commandModel, InsertEventAggregate[] eventModels, CancellationToken ct)
 	{
 		for (int attempt = 0; attempt < _retryAttempts; attempt++)
 		{
-			await using var tx = await _connection.BeginTransactionAsync(ct);
 			try
 			{
-				await InsertCommandAsync(commandModel, tx, ct);
-				var inserted = await InsertMultipleEventsWithSequencing(eventModel, tx, ct);
-				await tx.CommitAsync(ct);
-				return (commandModel, inserted);
+				var result = await _connection.QuerySingleAsync<CommandAndEventResult[]>(
+					StockySqlFunctions.InsertCommandAndMultipleEvents,
+					new { p_command = commandModel, p_events = eventModels },
+					commandType: System.Data.CommandType.StoredProcedure);
+				return result;
 			}
 			catch (PostgresException ex) when (ex.SqlState == "23505")
 			{
 				_logger.LogWarning("Sequence conflict, attempt {Attempt}/{Max}",
 					attempt + 1, _retryAttempts);
-			}
-			catch
-			{
-				await tx.RollbackAsync(ct);
-				throw;
 			}
 		}
 
@@ -186,69 +179,64 @@ public class PostgresEventStore : IDisposable, IAsyncDisposable
 			$"Unable to register event after {_retryAttempts} retries");
 	}
 
-	private async Task<(CommandAggregate, EventAggregate[])> WithAdvisoryLockMulti(
-		CommandAggregate commandModel, EventAggregate[] eventModels, CancellationToken ct)
+	private async Task<CommandAndEventResult[]> WithAdvisoryLockMulti(
+		CommandAggregate commandModel, InsertEventAggregate[] eventModels, CancellationToken ct)
 	{
-		await using var tx = await _connection.BeginTransactionAsync(ct);
-		try
-		{
-			var distinctAggregates = eventModels
-				.Select(e => (e.AggregateType, e.AggregateId))
-				.Distinct()
-				.OrderBy(a => a.AggregateType)
-				.ThenBy(a => a.AggregateId);
-
-			await InsertCommandAsync(commandModel, tx, ct);
-			foreach (var (aggType, aggId) in distinctAggregates)
-			{
-				await AcquireAdvisoryLockAsync(
-					eventModels.First(e => e.AggregateType == aggType && e.AggregateId == aggId),
-					tx, ct);
-			}
-			var inserted = await InsertMultipleEventsWithSequencing(eventModels, tx, ct);
-			await tx.CommitAsync(ct);
-			return (commandModel, inserted);
-		}
-		catch
-		{
-			await tx.RollbackAsync(ct);
-			throw;
-		}
+		var result = await _connection.QuerySingleAsync<CommandAndEventResult[]>(
+			StockySqlFunctions.InsertCommandAndMultipleEventsWithAdvisoryLocks,
+			new { p_command = commandModel, p_events = eventModels },
+			commandType: System.Data.CommandType.StoredProcedure);
+		return result;
 	}
 
-	private async Task<EventAggregate[]> InsertMultipleEventsWithSequencing(EventAggregate[] eventModels, IDbTransaction tx, CancellationToken ct)
-	{
-		var sequenceTracker = new Dictionary<(string, Guid), int>();
-		var insertList = new List<EventAggregate>();
 
-		foreach (var model in eventModels)
+	private async Task<CommandAndEventResult[]> WithRowVersioningMulti(CommandAggregate commandModel, InsertEventAggregate[] eventModels, CancellationToken ct)
+	{
+		var nextByAggregate = new Dictionary<(string AggregateType, Guid AggregateId), int>();
+		var appends = new InsertEventAggregateWithExpectedNextSequence[eventModels.Length];
+
+		for (int i = 0; i < eventModels.Length; i++)
 		{
-			var key = (model.AggregateType, model.AggregateId);
-			if (!sequenceTracker.TryGetValue(key, out var nextSeq))
+			var eventModel = eventModels[i];
+			var key = (eventModel.AggregateType, eventModel.AggregateId);
+
+			if (!nextByAggregate.TryGetValue(key, out var previousExpected))
 			{
-				nextSeq = await QueryMaxSequenceAsync(model, tx, ct) + 1;
+				var currentVersion = await _connection.QuerySingleAsync<int>(
+					StockySqlFunctions.GetAggregateVersion,
+					new { p_aggregate_type = eventModel.AggregateType, p_aggregate_id = eventModel.AggregateId },
+					commandType: CommandType.StoredProcedure);
+
+				previousExpected = currentVersion;
 			}
-			var insert = await InsertEventAsync(model, nextSeq, tx, ct);
-			insertList.Add(insert);
-			sequenceTracker[key] = nextSeq + 1;
+
+			var expectedNext = previousExpected + 1;
+			nextByAggregate[key] = expectedNext;
+
+			appends[i] = new InsertEventAggregateWithExpectedNextSequence
+			{
+				Event = eventModel,
+				ExpectedNextSequence = expectedNext,
+			};
 		}
-		return insertList.ToArray();
+
+		var result = await _connection.QuerySingleAsync<CommandAndEventResult[]>(
+			StockySqlFunctions.InsertCommandAndMultipleEventsWithRowVersioning,
+			new { p_command = commandModel, p_appends = appends },
+			commandType: CommandType.StoredProcedure);
+
+		return result;
 	}
 
 	private async Task<int> QueryMaxSequenceAsync(EventAggregate model, IDbTransaction? tx, CancellationToken ct)
 	{
 		return await _connection.ExecuteScalarAsync<int>(new CommandDefinition(
-			MaxSeqSql,
-			new { aggregateType = model.AggregateType, aggregateId = model.AggregateId },
-			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
-	}
-
-	private async Task AcquireAdvisoryLockAsync(EventAggregate model, IDbTransaction tx, CancellationToken ct)
-	{
-		await _connection.ExecuteAsync(new CommandDefinition(
-			AdvisoryLockSql,
-			new { aggregateType = model.AggregateType, aggregateId = model.AggregateId },
-			tx, commandTimeout: _commandTimeout, cancellationToken: ct));
+			StockySqlFunctions.GetMaxAggregateSequenceFromEventTable,
+			new { p_aggregate_type = model.AggregateType, p_aggregate_id = model.AggregateId },
+			tx,
+			commandType: CommandType.StoredProcedure,
+			commandTimeout: _commandTimeout,
+			cancellationToken: ct));
 	}
 
 	public async Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, CancellationToken ct = default) where T : StockyEventPayload

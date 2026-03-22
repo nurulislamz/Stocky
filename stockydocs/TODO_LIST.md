@@ -2,7 +2,7 @@
 
 Scanned from inline `TODO`, `FIXME`, and `[Obsolete]` markers across **stockyapi** and **stockymodels**.
 
-Last updated: February 2026
+Last updated: March 2026
 
 ---
 
@@ -17,228 +17,153 @@ Last updated: February 2026
 
 ---
 
-## 1. Error Handling & Logging
+## Event Store Improvements (Current Focus)
 
-### 1.1 Repository exception handling is raw and inconsistent
+### E1. Fix WithRowVersioningMulti – add proper version validation
 **Priority:** P0
-**Files:**
-- `stockyapi/Repository/Funds/FundsRepository.cs` (line 26)
-- `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (multiple locations)
+**File:** `stockymodels/EventStore/EventStore.cs`
 
-**Problem:** Repositories throw raw `Exception` or `NullReferenceException` with ad-hoc messages. No structured logging. No correlation IDs. Callers cannot distinguish "portfolio not found" from a database failure.
+**Problem:** `WithRowVersioningMulti` does not perform row version validation. It behaves like optimistic concurrency (relies on unique constraint) instead of explicit version checking. The single-event `WithRowVersioning` correctly:
+1. Reads expected next sequence **before** transaction
+2. Re-reads **inside** transaction
+3. Compares and throws if they differ
+4. Uses the pre-read expected sequence for the insert
+
+`WithRowVersioningMulti` skips steps 1–3 entirely.
 
 **Action items:**
-- [x] Replace `throw new Exception(...)` with domain-specific exceptions or return `Result<T>.Fail(...)` so failures flow through the existing failure pipeline
-- [x] Add structured `ILogger` calls with event IDs at the repository level (partially done in PortfolioRepository but not FundsRepository)
-- [~] Consider a `PortfolioNotFoundException` that maps to 404 at the API layer
-- [x] Remove `await _dbContext.SaveChangesAsync()` from `GetFundsAsync` (read-only query should not call SaveChanges)
+- [ ] Before starting the transaction: for each distinct (AggregateType, AggregateId), query `MAX(AggregateSequenceId)` and build a map of expected next sequences
+- [ ] Inside the transaction: re-query max sequences for all distinct aggregates
+- [ ] Compare expected vs current; if any differ, throw `InvalidOperationException` with a clear message (e.g. "Row version conflict for aggregate X")
+- [ ] Use the expected sequences (not the re-read ones) when inserting, so semantics match single-event row versioning
+- [ ] Add integration tests for `RegisterMultipleEventsAsync` with `ConcurrencyLevel.RowVersion` (multi-aggregate, single-aggregate multi-event, and conflict scenarios)
 
-### 1.2 BaseController ProblemDetails is incomplete
+---
+
+### E2. Add optional expectedVersion parameter to RegisterEventAsync (RowVersion mode)
 **Priority:** P1
-**File:** `stockyapi/Controllers/Helpers/BaseController.cs` (lines 14, 25)
+**File:** `stockymodels/EventStore/EventStore.cs`
 
-**Problem:** `ProcessFailure` does not populate the RFC 9457 `type` field. A `ProblemTypes` dictionary exists but is unused.
+**Problem:** The tests in `EventStoreRowVersioningTests.cs` expect `RegisterEventAsync(cmd, evt, context, expectedVersion: 0)` and `GetStreamVersionAsync("FundId", fundId)`, but the current API has no `expectedVersion` parameter or `GetStreamVersionAsync`. The current `WithRowVersioning` uses an implicit “read before tx” as the expected version, which works but does not allow the caller to explicitly assert the version they expect (e.g. from a prior read).
 
 **Action items:**
-- [ ] Wire `ProblemTypes` into `ProcessFailure` so each `Failure` subclass maps to a problem type URI
-- [ ] Expand `ProblemTypes` to cover all Failure types (400, 401, 403, 409, 422, 500, 503, 504)
-- [ ] Consider hosting a `/problems/{type}` endpoint that describes each error type (or link to docs)
+- [ ] Add optional `int? expectedVersion` parameter to `RegisterEventAsync` (and `RegisterMultipleEventsAsync` if needed)
+- [ ] When `ConcurrencyLevel.RowVersion` and `expectedVersion` is not null: validate that `expectedVersion == currentMaxSeq` before inserting; throw with a clear message if mismatch
+- [ ] Add `GetStreamVersionAsync(string aggregateType, Guid aggregateId)` (or equivalent) that returns `MAX(AggregateSequenceId)` for the stream
+- [ ] Align enum: tests use `ConcurrencyLevel.RowVersioning` but code has `RowVersion` – standardise (e.g. add `RowVersioning` as alias or rename to match tests)
+- [ ] Update or fix `EventStoreRowVersioningTests` so they compile and pass against the updated API
 
 ---
 
-## 2. Validation & Security
+### E3. Sequence indexer – pros and cons analysis
+**Priority:** P2 (decision/documentation)
 
-### 2.1 Email validation missing in UserContext
-**Priority:** P1
-**File:** `stockyapi/Middleware/UserContext.cs` (line 43)
+**Context:** A “sequence indexer” typically means a **global** monotonically increasing sequence number across all events (in addition to the per-aggregate `AggregateSequenceId`).
 
-**Problem:** The email claim is read from the JWT but no format validation is performed before it's used as the user's identity.
+**Pros:**
+- **Event log subscriptions:** Consumers can subscribe from “event N” and process in global order
+- **Replication / CDC:** Easier to track “last processed position” for outbox-style replication
+- **Debugging / auditing:** Single number to reference any event across the system
+- **Time-ordered queries:** Can order events across aggregates by insertion order
+
+**Cons:**
+- **Schema change:** New column (e.g. `GlobalSequenceId` BIGSERIAL or similar), migration, backfill
+- **Single writer:** Global sequence usually implies a single writer or coordination; with multiple appenders, you need a sequence source (e.g. PostgreSQL `nextval` on a sequence)
+- **Per-aggregate ordering:** `AggregateSequenceId` already gives correct order per stream; global sequence adds little for pure aggregate replay
+- **Complexity:** More moving parts, potential bottlenecks if the sequence is a hotspot
+
+**Recommendation:** Document the decision. If you plan event subscriptions or cross-aggregate ordering, add a global sequence. If you only need per-stream replay, keep the current design. Defer implementation until there is a concrete use case.
 
 **Action items:**
-- [x] Add email format validation (regex or `MailAddress.TryCreate`)
-- [x] Log a warning and reject the request if the claim is present but malformed
-
-### 2.2 Add additional claims to IUserContext
-**Priority:** P2
-**File:** `stockyapi/Middleware/IUserContext.cs` (line 9)
-
-**Action items:**
-- [x] Add `Role`, `FirstName`, `Surname` properties to `IUserContext`
-- [x] Populate them in `UserContext` from JWT claims
-- [x] Use `Role` for authorization checks where needed (admin endpoints, premium features)
+- [ ] Document the decision (add to this TODO or a design doc): adopt global sequence index or not, and why
+- [ ] If adopting: design column name, type (BIGINT/BIGSERIAL), and migration strategy
+- [ ] If adopting: ensure Dapper inserts use the sequence (e.g. `INSERT ... RETURNING` or `nextval`)
 
 ---
 
-## 3. Repository & Data Access
+### E4. Keep all logic in Dapper (no PostgreSQL functions for inserts)
+**Priority:** P2 (policy)
 
-### 3.1 Use HashSet for holding ID lookups
-**Priority:** P2
-**File:** `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (line 55)
-
-**Action items:**
-- [x] Convert `Guid[] requestedIds` to `HashSet<Guid>` for O(1) lookups in `ValidateHoldingsExist`
-- [x] Same change for `string[] requestedTickers`
-
-### 3.2 Implement reimbursement on holding deletion
-**Priority:** P1
-**File:** `stockyapi/Repository/PortfolioRepository/PortfolioRepository.cs` (line 199)
-
-**Problem:** `DeleteHoldingsAsync` removes holdings but does not reimburse the portfolio's cash balance. This is a financial correctness issue.
+**Context:** The migration `003InsertCommandAndEventFunction.sql` defines `insert_command_and_event`. The decision is to keep all insert logic in C# with Dapper.
 
 **Action items:**
-- [ ] Add an optional `reimburse` parameter (bool or enum: `Reimburse` / `WriteOff`)
-- [ ] When reimbursing: calculate value from `Shares * AverageCost`, add to `CashBalance`, subtract from `InvestedAmount`
-- [ ] Record the reimbursement in an `AssetTransactionModel` with a new `TransactionType.Reimburse`
-
-### 3.3 UserRepository CreateUser separation
-**Priority:** P2
-**File:** `stockyapi/Repository/User/UserRepository.cs` (line 44)
-
-**Problem:** User creation has commented-out code for initializing portfolio and preferences inline. This should be separated.
-
-**Action items:**
-- [ ] Create user in `UserRepository.CreateUserAsync`
-- [ ] Create portfolio and preferences in a dedicated setup service or orchestrator (e.g. `UserSetupService`)
-- [ ] Wrap in a transaction to ensure atomicity
-
-### 3.4 UserRepository UpdateUser is too broad
-**Priority:** P2
-**File:** `stockyapi/Repository/User/UserRepository.cs` (line 83)
-
-**Action items:**
-- [ ] Replace `UpdateUserAsync(UserModel)` with targeted methods: `UpdateEmailAsync`, `UpdatePasswordAsync`, `UpdateProfileAsync`
-- [ ] Use EF `Attach` + mark specific properties as modified to avoid overwriting unrelated fields
+- [ ] Do not call `insert_command_and_event` from the event store; keep using parameterised `INSERT` via Dapper
+- [ ] Optionally: add a revert migration or comment that the function is unused by the app (or remove it if not needed for other tooling)
+- [ ] Ensure all sequencing, locking, and validation remain in C# for consistency and testability
 
 ---
 
-## 4. Caching
+## Summary – Event Store TODO
 
-### 4.1 Implement FusionCache
-**Priority:** P2
-**File:** `stockyapi/Services/BaseApiServiceClient.cs` (line 53)
-
-**Problem:** Currently using `IMemoryCache` directly. FusionCache would add cache stampede protection, distributed caching support, and fail-safe stale data.
-
-**Action items:**
-- [ ] Add `ZiggyCreatures.FusionCache` NuGet package
-- [ ] Replace `IMemoryCache` with `IFusionCache` in `BaseApiServiceClient`
-- [ ] Configure TTL, fail-safe, and optional Redis backplane for multi-instance deployments
+| ID  | Priority | Description |
+|-----|----------|-------------|
+| E1  | P0       | Fix WithRowVersioningMulti – add version validation |
+| E2  | P1       | Add expectedVersion + GetStreamVersionAsync, align tests |
+| E3  | P2       | Document sequence indexer decision (pros/cons) |
+| E4  | P2       | Confirm policy: all logic in Dapper, no PG functions for inserts |
 
 ---
 
-## 5. Feature Implementation
+## Other Areas (Deferred / Non–Event Store)
 
-### 5.1 Fund transaction history endpoint
-**Priority:** P1
-**File:** `stockyapi/Application/Funds/FundsController.cs` (line 69)
+### 1. Error Handling & Logging
+- **1.1** Repository exception handling – mostly done (marked complete in prior list)
+- **1.2** BaseController ProblemDetails – wire `ProblemTypes`, expand coverage (P1)
 
-**Action items:**
-- [ ] Add `GET /api/funds/history` endpoint
-- [ ] Query `FundsTransactions` by user's portfolio, paginated, sorted by `CreatedAt` descending
-- [ ] Return `FundsTransactionModel` list with total count for pagination
+### 2. Validation & Security
+- **2.1** Email validation – done
+- **2.2** IUserContext claims – done
 
-### 5.2 SQLite dev mode
-**Priority:** P3
-**File:** `stockyapi/Program.cs` (line 67)
+### 3. Repository & Data Access
+- **3.1** HashSet for ID lookups – done
+- **3.2** Reimbursement on holding deletion (P1)
+- **3.3** UserRepository CreateUser separation (P2)
+- **3.4** UserRepository UpdateUser – targeted methods (P2)
 
-**Problem:** Comment says "Add SQLite" but the code already supports SQLite via a dev flag. Verify this TODO is stale and remove it, or finish the implementation if it's incomplete.
+### 4. Caching
+- **4.1** FusionCache (P2)
 
-**Action items:**
-- [ ] Verify SQLite dev mode works end-to-end
-- [ ] Remove the TODO if it's already complete
+### 5. Feature Implementation
+- **5.1** Fund transaction history endpoint (P1)
+- **5.2** SQLite dev mode – verify/remove stale TODO (P3)
 
----
+### 6. Code Organisation
+- **6.1** Fix namespacing (P3)
+- **6.2** CustomClaimTypes – verify/remove stale TODO (P3)
 
-## 6. Code Organisation & Naming
+### 7. Deprecated Code
+- **7.1** Remove obsolete Quote/QuoteSummary (P2)
 
-### 6.1 Fix namespacing everywhere
-**Priority:** P3
-**File:** `stockyapi/Application/Portfolio/ZHelperTypes/OrderCommand.cs` (line 5)
-
-**Action items:**
-- [ ] Move `OrderCommand.cs` out of `ZHelperTypes` (the Z-prefix is a sort hack)
-- [ ] Rename to `stockyapi.Application.Portfolio.Commands`
-- [ ] Audit all namespaces for consistency (`stockyapi.Application.X`, `stockyapi.Repository.X`, `stockyapi.Services.X`)
-
-### 6.2 Rename CustomClaimTypes
-**Priority:** P3
-**File:** `stockyapi/Services/TokenService.cs` (line 17)
-
-**Problem:** The TODO says "Change name to `public static class CustomClaimTypes`" but the class is already named that. Likely the TODO is stale.
-
-**Action items:**
-- [ ] Verify the name is correct and remove the TODO
-- [ ] Consider moving `CustomClaimTypes` to the `Middleware` or `Options` namespace since it's used by both TokenService and UserContext
+### 8. stockymodels (Non–Event Store)
+- **8.1** Migration/model nullability mismatch (P1)
+- **8.2** Unused OrderType enum (P3)
+- **8.3** DefaultCurrency GDP→GBP typo (P0)
 
 ---
 
-## 7. Deprecated Code Cleanup
+## Execution Plan – Event Store Focus
 
-### 7.1 Remove obsolete Quote and QuoteSummary endpoints
-**Priority:** P2
-**Files:**
-- `stockyapi/Application/MarketPricing/MarketPricingController.cs` (lines 90, 108)
-- `stockyapi/Application/MarketPricing/MarketPricingApi.cs` (lines 45, 53)
-- `stockyapi/Application/MarketPricing/IMarketPricingApi.cs`
-- `stockyapi/Services/YahooFinance/IYahooFinanceService.cs` (both methods marked `[Obsolete("...", true)]`)
+### Phase 1: Fix RowVersionMulti (E1)
+1. Implement expected-sequence map for all distinct aggregates before transaction
+2. Inside transaction: re-query max sequences, compare, throw on mismatch
+3. Use expected sequences for inserts (consistent with single-event behaviour)
+4. Add integration tests for multi-event row versioning (success and conflict)
 
-**Problem:** `GetQuotes` and `GetQuoteSummary` are marked obsolete because Yahoo Finance removed these endpoints. The code compiles (controller has `[Obsolete]` without `error: true`) but will fail at runtime.
+### Phase 2: expectedVersion API (E2)
+1. Add `expectedVersion` parameter to `RegisterEventAsync` (optional)
+2. Add `GetStreamVersionAsync(aggregateType, aggregateId)`
+3. When RowVersion + expectedVersion provided: validate before insert
+4. Fix enum naming (RowVersion vs RowVersioning) and update tests
+5. Ensure `EventStoreRowVersioningTests` compile and pass
 
-**Action items:**
-- [ ] Remove `GetQuotes` and `GetQuoteSummary` from controller, API, interface, and service
-- [ ] Remove corresponding types: `QuoteResponseArray`, `QuoteSummaryResult` (if unused elsewhere)
-- [ ] Remove corresponding test cases in `MarketPricingControllerTests`
-- [ ] Remove mock JSON fixtures if any
-
----
-
-## 8. stockymodels Issues (Found During Review)
-
-### 8.1 Migration / model nullability mismatch
-**Priority:** P1
-
-**Problem:** `AssetTransactionModel` declares `Quantity`, `Price`, and `NewAverageCost` as `decimal?` (nullable) but the migration creates them as `NOT NULL`. Delete transactions use `null` for these fields, which will fail against the DB.
-
-**Action items:**
-- [ ] Generate a new migration that makes these columns nullable
-- [ ] Or change the model to non-nullable and use `0` for delete transactions (less clean)
-
-### 8.2 Unused `OrderType` enum
-**Priority:** P3
-**File:** `stockymodels/Models/Enums/OrderType.cs`
-
-**Action items:**
-- [ ] If limit/stop orders are planned, keep it and document the plan
-- [ ] Otherwise remove it to reduce dead code
-
-### 8.3 `DefaultCurrency` enum has `GDP` instead of `GBP`
-**Priority:** P0
-**File:** `stockymodels/Models/Enums/DefaultCurrency.cs`
-
-**Action items:**
-- [ ] Rename `GDP` to `GBP` (British Pounds)
-- [ ] Generate a migration to update existing rows
-- [ ] Add more currencies (EUR, JPY, etc.) as needed
-
----
-
-## Summary by Priority
-
-| Priority | Count | Key Items |
-|----------|-------|-----------|
-| P0 | 2 | Exception handling, GDP→GBP typo |
-| P1 | 5 | Holding deletion reimbursement, ProblemDetails, email validation, fund history, nullability mismatch |
-| P2 | 6 | HashSet, UpdateUser, FusionCache, obsolete cleanup, user creation separation, IUserContext claims |
-| P3 | 4 | Namespacing, SQLite TODO cleanup, OrderType, CustomClaimTypes |
+### Phase 3: Documentation & Policy (E3, E4)
+1. Document sequence indexer decision (add or not, rationale)
+2. Confirm Dapper-only policy; document or remove unused PG function
 
 ---
 
 ## Workflow
 
-1. Start with **P0** items (data integrity and correctness)
-2. Then **P1** (feature completeness and quality)
-3. **P2** items can be done as part of regular refactoring sprints
-4. **P3** items can be picked up when touching nearby code
-
-Add a validFrom or validTo endpoint to query portfolio endpoint
-Lint tests
+1. Start with **E1** (RowVersionMulti fix) – highest impact for correctness
+2. Then **E2** (expectedVersion API) – improves API and test alignment
+3. **E3** and **E4** – documentation and policy, no code change required immediately

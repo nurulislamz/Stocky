@@ -2,7 +2,7 @@ SET search_path TO stockydb;
 
 CREATE OR REPLACE FUNCTION get_aggregate_version(
     p_aggregate_type VARCHAR(32),
-    p_aggregate_id TEXT
+    p_aggregate_id uuid
 )
 RETURNS INTEGER
 LANGUAGE sql

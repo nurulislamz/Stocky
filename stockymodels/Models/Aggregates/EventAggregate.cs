@@ -31,7 +31,7 @@ public record InsertEventAggregate
     public required Guid CommandId { get; init; }
 
     /// <summary>Correlation id for distributed tracing. Null when not tracked.</summary>
-    public required Guid? TraceId { get; init; }
+    public required Guid TraceId { get; init; }
 
     public override string ToString()
     {
@@ -41,7 +41,25 @@ public record InsertEventAggregate
     }
 }
 
-public record EventAggregate : InsertEventAggregate
+public record InsertEventAggregateWithExpectedNextSequence
+{
+    public required InsertEventAggregate Event { get; init; }
+
+    public required int ExpectedNextSequence { get; init; }
+}
+
+public record InsertEventAggregateWithSeqId : InsertEventAggregate
+{
+
+    public override string ToString()
+    {
+        return $"Id={EventId}, AggregateType={AggregateType}, AggregateId={AggregateId}, AggregateSequenceId={AggregateSequenceId}, EventType={EventType}, " +
+               $"TtStart={TtStart:O}, TtEnd={TtEnd:O}, ValidFrom={ValidFrom:O}, ValidTo={ValidTo:O}, " +
+               $"EventPayloadJson={EventPayloadJson}";
+    }
+}
+
+public record EventAggregate : InsertEventAggregateWithSeqId
 {
     public required int AggregateSequenceId { get; init; }
 
