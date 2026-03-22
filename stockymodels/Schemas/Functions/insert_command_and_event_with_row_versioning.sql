@@ -1,6 +1,6 @@
 -- Row-version append: caller passes the next sequence they computed *before* this transaction
--- (same as get_max_aggregate_sequence(...) + 1 at read time). Inside the txn we recompute
--- get_max + 1; if it differs, the stream advanced between the client's read and this txn → conflict.
+-- (same as get_aggregate_version(...) + 1 at read time). Inside the txn we recompute
+-- version + 1; if it differs, the stream advanced between the client's read and this txn → conflict.
 -- No advisory lock (optimistic / compare-and-append).
 SET search_path TO stockydb;
 
@@ -30,7 +30,7 @@ BEGIN
         raise exception 'Command and event trace IDs do not match';
     end if;
 
-    v_max_now := get_max_aggregate_sequence((p_event).event.aggregate_type, (p_event).event.aggregate_id);
+    v_max_now := get_aggregate_version((p_event).event.aggregate_type, (p_event).event.aggregate_id::text);
     v_next_now := v_max_now + 1;
 
     IF v_next_now IS DISTINCT FROM p_event.expected_next_sequence THEN

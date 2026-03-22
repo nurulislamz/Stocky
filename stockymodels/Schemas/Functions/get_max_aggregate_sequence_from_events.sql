@@ -1,6 +1,6 @@
 SET search_path TO stockydb;
 
-CREATE OR REPLACE FUNCTION get_max_aggregate_sequence(
+CREATE OR REPLACE FUNCTION get_max_aggregate_sequence_from_events(
     p_aggregate_type VARCHAR(32),
     p_aggregate_id TEXT
 )

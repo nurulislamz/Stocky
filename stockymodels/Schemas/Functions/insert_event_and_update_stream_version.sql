@@ -28,7 +28,7 @@ BEGIN
         v_next_seq, p.event_type, p.event_payload_json,
         p.tt_start, p.tt_end, p.valid_from, p.valid_to, p.command_id, p.trace_id, v_db_stored_at_time
     );
-    PERFORM insert_or_update_stream_version(p.aggregate_type, p.aggregate_id, v_next_seq);
+    PERFORM insert_or_update_aggregate_version(p.aggregate_type, p.aggregate_id, v_next_seq);
 
     RETURN QUERY SELECT p.event_id, p.user_id, p.aggregate_id, v_next_seq, p.command_id, p.trace_id, v_db_stored_at_time;
 END;

@@ -51,7 +51,7 @@ BEGIN
                 USING ERRCODE = '22023';
         END IF;
 
-        v_max_now := get_max_aggregate_sequence(v_event.aggregate_type, v_event.aggregate_id);
+        v_max_now := get_aggregate_version(v_event.aggregate_type, v_event.aggregate_id::text);
         v_next_now := v_max_now + 1;
 
         IF v_next_now IS DISTINCT FROM v_exp THEN

@@ -27,12 +27,10 @@ BEGIN
         hashtext(p_event.aggregate_type::text),
         hashtext(p_event.aggregate_id::text)
     );
-    v_max_seq := get_max_aggregate_sequence(p_event.aggregate_type, p_event.aggregate_id);
+    v_max_seq := get_aggregate_version(p_event.aggregate_type, p_event.aggregate_id::text);
 
     v_command_result := insert_command(p_command);
     v_event_result := insert_event_and_update_stream_version(p_event, v_max_seq + 1);
-
-
 
     RETURN QUERY SELECT
         v_command_result.command_id,

@@ -8,8 +8,11 @@ RETURNS INTEGER
 LANGUAGE sql
 STABLE
 AS $$
-    SELECT v."CurrentSeqId"
-    FROM stockydb."AggregateVersion" v
-    WHERE v."AggregateType" = p_aggregate_type
-      AND v."AggregateId" = p_aggregate_id;
+    SELECT COALESCE(
+        (SELECT v."CurrentSeqId"
+         FROM stockydb."AggregateVersion" v
+         WHERE v."AggregateType" = p_aggregate_type
+           AND v."AggregateId" = p_aggregate_id),
+        0
+    )::integer;
 $$;
