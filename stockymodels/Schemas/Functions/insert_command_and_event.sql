@@ -25,7 +25,8 @@ BEGIN
     end if;
 
     v_command_result := insert_command(p_command);
-    v_event_result := insert_event(p_event, v_max_seq + 1);
+    v_event_result := insert_event_and_update_stream_version(p_event, v_max_seq + 1);
+
 
     RETURN QUERY SELECT
         v_command_result.command_id,

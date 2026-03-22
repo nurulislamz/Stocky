@@ -33,7 +33,6 @@ CREATE TYPE command_insert AS (
     command_payload_json jsonb,
     tt_start timestamptz,
     tt_end timestamptz,
-    request_id uuid,
     trace_id uuid
 );
 

@@ -50,7 +50,7 @@ BEGIN
             raise exception 'Command and event trace IDs do not match';
         end if;
 
-        v_event_result := insert_event(v_event, v_next_seq);
+        v_event_result := insert_event_and_update_stream_version(v_event, v_next_seq);
 
         v_results := array_append(
             v_results,

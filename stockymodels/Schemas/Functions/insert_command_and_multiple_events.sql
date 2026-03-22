@@ -29,7 +29,7 @@ BEGIN
     LOOP
         v_next_seq := get_max_aggregate_sequence(v_event.aggregate_type, v_event.aggregate_id) + 1;
 
-        v_event_result := insert_event(v_event, v_next_seq);
+        v_event_result := insert_event_and_update_stream_version(v_event, v_next_seq);
 
         v_results := array_append(
             v_results,

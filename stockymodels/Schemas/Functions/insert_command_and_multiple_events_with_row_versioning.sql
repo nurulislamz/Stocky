@@ -60,7 +60,7 @@ BEGIN
                 USING ERRCODE = 'P0001';
         END IF;
 
-        v_event_result := insert_event(v_event, v_next_now);
+        v_event_result := insert_event_and_update_stream_version(v_event, v_next_now);
 
         v_results := array_append(
             v_results,

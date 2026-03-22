@@ -1,7 +1,7 @@
 SET search_path TO stockydb;
 
 -- Inserts one event row; returns the stored event id and assigned aggregate sequence.
-CREATE OR REPLACE FUNCTION insert_event(p stockydb.event_insert, v_next_seq int)
+CREATE OR REPLACE FUNCTION insert_event_and_update_stream_version(p stockydb.event_insert, v_next_seq int)
 RETURNS TABLE (
     event_id uuid,
     user_id uuid,
@@ -28,6 +28,7 @@ BEGIN
         v_next_seq, p.event_type, p.event_payload_json,
         p.tt_start, p.tt_end, p.valid_from, p.valid_to, p.command_id, p.trace_id, v_db_stored_at_time
     );
+    PERFORM insert_or_update_stream_version(p.aggregate_type, p.aggregate_id, v_next_seq);
 
     RETURN QUERY SELECT p.event_id, p.user_id, p.aggregate_id, v_next_seq, p.command_id, p.trace_id, v_db_stored_at_time;
 END;

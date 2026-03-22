@@ -40,7 +40,7 @@ BEGIN
     END IF;
 
     v_command_result := insert_command(p_command);
-    v_event_result := insert_event((p_event).event, v_next_now);
+    v_event_result := insert_event_and_update_stream_version((p_event).event, v_next_now);
 
     RETURN QUERY SELECT
         v_command_result.command_id,

@@ -34,7 +34,8 @@ BEGIN
         p.tt_end,
         p.trace_id,
         v_db_stored_at_time
-    )
+    );
+
     RETURN QUERY SELECT p.command_id, p.user_id, p.trace_id, v_db_stored_at_time;
 END;
 $$;
