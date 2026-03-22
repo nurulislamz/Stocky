@@ -1,23 +1,23 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using stockymodels.Events;
 
 namespace stockymodels.models;
 
-public record EventAggregate
+public record InsertEventAggregate
 {
-    public required Guid EventId { get; set; }
+    public required Guid EventId { get; init; }
 
-    public required Guid UserId { get; set; }
+    public required Guid UserId { get; init; }
 
-    public required string AggregateType { get; set; }
+    public required string AggregateType { get; init; }
 
-    public required Guid AggregateId { get; set; }
+    public required Guid AggregateId { get; init; }
 
-    public int AggregateSequenceId { get; set; }
-
-    public required string EventType { get; set; }
+    public required string EventType { get; init; }
 
     /// <summary>StockyEvent payload as JSON for querying and APIs.</summary>
-    public required string EventPayloadJson { get; set; }
+    public required JsonDocument EventPayloadJson { get; init; }
 
     public required DateTimeOffset TtStart { get; set; }
 
@@ -28,18 +28,29 @@ public record EventAggregate
     public required DateTimeOffset ValidTo { get; set; }
 
     /// <summary>FK to the command that produced this event.</summary>
-    public required Guid CommandId { get; set; }
+    public required Guid CommandId { get; init; }
 
     /// <summary>Correlation id for distributed tracing. Null when not tracked.</summary>
-    public required Guid? TraceId { get; set; }
+    public required Guid? TraceId { get; init; }
 
     public override string ToString()
     {
-        var jsonPreview = EventPayloadJson?.Length > 200
-            ? EventPayloadJson[..200] + "..."
-            : EventPayloadJson ?? "";
+        return $"Id={EventId}, AggregateType={AggregateType}, AggregateId={AggregateId}, EventType={EventType}, " +
+            $"TtStart={TtStart:O}, TtEnd={TtEnd:O}, ValidFrom={ValidFrom:O}, ValidTo={ValidTo:O}, " +
+            $"EventPayloadJson={EventPayloadJson}";
+    }
+}
+
+public record EventAggregate : InsertEventAggregate
+{
+    public required int AggregateSequenceId { get; init; }
+
+    public required DateTimeOffset StoredAt {get; init; }
+
+    public override string ToString()
+    {
         return $"Id={EventId}, AggregateType={AggregateType}, AggregateId={AggregateId}, AggregateSequenceId={AggregateSequenceId}, EventType={EventType}, " +
             $"TtStart={TtStart:O}, TtEnd={TtEnd:O}, ValidFrom={ValidFrom:O}, ValidTo={ValidTo:O}, " +
-            $"EventPayloadJson={jsonPreview}";
+            $"EventPayloadJson={EventPayloadJson}";
     }
 }

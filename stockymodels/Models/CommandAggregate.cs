@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace stockymodels.models;
 
@@ -23,7 +24,7 @@ public class CommandAggregate
 
     /// <summary>Command body serialized as JSON.</summary>
     [Required]
-    public required string CommandPayloadJson { get; init; }
+    public required JsonDocument CommandPayloadJson { get; init; }
 
     /// <summary>Transaction-time validity start (when the command was issued).</summary>
     [Required]

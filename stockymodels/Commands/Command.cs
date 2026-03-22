@@ -1,1 +1,1 @@
-public record Command;
+public abstract record Command;
