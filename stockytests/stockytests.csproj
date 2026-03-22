@@ -33,7 +33,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.11.0" />
         <ProjectReference Include="..\stockyapi\stockyapi.csproj" />
+        <ProjectReference Include="..\stockymodels\stockymodels.csproj" />
     </ItemGroup>
 
     <ItemGroup>
