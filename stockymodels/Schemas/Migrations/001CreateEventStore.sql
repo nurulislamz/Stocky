@@ -9,11 +9,11 @@ CREATE TABLE "Commands" (
     "CommandPayloadJson" JSONB NOT NULL,
     "TtStart" TIMESTAMPTZ NOT NULL,
     "TtEnd" TIMESTAMPTZ NOT NULL,
-    "RequestId" UUID NOT NULL,
-    "TraceId" UUID NULL
+    "TraceId" UUID NULL,
+    "DbStoredAtTime" TIMESTAMPTZ NOT NULL
 );
 
-CREATE INDEX "ix_commands_request_id" ON "Commands" ("RequestId");
+CREATE INDEX "ix_commands_trace_id" ON "Commands" ("TraceId");
 
 CREATE TABLE "Events" (
     "EventId" UUID PRIMARY KEY,

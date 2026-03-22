@@ -36,3 +36,17 @@ CREATE TYPE command_insert AS (
     request_id uuid,
     trace_id uuid
 );
+
+CREATE TYPE command_and_event_result AS (
+    command_id uuid,
+    command_user_id uuid,
+    command_trace_id uuid,
+    command_db_stored_at_time timestamptz,
+    event_id uuid,
+    event_user_id uuid,
+    event_aggregate_id uuid,
+    event_aggregate_sequence_id integer,
+    event_command_id uuid,
+    event_trace_id uuid,
+    event_db_stored_at_time timestamptz
+);
