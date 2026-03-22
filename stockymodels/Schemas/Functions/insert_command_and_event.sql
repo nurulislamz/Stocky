@@ -9,8 +9,9 @@ CREATE OR REPLACE FUNCTION insert_command_and_event(
 RETURNS INTEGER
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_max_seq INTEGER;
 BEGIN
-
     v_max_seq := get_max_aggregate_sequence(p_event.aggregate_type, p_event.aggregate_id);
 
     PERFORM insert_command(p_command);

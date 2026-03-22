@@ -6,8 +6,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO stockydb."Commands" (
-        "CommandId", "UserId", "CommandType", "CommandPayloadJson",
-        "TtStart", "TtEnd", "RequestId", "TraceId"
+        p stockydb.command_insert
     ) VALUES (
         p.command_id, p.user_id, p.command_type, p.command_payload_json,
         p.tt_start, p.tt_end, p.request_id, p.trace_id

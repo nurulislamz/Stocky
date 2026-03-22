@@ -27,8 +27,9 @@ CREATE TABLE "Events" (
     "TtEnd" TIMESTAMPTZ NOT NULL,
     "ValidFrom" TIMESTAMPTZ NOT NULL,
     "ValidTo" TIMESTAMPTZ NOT NULL,
-    "CommandId" UUID NULL,
-    "TraceId" UUID NULL,
+    "CommandId" UUID NOT NULL,
+    "TraceId" UUID NOT NULL,
+    "DbStoredAtTime" TIMESTAMPTZ NOT NULL,
     CONSTRAINT "uq_events_aggregate_type_id_sequence"
         UNIQUE ("AggregateType", "AggregateId", "AggregateSequenceId"),
     CONSTRAINT "fk_events_commands_command_id"
