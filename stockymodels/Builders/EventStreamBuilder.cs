@@ -16,12 +16,12 @@ public abstract class EventStreamBuilder<TEvent, TModel, TCreateEvent>
 	where TModel : class
 	where TCreateEvent : TEvent
 {
-	protected readonly PostgresEventStore EventStore;
+	protected readonly IEventStoreReader EventStoreReader;
 	protected readonly ILogger Logger;
 
-	protected EventStreamBuilder(PostgresEventStore eventStore, ILogger logger)
+	protected EventStreamBuilder(IEventStoreReader eventStoreReader, ILogger logger)
 	{
-		EventStore = eventStore;
+		EventStoreReader = eventStoreReader;
 		Logger = logger;
 	}
 
@@ -36,7 +36,7 @@ public abstract class EventStreamBuilder<TEvent, TModel, TCreateEvent>
 
 	public async Task<TModel?> BuildAsync(Guid aggregateId, Guid tradingAccountId, CancellationToken ct = default)
 	{
-		var events = await EventStore.QueryAllAggregatedEventsAsync<TEvent>(AggregateTypeId, aggregateId, ct);
+		var events = await EventStoreReader.QueryAllAggregatedEventsAsync<TEvent>(AggregateTypeId, aggregateId, ct: ct);
 		if (events is null or { Length: 0 })
 			return null;
 		return ApplyEvents(aggregateId, tradingAccountId, events);

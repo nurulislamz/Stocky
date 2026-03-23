@@ -1,3 +1,4 @@
+using System.Data;
 using stockymodels.Events;
 
 namespace stockymodels.EventStore;
@@ -8,6 +9,7 @@ namespace stockymodels.EventStore;
 /// </summary>
 public interface IEventStoreReader
 {
-	Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, CancellationToken ct = default) where T : StockyEventPayload;
-	Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, CancellationToken ct = default);
+	Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default) where T : StockyEventPayload;
+	Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, IDbConnection? connection = null, CancellationToken ct = default);
+	Task<int> GetStreamVersionAsync(string aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default);
 }

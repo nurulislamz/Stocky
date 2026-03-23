@@ -1,9 +1,11 @@
+using System.Data;
 using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using stockymodels.Events;
 using stockymodels.models;
+using stockymodels.Sql;
 
 namespace stockymodels.EventStore;
 
@@ -24,9 +26,9 @@ public class PostgresEventStoreReader : IEventStoreReader
 		_commandTimeout = commandTimeout;
 	}
 
-	public async Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, CancellationToken ct = default) where T : StockyEventPayload
+	public async Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default) where T : StockyEventPayload
 	{
-		var connection = await _factory.GetConnectionAsync(ct);
+		connection ??= await _factory.GetConnectionAsync(ct);
 
 		const string sql = """
 		                   SELECT e."EventType", e."EventPayloadJson" FROM stockydb."Events" e
@@ -63,9 +65,9 @@ public class PostgresEventStoreReader : IEventStoreReader
 		return list.Count > 0 ? list.ToArray() : null;
 	}
 
-	public async Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, CancellationToken ct = default)
+	public async Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, IDbConnection? connection = null, CancellationToken ct = default)
 	{
-		var connection = await _factory.GetConnectionAsync(ct);
+		connection ??= await _factory.GetConnectionAsync(ct);
 
 		const string sql = """
 		                   SELECT e."EventPayloadJson" FROM stockydb."Events" e
@@ -79,5 +81,17 @@ public class PostgresEventStoreReader : IEventStoreReader
 			commandTimeout: _commandTimeout,
 			cancellationToken: ct));
 		return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<StockyEventPayload>(json);
+	}
+
+	public async Task<int> GetStreamVersionAsync(string aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default)
+	{
+		connection ??= await _factory.GetConnectionAsync(ct);
+
+		return await connection.QuerySingleAsync<int>(new CommandDefinition(
+			StockySqlFunctions.GetAggregateVersion,
+			new { p_aggregate_type = aggregateType, p_aggregate_id = aggregateId },
+			commandType: CommandType.StoredProcedure,
+			commandTimeout: _commandTimeout,
+			cancellationToken: ct));
 	}
 }
