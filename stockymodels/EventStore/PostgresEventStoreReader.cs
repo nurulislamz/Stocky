@@ -1,6 +1,7 @@
 using System.Data;
 using System.Text.Json;
 using Dapper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using stockymodels.Events;
@@ -10,25 +11,29 @@ using stockymodels.Sql;
 namespace stockymodels.EventStore;
 
 /// <summary>
-/// Read-only access to the event store. Uses <see cref="IDbConnectionFactory"/> so the same
-/// scoped connection is shared with the write side when both are resolved in the same scope.
+/// Read-only access to the event store. Uses a keyed read-only <see cref="NpgsqlDataSource"/>
+/// injected via DI. Methods accept an optional <see cref="IDbConnection"/> override so the
+/// write side can pass its own connection for transactional consistency.
 /// </summary>
 public class PostgresEventStoreReader : IEventStoreReader
 {
-	private readonly IDbConnectionFactory _factory;
+	private readonly NpgsqlDataSource _dataSource;
 	private readonly int _commandTimeout;
 	private readonly ILogger<PostgresEventStore> _logger;
 
-	public PostgresEventStoreReader(IDbConnectionFactory factory, ILogger<PostgresEventStore> logger, int commandTimeout = 30)
+	public PostgresEventStoreReader([FromKeyedServices(DbKey.Read)] NpgsqlDataSource dataSource, ILogger<PostgresEventStore> logger, int commandTimeout = 30)
 	{
-		_factory = factory ?? throw new ArgumentNullException(nameof(factory));
+		_dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
 		_logger = logger;
 		_commandTimeout = commandTimeout;
 	}
 
 	public async Task<T[]?> QueryAllAggregatedEventsAsync<T>(int aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default) where T : StockyEventPayload
 	{
-		connection ??= await _factory.GetConnectionAsync(ct);
+		await using var ownedConnection = connection == null
+			? await _dataSource.OpenConnectionAsync(ct)
+			: null;
+		connection ??= ownedConnection;
 
 		const string sql = """
 		                   SELECT e."EventType", e."EventPayloadJson" FROM stockydb."Events" e
@@ -67,7 +72,10 @@ public class PostgresEventStoreReader : IEventStoreReader
 
 	public async Task<StockyEventPayload?> QuerySingleEventAsync(int aggregateType, Guid aggregateId, int aggregateSequenceId, IDbConnection? connection = null, CancellationToken ct = default)
 	{
-		connection ??= await _factory.GetConnectionAsync(ct);
+		await using var ownedConnection = connection == null
+			? await _dataSource.OpenConnectionAsync(ct)
+			: null;
+		connection ??= ownedConnection;
 
 		const string sql = """
 		                   SELECT e."EventPayloadJson" FROM stockydb."Events" e
@@ -85,7 +93,10 @@ public class PostgresEventStoreReader : IEventStoreReader
 
 	public async Task<int> GetStreamVersionAsync(string aggregateType, Guid aggregateId, IDbConnection? connection = null, CancellationToken ct = default)
 	{
-		connection ??= await _factory.GetConnectionAsync(ct);
+		await using var ownedConnection = connection == null
+			? await _dataSource.OpenConnectionAsync(ct)
+			: null;
+		connection ??= ownedConnection;
 
 		return await connection.QuerySingleAsync<int>(new CommandDefinition(
 			StockySqlFunctions.GetAggregateVersion,

@@ -14,6 +14,7 @@
         </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2" />
         <PackageReference Include="Microsoft.Testing.Platform" Version="2.0.2" />
         <PackageReference Include="Npgsql" Version="10.0.0" />
@@ -50,11 +51,26 @@
       <EmbeddedResource Include="Schemas\Functions\insert_event_and_update_stream_version.sql">
         <LogicalName>stockymodels.Functions.insert_event_and_update_stream_version.sql</LogicalName>
       </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_or_update_stream_version.sql">
+        <LogicalName>stockymodels.Functions.insert_or_update_stream_version.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\get_aggregate_version.sql">
+        <LogicalName>stockymodels.Functions.get_aggregate_version.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\get_max_aggregate_sequence_from_events.sql">
+        <LogicalName>stockymodels.Functions.get_max_aggregate_sequence_from_events.sql</LogicalName>
+      </EmbeddedResource>
       <EmbeddedResource Include="Schemas\Functions\get_max_aggregate_sequence.sql">
         <LogicalName>stockymodels.Functions.get_max_aggregate_sequence.sql</LogicalName>
       </EmbeddedResource>
       <EmbeddedResource Include="Schemas\Functions\insert_command_and_multiple_events_with_row_versioning.sql">
         <LogicalName>stockymodels.Functions.insert_command_and_multiple_events_with_row_versioning.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command_and_multiple_events.sql">
+        <LogicalName>stockymodels.Functions.insert_command_and_multiple_events.sql</LogicalName>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Schemas\Functions\insert_command_and_multiple_events_with_advisory_locks.sql">
+        <LogicalName>stockymodels.Functions.insert_command_and_multiple_events_with_advisory_locks.sql</LogicalName>
       </EmbeddedResource>
     </ItemGroup>
 

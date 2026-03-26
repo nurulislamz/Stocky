@@ -37,16 +37,40 @@ public class EventStoreRowVersioningTests
 	private async Task ApplySchemaAsync()
 	{
 		var assembly = typeof(PostgresEventStore).Assembly;
-		var resourceName = "stockymodels.Migrations.001CreateEventStore.sql";
-		await using var stream = assembly.GetManifestResourceStream(resourceName)
-			?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
-		using var reader = new StreamReader(stream);
-		var sql = await reader.ReadToEndAsync();
+		static async Task<string> ReadEmbeddedAsync(Assembly assembly, string resourceName)
+		{
+			await using var stream = assembly.GetManifestResourceStream(resourceName)
+				?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
+			using var reader = new StreamReader(stream);
+			return await reader.ReadToEndAsync();
+		}
 
 		await using var conn = new NpgsqlConnection(_connectionString);
 		await conn.OpenAsync();
-		await using var cmd = new NpgsqlCommand(sql, conn);
-		await cmd.ExecuteNonQueryAsync();
+
+		var scripts = new[]
+		{
+			"stockymodels.Migrations.001CreateEventStore.sql",
+			"stockymodels.Migrations.002DataType.sql",
+			"stockymodels.Functions.insert_or_update_stream_version.sql",
+			"stockymodels.Functions.get_aggregate_version.sql",
+			"stockymodels.Functions.get_max_aggregate_sequence_from_events.sql",
+			"stockymodels.Functions.insert_command.sql",
+			"stockymodels.Functions.insert_event_and_update_stream_version.sql",
+			"stockymodels.Functions.insert_command_and_event.sql",
+			"stockymodels.Functions.insert_command_and_event_with_advisory_lock.sql",
+			"stockymodels.Functions.insert_command_and_event_with_row_versioning.sql",
+			"stockymodels.Functions.insert_command_and_multiple_events.sql",
+			"stockymodels.Functions.insert_command_and_multiple_events_with_advisory_locks.sql",
+			"stockymodels.Functions.insert_command_and_multiple_events_with_row_versioning.sql",
+		};
+
+		foreach (var resourceName in scripts)
+		{
+			var sql = await ReadEmbeddedAsync(assembly, resourceName);
+			await using var cmd = new NpgsqlCommand(sql, conn);
+			await cmd.ExecuteNonQueryAsync();
+		}
 
 		// Disable RLS for tests (avoids needing app.user_id session variable)
 		await using var disableRls = new NpgsqlCommand(
@@ -61,11 +85,12 @@ public class EventStoreRowVersioningTests
 		var fundId = Guid.NewGuid();
 		var context = new AppendContext(userId, Guid.NewGuid());
 
-		var factory = new NpgsqlConnectionFactory(_connectionString);
-		var reader = new PostgresEventStoreReader(factory, NullLogger<PostgresEventStore>.Instance);
+		await using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
+		await using var writeDataSource = CreateDataSource(_connectionString, isWrite: true);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
 
-		await using var store = new PostgresEventStore(
-			_connectionString,
+		var store = new PostgresEventStore(
+			writeDataSource,
 			reader,
 			NullLogger<PostgresEventStore>.Instance,
 			concurrencyLevel: ConcurrencyLevel.RowVersioning);
@@ -116,16 +141,18 @@ public class EventStoreRowVersioningTests
 		var userId = Guid.NewGuid();
 		var fundId = Guid.NewGuid();
 		var context = new AppendContext(userId, Guid.NewGuid());
-		var factory = new NpgsqlConnectionFactory(_connectionString);
-		var reader = new PostgresEventStoreReader(factory, NullLogger<PostgresEventStore>.Instance);
+		using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
 
 		// Use a single store instance to append two events
-		using (var store = new PostgresEventStore(
-			_connectionString,
-			reader,
-			NullLogger<PostgresEventStore>.Instance,
-			concurrencyLevel: ConcurrencyLevel.RowVersioning))
+		using (var writeDataSource = CreateDataSource(_connectionString, isWrite: true))
 		{
+			var store = new PostgresEventStore(
+				writeDataSource,
+				reader,
+				NullLogger<PostgresEventStore>.Instance,
+				concurrencyLevel: ConcurrencyLevel.RowVersioning);
+
 			var evt = new StockyEvent("FundId", fundId, new FundsDepositedStockyEvent
 			{
 				Amount = 100m,
@@ -159,7 +186,48 @@ public class EventStoreRowVersioningTests
 	[Test]
 	public void RowVersioning_WithoutExpectedVersion_Throws()
 	{
+		var userId = Guid.NewGuid();
+		var fundId = Guid.NewGuid();
+		var context = new AppendContext(userId, Guid.NewGuid());
+		using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
+
+		using (var writeDataSource = CreateDataSource(_connectionString, isWrite: true))
+		{
+			var store = new PostgresEventStore(
+				writeDataSource,
+				reader,
+				NullLogger<PostgresEventStore>.Instance,
+				concurrencyLevel: ConcurrencyLevel.RowVersioning);
+
+			var evt = new StockyEvent("FundId", fundId, new FundsDepositedStockyEvent
+			{
+				Amount = 100m,
+				CashBalanceBefore = 0m,
+				CashBalanceAfter = 100m,
+				PortfolioTotalValueBefore = 0m,
+				PortfolioTotalValueAfter = 100m,
+				OccurredAt = DateTimeOffset.UtcNow,
+				RequestId = Guid.NewGuid()
+			});
+			var cmd = new stockyapi.Application.Commands.Funds.DepositFundsCommand(100m);
+			store.RegisterEventAsync(cmd, evt, userId, Guid.NewGuid()).GetAwaiter().GetResult();
+		}
+
 		// This test is no longer relevant as expectedVersion is internal
 		Assert.Ignore("Skipping - expectedVersion is now calculated internally");
+	}
+
+	private static NpgsqlDataSource CreateDataSource(string connectionString, bool isWrite)
+	{
+		var builder = new NpgsqlDataSourceBuilder(connectionString);
+		builder.MapComposite<CommandAndEventResult>("stockydb.command_and_event_result");
+		if (isWrite)
+		{
+			builder.MapComposite<stockymodels.models.CommandAggregate>("stockydb.command_insert");
+			builder.MapComposite<stockymodels.models.InsertEventAggregate>("stockydb.event_insert");
+			builder.MapComposite<stockymodels.models.InsertEventAggregateWithExpectedNextSequence>("stockydb.event_insert_with_seq_id");
+		}
+		return builder.Build();
 	}
 }

@@ -19,6 +19,7 @@ using stockyapi.Application.MarketPricing;
 using stockyapi.Application.Portfolio;
 using stockyapi.Controllers.Helpers;
 using stockyapi.Services.YahooFinance.Helper;
+using Npgsql;
 using stockymodels.Data;
 
 namespace stockyapi;
@@ -124,6 +125,28 @@ internal class Program
         services.AddScoped<IFundsRepository, FundsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPortfolioRepository, PortfolioRepository>();
+
+        // Event Store DIs — keyed NpgsqlDataSource for read/write separation (CQRS)
+        var writeCs = configuration.GetConnectionString("DefaultConnection")
+                      ?? throw new InvalidOperationException("DefaultConnection not found");
+        var readCs = configuration.GetConnectionString("ReadConnection") ?? writeCs;
+
+        services
+            .AddNpgsqlDataSource(writeCs, builder =>
+            {
+                builder.MapComposite<stockymodels.models.CommandAggregate>("stockydb.command_insert");
+                builder.MapComposite<stockymodels.models.InsertEventAggregate>("stockydb.event_insert");
+                builder.MapComposite<stockymodels.models.InsertEventAggregateWithExpectedNextSequence>("stockydb.event_insert_with_seq_id");
+                builder.MapComposite<CommandAndEventResult>("stockydb.command_and_event_result");
+            }, serviceKey: stockymodels.EventStore.DbKey.Write)
+            .AddNpgsqlDataSource(readCs, builder =>
+            {
+                builder.MapComposite<CommandAndEventResult>("stockydb.command_and_event_result");
+            }, serviceKey: stockymodels.EventStore.DbKey.Read);
+
+        services.AddScoped<stockymodels.EventStore.IEventStoreReader, stockymodels.EventStore.PostgresEventStoreReader>();
+        services.AddScoped<stockymodels.EventStore.IEventStoreWriter, stockymodels.EventStore.PostgresEventStore>();
+
         services.AddMemoryCache();
 
         // Authentication Services
