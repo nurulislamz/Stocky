@@ -5,7 +5,7 @@ namespace stockymodels.EventStore;
 
 /// <summary>
 /// Read operations for the event store. Implemented by <see cref="PostgresEventStoreReader"/> (standalone)
-/// and used internally by <see cref="PostgresEventStore"/> (writer passes its connection for transactional consistency).
+/// and used internally by <see cref="EventStore"/> (writer passes its connection for transactional consistency).
 /// </summary>
 public interface IEventStoreReader
 {

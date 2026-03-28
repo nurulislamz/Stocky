@@ -36,7 +36,7 @@ public class EventStoreRowVersioningTests
 
 	private async Task ApplySchemaAsync()
 	{
-		var assembly = typeof(PostgresEventStore).Assembly;
+		var assembly = typeof(EventStore).Assembly;
 		static async Task<string> ReadEmbeddedAsync(Assembly assembly, string resourceName)
 		{
 			await using var stream = assembly.GetManifestResourceStream(resourceName)
@@ -87,13 +87,13 @@ public class EventStoreRowVersioningTests
 
 		await using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
 		await using var writeDataSource = CreateDataSource(_connectionString, isWrite: true);
-		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<EventStore>.Instance);
 
-		var store = new PostgresEventStore(
+		var store = new EventStore(
 			writeDataSource,
 			reader,
-			NullLogger<PostgresEventStore>.Instance,
-			concurrencyLevel: ConcurrencyLevel.RowVersioning);
+			NullLogger<EventStore>.Instance,
+			concurrencyTYPE: ConcurrencyLevel.RowVersioning);
 
 		// New stream: version 0
 		var version = await reader.GetStreamVersionAsync("FundId", fundId);
@@ -142,16 +142,16 @@ public class EventStoreRowVersioningTests
 		var fundId = Guid.NewGuid();
 		var context = new AppendContext(userId, Guid.NewGuid());
 		using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
-		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<EventStore>.Instance);
 
 		// Use a single store instance to append two events
 		using (var writeDataSource = CreateDataSource(_connectionString, isWrite: true))
 		{
-			var store = new PostgresEventStore(
+			var store = new EventStore(
 				writeDataSource,
 				reader,
-				NullLogger<PostgresEventStore>.Instance,
-				concurrencyLevel: ConcurrencyLevel.RowVersioning);
+				NullLogger<EventStore>.Instance,
+				concurrencyTYPE: ConcurrencyLevel.RowVersioning);
 
 			var evt = new StockyEvent("FundId", fundId, new FundsDepositedStockyEvent
 			{
@@ -190,15 +190,15 @@ public class EventStoreRowVersioningTests
 		var fundId = Guid.NewGuid();
 		var context = new AppendContext(userId, Guid.NewGuid());
 		using var readDataSource = CreateDataSource(_connectionString, isWrite: false);
-		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<PostgresEventStore>.Instance);
+		var reader = new PostgresEventStoreReader(readDataSource, NullLogger<EventStore>.Instance);
 
 		using (var writeDataSource = CreateDataSource(_connectionString, isWrite: true))
 		{
-			var store = new PostgresEventStore(
+			var store = new EventStore(
 				writeDataSource,
 				reader,
-				NullLogger<PostgresEventStore>.Instance,
-				concurrencyLevel: ConcurrencyLevel.RowVersioning);
+				NullLogger<EventStore>.Instance,
+				concurrencyTYPE: ConcurrencyLevel.RowVersioning);
 
 			var evt = new StockyEvent("FundId", fundId, new FundsDepositedStockyEvent
 			{

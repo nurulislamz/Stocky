@@ -14,21 +14,21 @@ namespace stockymodels.EventStore;
 /// Dapper-based append-only event store. Inserts commands and events per 001CreateEventStore.sql.
 /// Use for high-throughput event appends; read models are updated separately (two-prong flow).
 /// </summary>
-public class PostgresEventStore : IEventStoreWriter
+public class EventStore : IEventStoreWriter
 {
 	private readonly NpgsqlDataSource _dataSource;
 	private readonly int _retryAttempts;
-	private readonly ConcurrencyLevel _concurrencyLevel;
-	private readonly ILogger<PostgresEventStore> _logger;
+	private readonly ConcurrencyType _concurrencyType;
+	private readonly ILogger<EventStore> _logger;
 	private readonly IEventStoreReader _reader;
 
-	public PostgresEventStore([FromKeyedServices(DbKey.Write)] NpgsqlDataSource dataSource, IEventStoreReader reader, ILogger<PostgresEventStore> logger, int retryAttempts = 5, ConcurrencyLevel? concurrencyLevel = null)
+	public EventStore([FromKeyedServices(DbKey.Write)] NpgsqlDataSource dataSource, IEventStoreReader reader, ILogger<EventStore> logger, int? retryAttempts, ConcurrencyType? concurrencyType)
 	{
 		_dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
 		_reader = reader ?? throw new ArgumentNullException(nameof(reader));
 		_logger = logger;
-		_retryAttempts = retryAttempts;
-		_concurrencyLevel = concurrencyLevel ?? ConcurrencyLevel.OptimisticConcurrency;
+		_retryAttempts = retryAttempts ?? 3;
+		_concurrencyType = concurrencyType ?? ConcurrencyType.OptimisticConcurrency;
 	}
 
 	/// <summary>Appends a command and one event in a single transaction.</summary>
@@ -48,7 +48,7 @@ public class PostgresEventStore : IEventStoreWriter
 		var insertCommand = CreateCommandAggregate(command, commandId, userId, traceId, now, ttEnd);
 		var insertEvent = CreateInsertEventAggregate(@event, eventId, commandId, userId, traceId, now, ttEnd);
 
-		return _concurrencyLevel switch
+		return _concurrencyType switch
 		{
 			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetry(connection, insertCommand, insertEvent, ct),
 			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLock(connection, insertCommand, insertEvent, ct),
@@ -128,7 +128,7 @@ public class PostgresEventStore : IEventStoreWriter
 		var commandModel = CreateCommandAggregate(command, commandId, userId, traceId, now, ttEnd);
 		var eventModels = events.Select(e => CreateInsertEventAggregate(e, eventId, commandId, userId, traceId, now, ttEnd)).ToArray();
 
-		return _concurrencyLevel switch
+		return _concurrencyType switch
 		{
 			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetryMulti(connection, commandModel, eventModels, ct),
 			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLockMulti(connection, commandModel, eventModels, ct),

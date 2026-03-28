@@ -7,7 +7,7 @@ namespace stockymodels.EventStore;
 
 public class PortfolioBuilder : EventStreamBuilder<PortfolioEvent, PortfolioAggregate, PortfolioCreatedStockyEvent>
 {
-	public PortfolioBuilder(IEventStoreReader eventStoreReader, ILogger<PostgresEventStore> logger)
+	public PortfolioBuilder(IEventStoreReader eventStoreReader, ILogger<EventStore> logger)
 		: base(eventStoreReader, logger)
 	{
 	}

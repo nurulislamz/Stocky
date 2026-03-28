@@ -11,7 +11,7 @@ namespace stockymodels.EventStore;
 /// </summary>
 public class FundAccountBuilder : EventStreamBuilder<FundAccountEvent, FundAccountAggregate, FundAccountCreatedStockyEvent>
 {
-	public FundAccountBuilder(IEventStoreReader eventStoreReader, ILogger<PostgresEventStore> logger)
+	public FundAccountBuilder(IEventStoreReader eventStoreReader, ILogger<EventStore> logger)
 		: base(eventStoreReader, logger)
 	{
 	}

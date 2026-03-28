@@ -145,7 +145,7 @@ internal class Program
             }, serviceKey: stockymodels.EventStore.DbKey.Read);
 
         services.AddScoped<stockymodels.EventStore.IEventStoreReader, stockymodels.EventStore.PostgresEventStoreReader>();
-        services.AddScoped<stockymodels.EventStore.IEventStoreWriter, stockymodels.EventStore.PostgresEventStore>();
+        services.AddScoped<stockymodels.EventStore.IEventStoreWriter, stockymodels.EventStore.EventStore>();
 
         services.AddMemoryCache();
 

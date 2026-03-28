@@ -5,7 +5,7 @@ namespace stockymodels.EventStore;
 
 /// <summary>
 /// Write operations for the event store.
-/// Implemented by <see cref="PostgresEventStore"/>.
+/// Implemented by <see cref="EventStore"/>.
 /// </summary>
 public interface IEventStoreWriter
 {

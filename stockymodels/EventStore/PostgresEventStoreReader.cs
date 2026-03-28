@@ -19,9 +19,9 @@ public class PostgresEventStoreReader : IEventStoreReader
 {
 	private readonly NpgsqlDataSource _dataSource;
 	private readonly int _commandTimeout;
-	private readonly ILogger<PostgresEventStore> _logger;
+	private readonly ILogger<EventStore> _logger;
 
-	public PostgresEventStoreReader([FromKeyedServices(DbKey.Read)] NpgsqlDataSource dataSource, ILogger<PostgresEventStore> logger, int commandTimeout = 30)
+	public PostgresEventStoreReader([FromKeyedServices(DbKey.Read)] NpgsqlDataSource dataSource, ILogger<EventStore> logger, int commandTimeout = 30)
 	{
 		_dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
 		_logger = logger;
