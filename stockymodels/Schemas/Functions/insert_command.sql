@@ -16,15 +16,15 @@ DECLARE
 BEGIN
     v_db_stored_at_time := pg_catalog.clock_timestamp();
 
-    INSERT INTO stockydb."Commands" (
-        "CommandId",
-        "UserId",
-        "CommandType",
-        "CommandPayloadJson",
-        "TtStart",
-        "TtEnd",
-        "TraceId",
-        "DbStoredAtTime"
+    INSERT INTO stockydb.commands (
+        command_id,
+        user_id,
+        command_type,
+        command_payload_json,
+        tt_start,
+        tt_end,
+        trace_id,
+        db_stored_at_time
     ) VALUES (
         p.command_id,
         p.user_id,

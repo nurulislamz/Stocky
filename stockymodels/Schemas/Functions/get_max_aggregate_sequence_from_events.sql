@@ -8,8 +8,8 @@ RETURNS INTEGER
 LANGUAGE sql
 STABLE
 AS $$
-    SELECT COALESCE(MAX(e."AggregateSequenceId"), 0)::integer
-    FROM stockydb."Events" e
-    WHERE e."AggregateType" = p_aggregate_type
-      AND e."AggregateId" = p_aggregate_id;
+    SELECT COALESCE(MAX(e.aggregate_sequence_id), 0)::integer
+    FROM stockydb.events e
+    WHERE e.aggregate_type = p_aggregate_type
+      AND e.aggregate_id = p_aggregate_id;
 $$;

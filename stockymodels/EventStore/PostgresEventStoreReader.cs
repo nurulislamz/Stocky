@@ -36,10 +36,10 @@ public class PostgresEventStoreReader : IEventStoreReader
 		connection ??= ownedConnection;
 
 		const string sql = """
-		                   SELECT e."EventType", e."EventPayloadJson" FROM stockydb."Events" e
-		                   WHERE e."AggregateType" = @aggregateType
-		                   AND e."AggregateId" = @aggregateId
-		                   ORDER BY e."AggregateSequenceId"
+		                   SELECT e.event_type, e.event_payload_json FROM stockydb.events e
+		                   WHERE e.aggregate_type = @aggregateType
+		                   AND e.aggregate_id = @aggregateId
+		                   ORDER BY e.aggregate_sequence_id
 		                   """;
 		var rows = await connection.QueryAsync<(string, string)>(new CommandDefinition(sql, new { aggregateType, aggregateId }, commandTimeout: _commandTimeout, cancellationToken: ct));
 		var list = new List<T>();
@@ -78,10 +78,10 @@ public class PostgresEventStoreReader : IEventStoreReader
 		connection ??= ownedConnection;
 
 		const string sql = """
-		                   SELECT e."EventPayloadJson" FROM stockydb."Events" e
-		                   WHERE e."AggregateType" = @aggregateType
-		                   AND e."AggregateId" = @aggregateId
-		                   AND e."AggregateSequenceId" = @aggregateSequenceId
+		                   SELECT e.event_payload_json FROM stockydb.events e
+		                   WHERE e.aggregate_type = @aggregateType
+		                   AND e.aggregate_id = @aggregateId
+		                   AND e.aggregate_sequence_id = @aggregateSequenceId
 		                   """;
 
 		var json = await connection.QuerySingleOrDefaultAsync<string>(new CommandDefinition(sql,

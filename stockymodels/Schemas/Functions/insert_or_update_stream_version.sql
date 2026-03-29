@@ -10,14 +10,14 @@ DECLARE
 BEGIN
     v_db_stored_at_time := pg_catalog.clock_timestamp();
 
-    INSERT INTO stockydb."AggregateVersion" (
-        "AggregateType", "AggregateId", "CurrentSeqId", "UpdatedAt"
+    INSERT INTO stockydb.aggregate_version (
+        aggregate_type, aggregate_id, current_seq_id, updated_at
     ) VALUES (
         aggregate_type, aggregate_id, current_seq_id, v_db_stored_at_time
     )
-    ON CONFLICT ("AggregateType", "AggregateId") DO UPDATE
-    SET "CurrentSeqId" = EXCLUDED."CurrentSeqId",
-        "UpdatedAt" = v_db_stored_at_time;
+    ON CONFLICT (aggregate_type, aggregate_id) DO UPDATE
+    SET current_seq_id = EXCLUDED.current_seq_id,
+        updated_at = v_db_stored_at_time;
 
     RETURN;
 END;

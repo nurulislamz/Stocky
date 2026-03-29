@@ -19,10 +19,10 @@ BEGIN
     v_db_stored_at_time := pg_catalog.clock_timestamp();
 
 
-    INSERT INTO stockydb."Events" (
-        "EventId", "UserId", "AggregateType", "AggregateId",
-        "AggregateSequenceId", "EventType", "EventPayloadJson",
-        "TtStart", "TtEnd", "ValidFrom", "ValidTo", "CommandId", "TraceId", "DbStoredAtTime"
+    INSERT INTO stockydb.events (
+        event_id, user_id, aggregate_type, aggregate_id,
+        aggregate_sequence_id, event_type, event_payload_json,
+        tt_start, tt_end, valid_from, valid_to, command_id, trace_id, db_stored_at_time
     ) VALUES (
         p.event_id, p.user_id, p.aggregate_type, p.aggregate_id,
         v_next_seq, p.event_type, p.event_payload_json,

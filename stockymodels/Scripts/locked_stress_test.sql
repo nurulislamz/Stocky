@@ -46,9 +46,9 @@ $$;
 CALL stockydb.run_locked_stress(50);
 
 -- Verify no duplicate sequence IDs (empty result = success)
-SELECT "AggregateSequenceId", COUNT(*) AS cnt
-FROM stockydb."Events"
-WHERE "AggregateType" = 0
-  AND "AggregateId" = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'::uuid
-GROUP BY "AggregateSequenceId"
+SELECT aggregate_sequence_id, COUNT(*) AS cnt
+FROM stockydb.events
+WHERE aggregate_type = 0
+  AND aggregate_id = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'::uuid
+GROUP BY aggregate_sequence_id
 HAVING COUNT(*) > 1;

@@ -9,10 +9,10 @@ LANGUAGE sql
 STABLE
 AS $$
     SELECT COALESCE(
-        (SELECT v."CurrentSeqId"
-         FROM stockydb."AggregateVersion" v
-         WHERE v."AggregateType" = p_aggregate_type
-           AND v."AggregateId" = p_aggregate_id),
+        (SELECT v.current_seq_id
+         FROM stockydb.aggregate_version v
+         WHERE v.aggregate_type = p_aggregate_type
+           AND v.aggregate_id = p_aggregate_id),
         0
     )::integer;
 $$;
