@@ -50,9 +50,9 @@ public class EventStore : IEventStoreWriter
 
 		return _concurrencyType switch
 		{
-			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetry(connection, insertCommand, insertEvent, ct),
-			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLock(connection, insertCommand, insertEvent, ct),
-			ConcurrencyLevel.RowVersion => await WithRowVersioning(connection, insertCommand, insertEvent, ct),
+			ConcurrencyType.OptimisticConcurrency => await WithOptimisticRetry(connection, insertCommand, insertEvent, ct),
+			ConcurrencyType.LockOnAggregate => await WithAdvisoryLock(connection, insertCommand, insertEvent, ct),
+			ConcurrencyType.RowVersion => await WithRowVersioning(connection, insertCommand, insertEvent, ct),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
@@ -130,9 +130,9 @@ public class EventStore : IEventStoreWriter
 
 		return _concurrencyType switch
 		{
-			ConcurrencyLevel.OptimisticConcurrency => await WithOptimisticRetryMulti(connection, commandModel, eventModels, ct),
-			ConcurrencyLevel.LockOnAggregate => await WithAdvisoryLockMulti(connection, commandModel, eventModels, ct),
-			ConcurrencyLevel.RowVersion => await WithRowVersioningMulti(connection, commandModel, eventModels, ct),
+			ConcurrencyType.OptimisticConcurrency => await WithOptimisticRetryMulti(connection, commandModel, eventModels, ct),
+			ConcurrencyType.LockOnAggregate => await WithAdvisoryLockMulti(connection, commandModel, eventModels, ct),
+			ConcurrencyType.RowVersion => await WithRowVersioningMulti(connection, commandModel, eventModels, ct),
 			_ => throw new ArgumentOutOfRangeException()
 		};
 	}
