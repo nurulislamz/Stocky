@@ -101,7 +101,7 @@ public class PostgresEventStoreReader : IEventStoreReader
 		return await connection.QuerySingleAsync<int>(new CommandDefinition(
 			StockySqlFunctions.GetAggregateVersion,
 			new { p_aggregate_type = aggregateType, p_aggregate_id = aggregateId },
-			commandType: CommandType.StoredProcedure,
+			commandType: System.Data.CommandType.StoredProcedure,
 			commandTimeout: _commandTimeout,
 			cancellationToken: ct));
 	}

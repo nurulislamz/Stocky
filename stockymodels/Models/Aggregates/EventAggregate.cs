@@ -50,6 +50,7 @@ public record InsertEventAggregateWithExpectedNextSequence
 
 public record InsertEventAggregateWithSeqId : InsertEventAggregate
 {
+    public required int AggregateSequenceId { get; init; }
 
     public override string ToString()
     {
@@ -61,9 +62,7 @@ public record InsertEventAggregateWithSeqId : InsertEventAggregate
 
 public record EventAggregate : InsertEventAggregateWithSeqId
 {
-    public required int AggregateSequenceId { get; init; }
-
-    public required DateTimeOffset StoredAt {get; init; }
+    public required DateTimeOffset StoredAt { get; init; }
 
     public override string ToString()
     {

@@ -24,16 +24,16 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="Schemas\Migrations\001CreateEventStore.sql">
+      <EmbeddedResource Include="Schemas\Migrations\001_create_event_store.sql">
         <LogicalName>stockymodels.Migrations.001CreateEventStore.sql</LogicalName>
       </EmbeddedResource>
-      <EmbeddedResource Include="Schemas\Migrations\001CreateEventStoreRevert.sql">
+      <EmbeddedResource Include="Schemas\Migrations\001_create_event_store_revert.sql">
         <LogicalName>stockymodels.Migrations.001CreateEventStoreRevert.sql</LogicalName>
       </EmbeddedResource>
-      <EmbeddedResource Include="Schemas\Migrations\002DataType.sql">
+      <EmbeddedResource Include="Schemas\Migrations\002_data_type.sql">
         <LogicalName>stockymodels.Migrations.002DataType.sql</LogicalName>
       </EmbeddedResource>
-      <EmbeddedResource Include="Schemas\Migrations\002DataTypeRevert.sql">
+      <EmbeddedResource Include="Schemas\Migrations\002_data_type_revert.sql">
         <LogicalName>stockymodels.Migrations.002DataTypeRevert.sql</LogicalName>
       </EmbeddedResource>
       <EmbeddedResource Include="Schemas\Functions\insert_command_and_event.sql">
@@ -59,9 +59,6 @@
       </EmbeddedResource>
       <EmbeddedResource Include="Schemas\Functions\get_max_aggregate_sequence_from_events.sql">
         <LogicalName>stockymodels.Functions.get_max_aggregate_sequence_from_events.sql</LogicalName>
-      </EmbeddedResource>
-      <EmbeddedResource Include="Schemas\Functions\get_max_aggregate_sequence.sql">
-        <LogicalName>stockymodels.Functions.get_max_aggregate_sequence.sql</LogicalName>
       </EmbeddedResource>
       <EmbeddedResource Include="Schemas\Functions\insert_command_and_multiple_events_with_row_versioning.sql">
         <LogicalName>stockymodels.Functions.insert_command_and_multiple_events_with_row_versioning.sql</LogicalName>
